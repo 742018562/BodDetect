@@ -1,0 +1,107 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x86</Platforms>
+    <StartupObject>BodDetect.App</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="editIcon.png" />
+    <None Remove="icon.png" />
+    <None Remove="iconMove.png" />
+    <None Remove="pic.jpg" />
+    <None Remove="Resources\2D\BOD.png" />
+    <None Remove="Resources\2D\COD.png" />
+    <None Remove="Resources\2D\DO.png" />
+    <None Remove="Resources\2D\PH.png" />
+    <None Remove="Resources\2D\uv254.png" />
+    <None Remove="Resources\2D\悬浮物.png" />
+    <None Remove="Resources\2D\水温1.png" />
+    <None Remove="Resources\2D\浊度.png" />
+    <None Remove="Resources\air.png" />
+    <None Remove="Resources\beijing.png" />
+    <None Remove="Resources\biaoding.png" />
+    <None Remove="Resources\biaoti.png" />
+    <None Remove="Resources\COD.png" />
+    <None Remove="Resources\cuboid1.jpg" />
+    <None Remove="Resources\cuboid2.jpg" />
+    <None Remove="Resources\cuboid3.jpg" />
+    <None Remove="Resources\cuboid4.jpg" />
+    <None Remove="Resources\down.png" />
+    <None Remove="Resources\editIcon.png" />
+    <None Remove="Resources\fa.png" />
+    <None Remove="Resources\huanchong.png" />
+    <None Remove="Resources\icon.png" />
+    <None Remove="Resources\iconMove.png" />
+    <None Remove="Resources\nomale.png" />
+    <None Remove="Resources\PH.png" />
+    <None Remove="Resources\pic.jpg" />
+    <None Remove="Resources\qingxi.png" />
+    <None Remove="Resources\sample.png" />
+    <None Remove="Resources\shuiyangpng.png" />
+    <None Remove="Resources\stard.png" />
+    <None Remove="Resources\store.png" />
+    <None Remove="Resources\tabIcon.png" />
+    <None Remove="Resources\titleMuenIcon.png" />
+    <None Remove="Resources\up.png" />
+    <None Remove="Resources\water.png" />
+    <None Remove="Resources\zhushe.png" />
+    <None Remove="Resources\zhushe_up.png" />
+    <None Remove="Resources\悬浮物.png" />
+    <None Remove="Resources\水温.png" />
+    <None Remove="Resources\水温1.png" />
+    <None Remove="Resources\浊度.png" />
+    <None Remove="Resources\溶解氧.png" />
+    <None Remove="tabIcon.png" />
+    <None Remove="titleMuenIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arthas\Arthas.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\2D\BOD.png" />
+    <Resource Include="Resources\2D\COD.png" />
+    <Resource Include="Resources\2D\DO.png" />
+    <Resource Include="Resources\2D\PH.png" />
+    <Resource Include="Resources\2D\uv254.png" />
+    <Resource Include="Resources\2D\悬浮物.png" />
+    <Resource Include="Resources\2D\水温1.png" />
+    <Resource Include="Resources\2D\浊度.png" />
+    <Resource Include="Resources\air.png" />
+    <Resource Include="Resources\beijing.png" />
+    <Resource Include="Resources\biaoding.png" />
+    <Resource Include="Resources\biaoti.png" />
+    <Resource Include="Resources\COD.png" />
+    <Resource Include="Resources\down.png" />
+    <Resource Include="Resources\editIcon.png" />
+    <Resource Include="Resources\fa.png" />
+    <Resource Include="Resources\huanchong.png" />
+    <Resource Include="Resources\icon.png" />
+    <Resource Include="Resources\iconMove.png" />
+    <Resource Include="Resources\nomale.png" />
+    <Resource Include="Resources\PH.png" />
+    <Resource Include="Resources\pic.jpg" />
+    <Resource Include="Resources\qingxi.png" />
+    <Resource Include="Resources\sample.png" />
+    <Resource Include="Resources\shuiyangpng.png" />
+    <Resource Include="Resources\stard.png" />
+    <Resource Include="Resources\store.png" />
+    <Resource Include="Resources\tabIcon.png" />
+    <Resource Include="Resources\titleMuenIcon.png" />
+    <Resource Include="Resources\up.png" />
+    <Resource Include="Resources\water.png" />
+    <Resource Include="Resources\zhushe.png" />
+    <Resource Include="Resources\zhushe_up.png" />
+    <Resource Include="Resources\悬浮物.png" />
+    <Resource Include="Resources\水温.png" />
+    <Resource Include="Resources\水温1.png" />
+    <Resource Include="Resources\浊度.png" />
+    <Resource Include="Resources\溶解氧.png" />
+  </ItemGroup>
+
+</Project>
