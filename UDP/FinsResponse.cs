@@ -83,6 +83,10 @@ namespace BodDetect.UDP
                 case RecDataType.Big_float:
                     FloatData = Tool.BigToFloats(data);
                     break;
+
+                case RecDataType.DO_float:
+                    FloatData = Tool.DoFloats(data);
+                    break;
                 default:
                     break;
             }

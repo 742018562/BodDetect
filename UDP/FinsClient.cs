@@ -87,6 +87,14 @@ namespace BodDetect.UDP
             return Read(sid, cmd).Int32Data;
         }
 
+        public float[] ReadDOFloatData(ushort startAddress, byte bitAddress, ushort count, byte memoryAreaCode)
+        {
+            var sid = IncrementSid();
+            var cmd = FinsDriver.ReadDataCommand(new Header(sid, true), memoryAreaCode, startAddress, bitAddress, count);
+            _responses[sid].RecType = RecDataType.DO_float;
+            return Read(sid, cmd).FloatData;
+        }
+
         /// <summary>
         /// Syncroniously reads specified number of ushorts starting from specified address in work memory
         /// </summary>

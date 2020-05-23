@@ -18,16 +18,20 @@ namespace BodDetect
 
         public MainWindow mainWindow { get; set; }
 
-        string PLC_IP { get; set; }
-        int PLC_Port { get; set; }
+        public string PLC_IP { get; set; }
+        public int PLC_Port { get; set; }
+
+        private bool isSampling;
 
         IPAddress PLCAddress { get; set; }
 
         IPEndPoint PLCEndPoint { get; set; }
+        public bool IsSampling { get => isSampling; set => isSampling = value; }
 
         Dictionary<byte, int> Valve1Pairs = new Dictionary<byte, int>();
         Dictionary<byte, int> Valve2Pairs = new Dictionary<byte, int>();
 
+        BodData bodData;
 
         public BodHelper(string plcIP, int port)
         {
@@ -104,7 +108,7 @@ namespace BodDetect
             }
 
             bitAdress = 0X00;
-            float[] Data = finsClient.ReadLitFloatData(PLCConfig.DO_StartAddress, bitAdress, PLCConfig.DO_Count, PLCConfig.Dr);
+            float[] Data = finsClient.ReadDOFloatData(PLCConfig.DO_StartAddress, bitAdress, PLCConfig.DO_Count, PLCConfig.Dr);
 
             return Data;
         }
@@ -130,7 +134,7 @@ namespace BodDetect
             }
 
             bitAdress = 0X00;
-            float[] Data = finsClient.ReadLitFloatData(PLCConfig.PH_StartAddress, bitAdress, PLCConfig.PH_Count, PLCConfig.Dr);
+            float[] Data = finsClient.ReadDOFloatData(PLCConfig.PH_StartAddress, bitAdress, PLCConfig.PH_Count, PLCConfig.Dr);
 
             return Data;
 
@@ -378,111 +382,133 @@ namespace BodDetect
             //[ 7. 调用BOD使用样液池的样液]
             //[ 08. 通过BOD获取最终计算值]
 
-            //if (finsClient == null)
-            //{
-            //    return;
-            //}
-            bool success = false;
-            //    byte[] data = { PLCConfig.CisternPumpBit };
-            //    //[1. 通过泵抽取水样到储水池  ]
-            //    success = ValveControl(PLCConfig.Valve1Address, data);
-            //    if (!success)
-            //    {
-            //        return;
-            //    }
 
-            //[ 2. 调用BOD接口使用缓冲液清洗 ]
-
-            //[ 3. 抽取标定液然后进行稀释放入到标液池,抽取清水清洗注射泵]
-            List<PLCParam> pLCParams = new List<PLCParam>();
-
-            PLCParam pLCParam1 = new PLCParam
+            try
             {
-                address = PLCConfig.Valve2Address
-            };
-            pLCParam1.data.Add(PLCConfig.StandardValveBit);
-            pLCParams.Add(pLCParam1);
+                if (finsClient == null)
+                {
+                    return;
+                }
+                IsSampling = true;
 
-            PLCParam pLCParam2 = new PLCParam
-            {
-                address = PLCConfig.Valve2Address
-            };
-            pLCParam2.data.Add(PLCConfig.NormalValveBit);
-            pLCParams.Add(pLCParam2);
+                bool success = false;
+                //    byte[] data = { PLCConfig.CisternPumpBit };
+                //    //[1. 通过泵抽取水样到储水池  ]
+                //    success = ValveControl(PLCConfig.Valve1Address, data);
+                //    if (!success)
+                //    {
+                //        return;
+                //    }
 
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-            if (!success)
+                //[ 2. 调用BOD接口使用缓冲液清洗 ]
+
+                //[ 3. 抽取标定液然后进行稀释放入到标液池,抽取清水清洗注射泵]
+                List<PLCParam> pLCParams = new List<PLCParam>();
+
+                PLCParam pLCParam1 = new PLCParam
+                {
+                    address = PLCConfig.Valve2Address
+                };
+                pLCParam1.data.Add(PLCConfig.StandardValveBit);
+                pLCParams.Add(pLCParam1);
+
+                PLCParam pLCParam2 = new PLCParam
+                {
+                    address = PLCConfig.Valve2Address
+                };
+                pLCParam2.data.Add(PLCConfig.NormalValveBit);
+                pLCParams.Add(pLCParam2);
+
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return;
+                }
+
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+                pLCParams[1].data[0] = PLCConfig.AirValveBit;
+
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return;
+                }
+
+                //[ 固定5ml的缓冲液]
+                pLCParams[0].data[0] = PLCConfig.bufferValveBit;
+                pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return;
+                }
+
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+                pLCParams[1].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return;
+                }
+
+                //[ 4. 获取COD的值判断是否需要稀释]
+                float[] DoDota = GetDoData();
+                uint[] TurbidityData = GetTurbidityData();
+                float[] PHData = GetPHData();
+                ushort[] CODData = GetCodData();
+
+                bodData.TemperatureData = DoDota[0];
+                bodData.DoData = DoDota[1];
+                bodData.TurbidityData = (float)TurbidityData[0] / 1000;
+                bodData.PHData = PHData[1];
+                bodData.CodData = (float)CODData[0] / 100;
+
+                //[ 5. 抽取样液进行稀释后放入样液池]
+                pLCParams[0].data[0] = PLCConfig.DepositValveBit;
+                pLCParams[1].data[0] = PLCConfig.SampleValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+                pLCParams[1].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return;
+                }
+
+                //[ 固定5ml的缓冲液]
+                pLCParams[0].data[0] = PLCConfig.bufferValveBit;
+                pLCParams[1].data[0] = PLCConfig.SampleValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+                pLCParams[1].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
+                if (!success)
+                {
+                    return;
+                }
+
+                //[ 6. 调用BOD使用标液池的标液]
+                List<byte> TempData = new List<byte>();
+                TempData.Add(PLCConfig.WashValveBit);
+                ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
+
+                //[ 7. 调用BOD使用样液池的样液]
+                TempData.Add(PLCConfig.SelectValveBit);
+                ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
+            }
+            catch (Exception ex)
             {
-                return;
+                string message = ex.Message;
+
+            }
+            finally 
+            {
+                IsSampling = false;
             }
 
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
-
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-            if (!success)
-            {
-                return;
-            }
-
-            //[ 固定5ml的缓冲液]
-            pLCParams[0].data[0] = PLCConfig.bufferValveBit;
-            pLCParams[1].data[0] = PLCConfig.NormalValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-            if (!success)
-            {
-                return;
-            }
-
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-            if (!success)
-            {
-                return;
-            }
-
-            //[ 4. 获取COD的值判断是否需要稀释]
-            float[] DoDota = GetDoData();
-            uint[] TurbidityData = GetTurbidityData();
-            float[] PHData = GetPHData();
-            ushort[] CODData = GetCodData();
-
-            //[ 5. 抽取样液进行稀释后放入样液池]
-            pLCParams[0].data[0] = PLCConfig.DepositValveBit;
-            pLCParams[1].data[0] = PLCConfig.SampleValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-            if (!success)
-            {
-                return;
-            }
-
-            //[ 固定5ml的缓冲液]
-            pLCParams[0].data[0] = PLCConfig.bufferValveBit;
-            pLCParams[1].data[0] = PLCConfig.SampleValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-
-            if (!success)
-            {
-                return;
-            }
-
-            //[ 6. 调用BOD使用标液池的标液]
-            List<byte> TempData = new List<byte>();
-            TempData.Add(PLCConfig.WashValveBit);
-            ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
-
-            //[ 7. 调用BOD使用样液池的样液]
-            TempData.Add(PLCConfig.SelectValveBit);
-            ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
         }
     }
 

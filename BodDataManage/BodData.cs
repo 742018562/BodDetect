@@ -1,32 +1,125 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace BodDetect
 {
-    class BodData
+    public class BodData : INotifyPropertyChanged
     {
-        private byte[] revicePLCData;
-
-        private byte[] sendPLCData;
-
-        private byte[] reciveBodData;
-
-        private byte[] sendBodData;
-
-        float[] DoData;
-        float[] PHData;
-        uint[] TurbidityData;
+        private float pHData;
+        private float doData;
+        private float temperatureData;
+        private float turbidityData;
+        private float codData;
+        private float uv254Data;
+        private float bod;
 
 
-        private Dictionary<string, int> sensorDataDic = new Dictionary<string, int>();
+        private int deviceStatus;
 
-        public Dictionary<string, int> ValveCmdDic = new Dictionary<string, int>();
+        public float PHData
+        {
+            get { return pHData; }
 
-        public byte[] RevicePLCData { get => revicePLCData; set => revicePLCData = value; }
-        public byte[] SendPLCData { get => sendPLCData; set => sendPLCData = value; }
-        public byte[] ReciveBodData { get => reciveBodData; set => reciveBodData = value; }
-        public byte[] SendBodData { get => sendBodData; set => sendBodData = value; }
+            set
+            {
+                if (pHData != value)
+                {
+                    pHData = value;
+                    OnPropertyChanged("PHData");
+                }
+            }
+        }
+        public float DoData
+        {
+            get => doData;
+            set
+            {
+                if (doData != value)
+                {
+                    doData = value;
+                    OnPropertyChanged("DoData");
+                }
+
+            }
+        }
+        public float TemperatureData
+        {
+            get => temperatureData;
+            set
+            {
+                if (temperatureData != value)
+                {
+                    temperatureData = value;
+                    OnPropertyChanged("TemperatureData");
+                }
+            }
+        }
+        public float TurbidityData
+        {
+            get => turbidityData;
+            set
+            {
+                if (turbidityData != value)
+                {
+                    turbidityData = value;
+                    OnPropertyChanged("TurbidityData");
+
+                }
+            }
+        }
+        public float CodData
+        {
+            get => codData;
+            set
+            {
+                if (codData != value)
+                {
+                    codData = value;
+                    OnPropertyChanged("CodData");
+
+                }
+            }
+        }
+        public float Uv254Data
+        {
+            get => uv254Data;
+            set
+            {
+                if (uv254Data != value)
+                {
+                    uv254Data = value;
+                    OnPropertyChanged("Uv254Data");
+
+                }
+
+            }
+        }
+        public int DeviceStatus { get => deviceStatus; set => deviceStatus = value; }
+        public float Bod
+        {
+            get => bod;
+            set
+            {
+                if (bod != value)
+                {
+                    bod = value;
+                    OnPropertyChanged("Bod");
+
+                }
+
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string strPropertyInfo)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(strPropertyInfo));
+            }
+        }
     }
 }
- 

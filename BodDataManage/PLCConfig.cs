@@ -55,6 +55,8 @@ namespace BodDetect.BodDataManage
         public const ushort COD_StartAddress = 630;
         public const ushort COD_Count = 1;
 
+        public const ushort Data_Status = 640;
+
         public const ushort PumpAbsorbAddress_1ml = 233;
         public const ushort PumpAbsorb5mlAddress_5ml = 231;
         public const ushort PumpDrainAddress = 232;

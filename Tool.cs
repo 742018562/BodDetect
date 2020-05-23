@@ -13,7 +13,8 @@ namespace BodDetect
         _uint16,
         _uint32,
         Little_float,
-        Big_float
+        Big_float,
+        DO_float
     }
 
 
@@ -54,12 +55,12 @@ namespace BodDetect
             for (int i = 0; i < r.Length; i++)
             {
                 byte[] floats = new byte[4];
-                floats[0] = data[i];
+                floats[0] = data[i*4];
                 floats[1] = data[i*4 + 1];
                 floats[2] = data[i*4 + 2];
                 floats[3] = data[i*4 + 3];
 
-                r[i] = BitConverter.ToSingle(floats);
+                r[i] = BitConverter.ToSingle(floats,0);
                 //r[i] = data[i * 2 + 1]; 
                 //r[i] = (ushort)(r[i] | data[i * 2] << 8);
             }
@@ -72,12 +73,12 @@ namespace BodDetect
             for (int i = 0; i < r.Length; i++)
             {
                 byte[] floats = new byte[4];
-                floats[3] = data[i];
+                floats[3] = data[i * 4];
                 floats[2] = data[i * 4 + 1];
                 floats[1] = data[i * 4 + 2];
                 floats[0] = data[i * 4 + 3];
 
-                r[i] = BitConverter.ToSingle(floats);
+                r[i] = BitConverter.ToSingle(floats,0);
                 //r[i] = data[i * 2 + 1]; 
                 //r[i] = (ushort)(r[i] | data[i * 2] << 8);
             }
@@ -85,17 +86,34 @@ namespace BodDetect
         }
 
 
+        public static float[] DoFloats(byte[] data) 
+        {
+            float[] r = new float[data.Length / 4];
+            for (int i = 0; i < r.Length; i++)
+            {
+                byte[] floats = new byte[4];
+                floats[0] = data[i * 4 + 1];
+                floats[1] = data[i * 4];
+                floats[2] = data[i * 4 + 3];
+                floats[3] = data[i * 4 + 2];
+
+                r[i] = BitConverter.ToSingle(floats, 0);
+
+            }
+            return r;
+        }
+
         public static uint[] ToInt32(byte[] data) 
         {
             uint[] r = new uint[data.Length / 4];
             for (int i = 0; i < r.Length; i++)
             {
                 byte[] int32s = new byte[4];
-                int32s[0] = data[i];
-                int32s[1] = data[i * 4 + 1];
-                int32s[2] = data[i * 4 + 2];
-                int32s[3] = data[i * 4 + 3];
-                r[i] = BitConverter.ToUInt32(int32s);
+                int32s[3] = data[i*4];
+                int32s[2] = data[i * 4 + 1];
+                int32s[1] = data[i * 4 + 2];
+                int32s[0] = data[i * 4 + 3];
+                r[i] = BitConverter.ToUInt32(int32s,0);
             }
             return r;
 
