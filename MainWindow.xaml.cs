@@ -445,10 +445,10 @@ namespace BodDetect
 
                     if (hasChecked)
                     {
-                        if (MessageBox.Show("有其他的阀门打开,是否关闭其他阀门", "提示", MessageBoxButton.YesNoCancel) != MessageBoxResult.Yes)
-                        {
-                            return;
-                        }
+                        //if (MessageBox.Show("有其他的阀门打开,是否关闭其他阀门", "提示", MessageBoxButton.YesNoCancel) != MessageBoxResult.Yes)
+                        //{
+                        //    return;
+                        //}
 
                         foreach (var item in ValveDic)
                         {
@@ -508,6 +508,39 @@ namespace BodDetect
         }
 
         private void PumpDrain_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (bodHelper.IsSampling == true)
+                {
+                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                var CheckedVavle = ValveDic.Where(t => t.Value.IsChecked == true).ToList();
+
+                if (CheckedVavle == null)
+                {
+                    MessageBox.Show(" 请打开任意一个阀门.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                if (CheckedVavle.Count > 2)
+                {
+                    MessageBox.Show(" 只能打开一个阀门,请关闭阀门.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                bodHelper.PumpDrain();
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void PumpDrain_Click(object sender, RoutedEventArgs e)
         {
             try
             {

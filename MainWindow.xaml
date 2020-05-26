@@ -365,7 +365,7 @@
                             <StackPanel Grid.Row="0" Orientation="Horizontal">
                                 <Metro:MetroImage   x:Name="PumpImage" Content="PumpImage" Source="/Resources/zhushe.png" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center"  Margin="425,0,10,0" />
                                 <Metro:MetroButton Name="PumpAbsorb" MetroButtonState="Red" Content="抽水" MinWidth="50"  Height="50" Width="70" Click="MetroButton_Click_3" />
-                                <Metro:MetroButton Name="PumpDrain" MetroButtonState="green" Content="放水" MinWidth="50" Height="50" Width="70" MouseLeftButtonDown="PumpDrain_MouseLeftButtonDown"  />
+                                <Metro:MetroButton Name="PumpDrain" MetroButtonState="green" Content="放水" MinWidth="50" Height="50" Width="70" MouseLeftButtonDown="PumpDrain_MouseLeftButtonDown" Click="PumpDrain_Click"  />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,120,0,30" Grid.RowSpan="2">

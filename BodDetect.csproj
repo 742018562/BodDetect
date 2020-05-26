@@ -104,4 +104,8 @@
     <Resource Include="Resources\溶解氧.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Serialport\" />
+  </ItemGroup>
+
 </Project>
