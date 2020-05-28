@@ -116,11 +116,15 @@ namespace BodDetect.UDP
             _rsv = 0;
             _gct = 0x02;
             _destinationNetworkAddress = 0;
-            _destinationAddress1 = 0xAE;
+            _destinationAddress1 = FinsClient.destinationAddress1;
             _destinationAddress2 = 0;
             _sourceNetworkAddress = 0;
-            _sourceAddress1 = 0x21;
+            _sourceAddress1 = FinsClient.sourceAddress1;
             _sourceAddress2 = 0;
+
+            //_sourceAddress1 = 0x21;
+            //_destinationAddress1 = 0xAE;
+
         }
 
         public void WriteTo(BinaryWriter ms)

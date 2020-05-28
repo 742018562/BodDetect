@@ -35,9 +35,14 @@ namespace BodDetect
 
         public Dictionary<byte, MetroSwitch> ValveDic = new Dictionary<byte, MetroSwitch>();
 
+        public Dictionary<byte, MetroSwitch> MultiValveDic = new Dictionary<byte, MetroSwitch>();
+
         //readonly FinsClient finsClient;
 
         DispatcherTimer timer = new DispatcherTimer();
+
+        DispatcherTimer WashTimer = new DispatcherTimer();
+
 
         public BodData bodData = new BodData();
 
@@ -74,6 +79,13 @@ namespace BodDetect
             ValveDic.Add(PLCConfig.NormalValveBit, NormalValve);
             ValveDic.Add(PLCConfig.SampleValveBit, Valve);
             ValveDic.Add(PLCConfig.DepositValveBit, StoreValve);
+
+
+            //ValveDic.Add(PLCConfig.CisternValveBit, RowValve);
+            //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
+            //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
+
+
 
             bodData.TemperatureData = (float)16.0;
             bodData.DoData = (float)4.3;
@@ -134,10 +146,19 @@ namespace BodDetect
 
 
                 string ip = IP_textbox.Text;
+
+                string[] value =  ip.Split('.');
+                if (value.Length < 4) 
+                {
+                    MessageBox.Show("异常ip!");
+                }
+
                 int port = Convert.ToInt32(Port_TextBox.Text);
 
                 bodHelper = new BodHelper(ip, port);
                 bool success = bodHelper.ConnectPlc();
+
+
 
                 bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
                 bodHelper.mainWindow = this;
@@ -441,23 +462,13 @@ namespace BodDetect
 
                 if (valve.IsChecked == true)
                 {
-                    bool hasChecked = ValveDic.Any(t => t.Value.IsChecked == true && t.Value != valve);
 
-                    if (hasChecked)
+                    foreach (var item in ValveDic)
                     {
-                        //if (MessageBox.Show("有其他的阀门打开,是否关闭其他阀门", "提示", MessageBoxButton.YesNoCancel) != MessageBoxResult.Yes)
-                        //{
-                        //    return;
-                        //}
-
-                        foreach (var item in ValveDic)
+                        if (item.Value != valve)
                         {
-                            if (item.Key != PLCConfig.DepositValveBit)
-                            {
-                                item.Value.IsChecked = false;
-                            }
+                            item.Value.IsChecked = false;
                         }
-
                     }
 
                     var key = ValveDic.FirstOrDefault(t => t.Value == valve).Key;
@@ -498,7 +509,12 @@ namespace BodDetect
                     return;
                 }
 
+                var key = CheckedVavle[0].Key;
+
+                timer.Tick += ProcessHandlers[key];
+
                 bodHelper.PunpAbsorb(PunpCapType.fiveml);
+                timer.Start();
 
             }
             catch (Exception)
@@ -570,6 +586,76 @@ namespace BodDetect
             catch (Exception)
             {
 
+            }
+        }
+
+        private void PumpWaterButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                
+                if (bodHelper.IsSampling == true)
+                {
+                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                PumpWaterButton.Visibility = Visibility.Collapsed;
+                PumpStopButton.Visibility = Visibility.Visible;
+                byte[] data = { PLCConfig.CisternPumpBit };
+
+                bool success =bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+        private void PumpStopButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                if (bodHelper.IsSampling == true)
+                {
+                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                PumpWaterButton.Visibility = Visibility.Visible;
+                PumpStopButton.Visibility = Visibility.Collapsed;
+                byte[] data = {0};
+
+                bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+        private void RowValve_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (bodHelper.IsSampling == true)
+                {
+                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    return;
+                }
+
+                byte[] data = { PLCConfig.DepositValveBit };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

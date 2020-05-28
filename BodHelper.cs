@@ -47,7 +47,7 @@ namespace BodDetect
         {
             try
             {
-                finsClient = new FinsClient(PLCEndPoint);
+                finsClient = new FinsClient(PLCEndPoint, PLC_IP);
             }
             catch (Exception)
             {

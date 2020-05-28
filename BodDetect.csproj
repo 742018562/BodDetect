@@ -25,6 +25,7 @@
     <None Remove="Resources\beijing.png" />
     <None Remove="Resources\biaoding.png" />
     <None Remove="Resources\biaoti.png" />
+    <None Remove="Resources\Bod.png" />
     <None Remove="Resources\COD.png" />
     <None Remove="Resources\cuboid1.jpg" />
     <None Remove="Resources\cuboid2.jpg" />
@@ -37,6 +38,7 @@
     <None Remove="Resources\icon.png" />
     <None Remove="Resources\iconMove.png" />
     <None Remove="Resources\nomale.png" />
+    <None Remove="Resources\paikou.png" />
     <None Remove="Resources\PH.png" />
     <None Remove="Resources\pic.jpg" />
     <None Remove="Resources\qingxi.png" />
@@ -76,6 +78,7 @@
     <Resource Include="Resources\beijing.png" />
     <Resource Include="Resources\biaoding.png" />
     <Resource Include="Resources\biaoti.png" />
+    <Resource Include="Resources\Bod.png" />
     <Resource Include="Resources\COD.png" />
     <Resource Include="Resources\down.png" />
     <Resource Include="Resources\editIcon.png" />
@@ -84,6 +87,7 @@
     <Resource Include="Resources\icon.png" />
     <Resource Include="Resources\iconMove.png" />
     <Resource Include="Resources\nomale.png" />
+    <Resource Include="Resources\paikou.png" />
     <Resource Include="Resources\PH.png" />
     <Resource Include="Resources\pic.jpg" />
     <Resource Include="Resources\qingxi.png" />

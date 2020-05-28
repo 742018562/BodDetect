@@ -19,10 +19,37 @@ namespace BodDetect.UDP
         private readonly object _lockObject = new object();
         private byte _sid;
 
-        public FinsClient(IPEndPoint remoteIpEndPoint)
+        public static byte destinationAddress1;
+
+        public static byte sourceAddress1;
+
+
+        private string remoteIp { get; set; }
+
+        public FinsClient(IPEndPoint remoteIpEndPoint,string RemoteIp)
         {
             _udpClient = new UdpClient();
             _udpClient.Connect(remoteIpEndPoint);
+
+            remoteIp = RemoteIp;
+
+            string[] value = remoteIp.Split('.');
+            if (value.Length < 4)
+            {
+                return;
+            }
+
+            destinationAddress1 = Convert.ToByte(value[3]);
+
+            string localeIp = Tool.GetLocalIP();
+
+            value = localeIp.Split('.');
+            if (value.Length < 4)
+            {
+                return;
+            }
+
+            sourceAddress1 = Convert.ToByte(value[3]);
 
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
