@@ -26,6 +26,7 @@
     <None Remove="Resources\biaoding.png" />
     <None Remove="Resources\biaoti.png" />
     <None Remove="Resources\Bod.png" />
+    <None Remove="Resources\Bod_Model.png" />
     <None Remove="Resources\COD.png" />
     <None Remove="Resources\cuboid1.jpg" />
     <None Remove="Resources\cuboid2.jpg" />
@@ -34,22 +35,35 @@
     <None Remove="Resources\down.png" />
     <None Remove="Resources\editIcon.png" />
     <None Remove="Resources\fa.png" />
+    <None Remove="Resources\green.png" />
     <None Remove="Resources\huanchong.png" />
     <None Remove="Resources\icon.png" />
     <None Remove="Resources\iconMove.png" />
+    <None Remove="Resources\icon\Automator.png" />
+    <None Remove="Resources\icon\BioHazard.png" />
+    <None Remove="Resources\icon\Briefcase PixelPress Media Design.png" />
+    <None Remove="Resources\icon\dashcode.png" />
+    <None Remove="Resources\icon\home.png" />
+    <None Remove="Resources\icon\toolbarSites.png" />
+    <None Remove="Resources\icon\xray.png" />
     <None Remove="Resources\nomale.png" />
     <None Remove="Resources\paikou.png" />
     <None Remove="Resources\PH.png" />
     <None Remove="Resources\pic.jpg" />
+    <None Remove="Resources\PLC.jpg" />
     <None Remove="Resources\qingxi.png" />
+    <None Remove="Resources\red.png" />
     <None Remove="Resources\sample.png" />
+    <None Remove="Resources\sensor.png" />
     <None Remove="Resources\shuiyangpng.png" />
     <None Remove="Resources\stard.png" />
     <None Remove="Resources\store.png" />
     <None Remove="Resources\tabIcon.png" />
     <None Remove="Resources\titleMuenIcon.png" />
+    <None Remove="Resources\today.png" />
     <None Remove="Resources\up.png" />
     <None Remove="Resources\water.png" />
+    <None Remove="Resources\yellow.png" />
     <None Remove="Resources\zhushe.png" />
     <None Remove="Resources\zhushe_up.png" />
     <None Remove="Resources\悬浮物.png" />
@@ -59,6 +73,12 @@
     <None Remove="Resources\溶解氧.png" />
     <None Remove="tabIcon.png" />
     <None Remove="titleMuenIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Bod_Model.png" />
+    <Resource Include="Resources\green.png" />
+    <Resource Include="Resources\icon\Automator.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -86,19 +106,30 @@
     <Resource Include="Resources\huanchong.png" />
     <Resource Include="Resources\icon.png" />
     <Resource Include="Resources\iconMove.png" />
+    <Resource Include="Resources\icon\BioHazard.png" />
+    <Resource Include="Resources\icon\Briefcase PixelPress Media Design.png" />
+    <Resource Include="Resources\icon\dashcode.png" />
+    <Resource Include="Resources\icon\home.png" />
+    <Resource Include="Resources\icon\toolbarSites.png" />
+    <Resource Include="Resources\icon\xray.png" />
     <Resource Include="Resources\nomale.png" />
     <Resource Include="Resources\paikou.png" />
     <Resource Include="Resources\PH.png" />
     <Resource Include="Resources\pic.jpg" />
+    <Resource Include="Resources\PLC.jpg" />
     <Resource Include="Resources\qingxi.png" />
+    <Resource Include="Resources\red.png" />
     <Resource Include="Resources\sample.png" />
+    <Resource Include="Resources\sensor.png" />
     <Resource Include="Resources\shuiyangpng.png" />
     <Resource Include="Resources\stard.png" />
     <Resource Include="Resources\store.png" />
     <Resource Include="Resources\tabIcon.png" />
     <Resource Include="Resources\titleMuenIcon.png" />
+    <Resource Include="Resources\today.png" />
     <Resource Include="Resources\up.png" />
     <Resource Include="Resources\water.png" />
+    <Resource Include="Resources\yellow.png" />
     <Resource Include="Resources\zhushe.png" />
     <Resource Include="Resources\zhushe_up.png" />
     <Resource Include="Resources\悬浮物.png" />
@@ -109,6 +140,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Control\" />
     <Folder Include="Serialport\" />
   </ItemGroup>
 

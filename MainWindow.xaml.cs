@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,10 +42,16 @@ namespace BodDetect
 
         DispatcherTimer timer = new DispatcherTimer();
 
-        DispatcherTimer WashTimer = new DispatcherTimer();
+        DispatcherTimer BodTimer = new DispatcherTimer();
+
+        DispatcherTimer WaterSampleTimer = new DispatcherTimer();
 
 
         public BodData bodData = new BodData();
+
+        MainWindow_Model mainWindow_Model;
+
+
 
         public MainWindow()
         {
@@ -95,9 +102,39 @@ namespace BodDetect
             bodData.Bod = 150;
             bodData.Uv254Data = 200;
 
+
+            init();
+
         }
 
 
+        public void init() 
+        {
+            mainWindow_Model = new MainWindow_Model();
+
+
+            for (int i = 0; i < 10; i++)
+            {
+                SysStatusList.Items.Add(new SysStatusMsg(i, "test0", "test1", "test2"));
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                AlarmList.Items.Add(new AlarmData(i, "test0", i+10,"test1", "test2",true));
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                HisParamList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+            }
+
+
+            logList.Items.Add("test");
+        }
 
         private void MetroButton_Click(object sender, RoutedEventArgs e)
         {
@@ -248,7 +285,10 @@ namespace BodDetect
             }
         }
 
-
+        /// <summary>
+        /// 多通阀进度条控制
+        /// </summary>
+        /// <param name="param"></param>
         public void ProcessAutoAdd(DelegateParam param)
         {
             while (true)
@@ -261,6 +301,16 @@ namespace BodDetect
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// Bod部分的进度条委托
+        /// </summary>
+        /// <param name="param"></param>
+        public void BodProcessCtrl(DelegateParam param) 
+        {
+
+
         }
 
 
@@ -656,6 +706,660 @@ namespace BodDetect
             {
 
                 throw;
+            }
+        }
+
+        private void StandCap_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+
+        }
+
+        private void MetroComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void PunpStand_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = PunpStand.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.StandardValveBit };
+
+                byte[] StandBodValve = { PLCConfig.NormalValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = {0};
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+                
+            }
+        }
+
+
+        private void PumpProcess(List<byte[]> data, List<ushort> address, PunpCapType punpCapType) 
+        {
+            if (data == null || data.Count < 2 || address == null || address.Count < 2) 
+            {
+                return;
+            }
+
+            bool success = false;
+
+            success = bodHelper.ValveControl(address[0], data[0]);
+
+            if (!success) 
+            {
+                MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
+            }
+
+            success = bodHelper.PunpAbsorb(punpCapType);
+
+            if (!success)
+            {
+                MessageBox.Show(" 注射泵抽水失败.", "提示", MessageBoxButton.OK);
+            }
+
+            Thread.Sleep(5000);
+
+            success = bodHelper.ValveControl(address[1], data[1]);
+            if (!success)
+            {
+                MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
+            }
+            success = bodHelper.PumpDrain();
+
+            if (!success)
+            {
+                MessageBox.Show(" 注射泵放水失败.", "提示", MessageBoxButton.OK);
+            }
+
+            Thread.Sleep(5000);
+        }
+
+        private void PumpCache_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = PumpCache.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.bufferValveBit };
+
+                byte[] StandBodValve = { PLCConfig.NormalValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void DrainCahce_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = DrainCahce.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData;
+
+
+                byte[] StandValve = { PLCConfig.NormalValveBit };
+
+                byte[] StandBodValve = { PLCConfig.AirValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void PunpSample_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = PunpSample.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.DepositValveBit };
+
+                byte[] StandBodValve = { PLCConfig.SampleValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void PumpWater_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = PumpWater.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.WaterValveBit };
+
+                byte[] StandBodValve = { PLCConfig.SampleValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void PumpCache1_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = PumpCache1.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.bufferValveBit };
+
+                byte[] StandBodValve = { PLCConfig.SampleValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void DrainSample_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = DrainSample.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData;
+
+
+                byte[] StandValve = { PLCConfig.SampleValveBit };
+
+                byte[] StandBodValve = { PLCConfig.AirValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void wash_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                string cap = wash.Text;
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.WaterValveBit };
+
+                byte[] StandBodValve = { PLCConfig.AirValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void sample_start_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = { 1 };
+
+            byte bitAddress = PLCConfig.CisternPumpBit;
+
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            if (!success)
+            {
+                MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
+            }
+        }
+
+        private void sample_end_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = { 0};
+
+            byte bitAddress = PLCConfig.CisternPumpBit;
+
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            if (!success)
+            {
+                MessageBox.Show(" 抽水样泵关闭失败.", "提示", MessageBoxButton.OK);
+            }
+        }
+
+        private void drain_start_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = { 1 };
+
+            byte bitAddress = PLCConfig.CisternValveBit;
+
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            if (!success)
+            {
+                MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
+            }
+        }
+
+        private void drain_end_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = { 0 };
+
+            byte bitAddress = PLCConfig.CisternValveBit;
+
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            if (!success)
+            {
+                MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
+            }
+        }
+
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            string value = textBox.Text;
+
+            int a = SysStatusList.Items.Count; 
+            SysStatusList.Items.Add(new SysStatusMsg(a+1, "2", value, value));
+        }
+
+        private void StandDilution_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string cap = StandAll.Text;
+                string zoom = Dilution.Text;
+
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+                int zoomdata = Convert.ToInt32(zoom);
+
+                int waterData = capData * (zoomdata - 1);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.StandardValveBit };
+
+                byte[] StandBodValve = { PLCConfig.NormalValveBit };
+
+                byte[] waterValve = { PLCConfig.WaterValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+
+                times = waterData / 5;
+                extraTimes = waterData % 5;
+                data[0] = waterValve;
+                data[1] = StandBodValve;
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void SampleDilution_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string cap = SampleAll.Text;
+                string zoom = DilutionSamp.Text;
+
+                if (string.IsNullOrEmpty(cap))
+                {
+                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                }
+
+                int capData = Convert.ToInt32(cap);
+                int zoomdata = Convert.ToInt32(zoom);
+
+                int waterData = capData * (zoomdata - 1);
+
+                int times = capData / 5;
+
+                int extraTimes = capData % 5;
+
+                byte[] StandValve = { PLCConfig.DepositValveBit };
+
+                byte[] StandBodValve = { PLCConfig.SampleValveBit };
+
+                byte[] waterValve = { PLCConfig.WaterValveBit };
+
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(StandValve);
+                data.Add(StandBodValve);
+
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+                times = waterData / 5;
+                extraTimes = waterData % 5;
+                data[0] = waterValve;
+                data[1] = StandBodValve;
+
+                while (times > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.fiveml);
+                    times--;
+                }
+
+                while (extraTimes > 0)
+                {
+                    PumpProcess(data, address, PunpCapType.oneml);
+                    extraTimes--;
+                }
+
+
+                byte[] data1 = { 0 };
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            }
+            catch (Exception)
+            {
+
+
             }
         }
     }

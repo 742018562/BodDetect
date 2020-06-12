@@ -4,11 +4,721 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BodDetect"
-        xmlns:Metro="https://github.com/1217950746/Arthas-WPFUI" x:Class="BodDetect.MainWindow"
+        xmlns:Metro="https://github.com/1217950746/Arthas-WPFUI" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" x:Class="BodDetect.MainWindow"
+
         mc:Ignorable="d"
     
     Title="{Binding Title}" >
 
+    <Window.Resources>
+        <!--日历主体样式表-->
+        <Style x:Key="CalendarItemStyle1"
+                TargetType="{x:Type CalendarItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CalendarItem}">
+                        <ControlTemplate.Resources>
+                            <DataTemplate x:Key="{x:Static CalendarItem.DayTitleTemplateResourceKey}">
+                                <!--日历星期几的绑定样式,我格式化成周一,周二等-->
+                                <TextBlock Foreground="#666666"
+                                            FontSize="14"
+                                            FontFamily="微软雅黑"
+                                            HorizontalAlignment="Center"
+                                            Margin="0 15"
+                                            Text="{Binding StringFormat=周{0} }"
+                                            VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </ControlTemplate.Resources>
+                        <Grid x:Name="PART_Root">
+                            <Grid.Resources>
+                                <!--设置日历控件 IsEnable=false 时的不可用遮罩层颜色,并且会播放过渡动画-->
+                                <SolidColorBrush x:Key="DisabledColor"
+                                                  Color="#A5FFFFFF" />
+                            </Grid.Resources>
+
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="Disabled">
+                                        <!--设置日历控件 IsEnable=false 时遮罩层透明度0-1变色动画-->
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To="1"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="PART_DisabledVisual" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+
+                            <Border BorderBrush="#cfcfcf"
+                                     BorderThickness="0"
+                                     Background="{TemplateBinding Background}"
+                                     CornerRadius="2">
+                                <Border>
+                                    <Grid>
+                                        <Grid.Resources>
+                                            <!--日历头左箭头按钮样式模版-->
+                                            <ControlTemplate x:Key="PreviousButtonTemplate"
+                                                              TargetType="{x:Type Button}">
+                                                <!--鼠标悬停在左箭头按钮上时改变鼠标指针样式-->
+                                                <Grid Cursor="Hand">
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroup x:Name="CommonStates">
+                                                            <VisualState x:Name="Normal" />
+                                                            <VisualState x:Name="MouseOver">
+                                                                <!--鼠标悬停在左箭头按钮上时左箭头颜色变化动画-->
+                                                                <Storyboard>
+                                                                    <ColorAnimation Duration="0"
+                                                                                     To="#FF73A9D8"
+                                                                                     Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                                                     Storyboard.TargetName="path" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                            <VisualState x:Name="Disabled">
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Duration="0"
+                                                                                      To=".5"
+                                                                                      Storyboard.TargetProperty="(Shape.Fill).(Brush.Opacity)"
+                                                                                      Storyboard.TargetName="path" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                    <!--左箭头整个区域矩形块-->
+                                                    <Rectangle Fill="#363636"
+                                                                Opacity="1"
+                                                                Stretch="Fill" />
+                                                    <Grid>
+                                                        <!--左箭头-->
+                                                        <Path x:Name="path"
+                                                               Data="M288.75,232.25 L288.75,240.625 L283,236.625 z"
+                                                               Fill="#e0e0e0"
+                                                               HorizontalAlignment="Left"
+                                                               Height="15"
+                                                               Width="15"
+                                                               Margin="20,0,0,0"
+                                                               Stretch="Fill"
+                                                               VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Grid>
+                                            </ControlTemplate>
+                                            <!--日历头右箭头按钮样式模版,这块跟左箭头样式模版没什么区别-->
+                                            <ControlTemplate x:Key="NextButtonTemplate"
+                                                              TargetType="{x:Type Button}">
+                                                <Grid Cursor="Hand">
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroup x:Name="CommonStates">
+                                                            <VisualState x:Name="Normal" />
+                                                            <VisualState x:Name="MouseOver">
+                                                                <Storyboard>
+                                                                    <ColorAnimation Duration="0"
+                                                                                     To="#FF73A9D8"
+                                                                                     Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                                                     Storyboard.TargetName="path" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                            <VisualState x:Name="Disabled">
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Duration="0"
+                                                                                      To=".5"
+                                                                                      Storyboard.TargetProperty="(Shape.Fill).(Brush.Opacity)"
+                                                                                      Storyboard.TargetName="path" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                    <Rectangle Fill="#363636"
+                                                                Opacity="1"
+                                                                Stretch="Fill" />
+                                                    <Grid>
+                                                        <Path x:Name="path"
+                                                               Data="M282.875,231.875 L282.875,240.375 L288.625,236 z"
+                                                               Fill="#e0e0e0"
+                                                               HorizontalAlignment="Right"
+                                                               Height="15"
+                                                               Width="15"
+                                                               Margin="0,0,20,0"
+                                                               Stretch="Fill"
+                                                               VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Grid>
+                                            </ControlTemplate>
+                                            <!--日历头中间年按钮样式模版-->
+                                            <ControlTemplate x:Key="HeaderButtonTemplate"
+                                                              TargetType="{x:Type Button}">
+                                                <Grid Cursor="Hand">
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroup x:Name="CommonStates">
+                                                            <VisualState x:Name="Normal" />
+                                                            <VisualState x:Name="MouseOver">
+                                                                <Storyboard>
+                                                                    <ColorAnimation Duration="0"
+                                                                                     To="#FF73A9D8"
+                                                                                     Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                                                     Storyboard.TargetName="buttonContent" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                            <VisualState x:Name="Disabled">
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Duration="0"
+                                                                                      To=".5"
+                                                                                      Storyboard.TargetProperty="Opacity"
+                                                                                      Storyboard.TargetName="buttonContent" />
+                                                                </Storyboard>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                    <ContentPresenter x:Name="buttonContent"
+                                                                       ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                       Content="{TemplateBinding Content}"
+                                                                       TextElement.Foreground="#e0e0e0"
+                                                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                       Margin="1,4,1,9"
+                                                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Grid.Resources>
+
+                                        <Grid.RowDefinitions>
+                                            <!--日历头,左箭头,年,右箭头-->
+                                            <RowDefinition Height="Auto" />
+                                            <!--日历内容,星期几和具体的日期几号几号-->
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <!--左箭头-->
+                                            <ColumnDefinition Width="Auto" />
+                                            <!--年-->
+                                            <ColumnDefinition Width="*" />
+                                            <!--右箭头-->
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <!--头,左箭头,年,右箭头,整体的背景色-->
+                                        <Border Grid.Row="0"
+                                                 Grid.ColumnSpan="3"
+                                                 Background="#363636"></Border>
+                                        <!--左箭头-->
+                                        <Button x:Name="PART_PreviousButton"
+                                                 Grid.Column="0"
+                                                 Focusable="False"
+                                                 HorizontalAlignment="Left"
+                                                 Grid.Row="0"
+                                                 Template="{StaticResource PreviousButtonTemplate}" />
+                                        <!--年-->
+                                        <Button x:Name="PART_HeaderButton"
+                                                 Grid.Column="1"
+                                                 FontFamily="微软雅黑"
+                                                 Focusable="False"
+                                                 FontSize="20"
+                                                 HorizontalAlignment="Center"
+                                                 Grid.Row="0"
+                                                 Template="{StaticResource HeaderButtonTemplate}"
+                                                 VerticalAlignment="Center" />
+                                        <!--右箭头-->
+                                        <Button x:Name="PART_NextButton"
+                                                 Grid.Column="2"
+                                                 Focusable="False"
+                                                 HorizontalAlignment="Right"
+                                                 Grid.Row="0"
+                                                 Template="{StaticResource NextButtonTemplate}" />
+                                        <!--日期几号几号内容显示-->
+                                        <Border Grid.Row="1"
+                                                 Grid.ColumnSpan="3"
+                                                 Margin="0"
+                                                 BorderBrush="#cfcfcf"
+                                                 BorderThickness="3,0,3,3">
+                                            <Grid x:Name="PART_MonthView"
+                                                   HorizontalAlignment="Center"
+                                                   Visibility="Visible">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                            </Grid>
+                                        </Border>
+
+                                        <!--月和年内容显示-->
+                                        <Grid x:Name="PART_YearView"
+                                               Grid.ColumnSpan="3"
+                                               HorizontalAlignment="Center"
+                                               Margin="6,-3,7,6"
+                                               Grid.Row="1"
+                                               Visibility="Hidden"
+                                               VerticalAlignment="Center">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </Border>
+                            <!--日历不可用的遮罩层-->
+                            <Rectangle x:Name="PART_DisabledVisual"
+                                        Fill="{StaticResource DisabledColor}"
+                                        Opacity="0"
+                                        RadiusY="2"
+                                        RadiusX="2"
+                                        Stretch="Fill"
+                                        Stroke="{StaticResource DisabledColor}"
+                                        StrokeThickness="1"
+                                        Visibility="Collapsed" />
+                        </Grid>
+                        <!--触发器属性-->
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled"
+                                      Value="False">
+                                <Setter Property="Visibility"
+                                         TargetName="PART_DisabledVisual"
+                                         Value="Visible" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding DisplayMode, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Calendar}}}"
+                                          Value="Year">
+                                <Setter Property="Visibility"
+                                         TargetName="PART_MonthView"
+                                         Value="Hidden" />
+                                <Setter Property="Visibility"
+                                         TargetName="PART_YearView"
+                                         Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DisplayMode, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Calendar}}}"
+                                          Value="Decade">
+                                <Setter Property="Visibility"
+                                         TargetName="PART_MonthView"
+                                         Value="Hidden" />
+                                <Setter Property="Visibility"
+                                         TargetName="PART_YearView"
+                                         Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--单个几号几号按钮的样式模版-->
+        <Style x:Key="CalendarDayButtonStyle1"
+                TargetType="{x:Type CalendarDayButton}">
+            <Setter Property="Margin"
+                     Value="1" />
+            <Setter Property="MinWidth"
+                     Value="5" />
+            <Setter Property="MinHeight"
+                     Value="5" />
+            <Setter Property="FontSize"
+                     Value="14" />
+            <Setter Property="FontFamily"
+                     Value="微软雅黑" />
+            <Setter Property="HorizontalContentAlignment"
+                     Value="Center" />
+            <Setter Property="VerticalContentAlignment"
+                     Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CalendarDayButton}">
+                        <Grid>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.1" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal" />
+                                    <!--悬停的颜色动画-->
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To="0.5"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="HighlightBackground" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <!--按下后动画-->
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To="0.5"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="HighlightBackground" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <!--不可用动画-->
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To="0"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="HighlightBackground" />
+                                            <DoubleAnimation Duration="0"
+                                                              To=".35"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="NormalText" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="SelectionStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Unselected" />
+                                    <!--选中某日期的样式-->
+                                    <VisualState x:Name="Selected">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To=".75"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="SelectedBackground" />
+                                            <ColorAnimation Duration="0"
+                                                             To="white"
+                                                             Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                             Storyboard.TargetName="NormalText" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CalendarButtonFocusStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="CalendarButtonFocused">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Duration="0"
+                                                                            Storyboard.TargetProperty="Visibility"
+                                                                            Storyboard.TargetName="DayButtonFocusVisual">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Visible</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="CalendarButtonUnfocused">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Duration="0"
+                                                                            Storyboard.TargetProperty="Visibility"
+                                                                            Storyboard.TargetName="DayButtonFocusVisual">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Collapsed</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="ActiveStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Active" />
+                                    <VisualState x:Name="Inactive">
+                                        <Storyboard>
+                                            <ColorAnimation Duration="0"
+                                                             To="#b4b3b3"
+                                                             Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                             Storyboard.TargetName="NormalText" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="DayStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="RegularDay" />
+                                    <!--今天的样式-->
+                                    <VisualState x:Name="Today">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To="1"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="TodayBackground" />
+                                            <ColorAnimation Duration="0"
+                                                             To="#666666"
+                                                             Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                             Storyboard.TargetName="NormalText" />
+
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility"
+                                                                            Storyboard.TargetName="imgToday">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Visible</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <!--过期日期的-->
+                                <VisualStateGroup x:Name="BlackoutDayStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="NormalDay" />
+                                    <VisualState x:Name="BlackoutDay">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To=".2"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="Blackout" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border BorderBrush="#bbbbbb"
+                                     BorderThickness="1">
+                                <Border BorderBrush="white"
+                                         BorderThickness="2,2,0,0"
+                                         Margin="1,1,0,0"></Border>
+                            </Border>
+
+                            <Rectangle x:Name="TodayBackground"
+                                        Fill="#c6c6c6"
+                                        Opacity="0"
+                                        RadiusY="1"
+                                        RadiusX="1" />
+                            <Rectangle x:Name="SelectedBackground"
+                                        Fill="#6eafbf"
+                                        Opacity="0"
+                                        RadiusY="1"
+                                        RadiusX="1" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                     BorderThickness="{TemplateBinding BorderThickness}"
+                                     Background="{TemplateBinding Background}" />
+                            <Rectangle x:Name="HighlightBackground"
+                                        Fill="#FFBADDE9"
+                                        Opacity="0"
+                                        RadiusY="1"
+                                        RadiusX="1" />
+                            <ContentPresenter x:Name="NormalText"
+                                               TextElement.Foreground="#666666"
+                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <Path x:Name="Blackout"
+                                   Data="M8.1772461,11.029181 L10.433105,11.029181 L11.700684,12.801641 L12.973633,11.029181 L15.191895,11.029181 L12.844727,13.999395 L15.21875,17.060919 L12.962891,17.060919 L11.673828,15.256231 L10.352539,17.060919 L8.1396484,17.060919 L10.519043,14.042364 z"
+                                   Fill="#FF000000"
+                                   HorizontalAlignment="Stretch"
+                                   Margin="3"
+                                   Opacity="0"
+                                   RenderTransformOrigin="0.5,0.5"
+                                   Stretch="Fill"
+                                   VerticalAlignment="Stretch" />
+                            <Rectangle x:Name="DayButtonFocusVisual"
+                                        IsHitTestVisible="false"
+                                        RadiusY="1"
+                                        RadiusX="1"
+                                        Stroke="#FF45D6FA"
+                                        Visibility="Collapsed" />
+
+                            <Image x:Name="imgToday"
+                                    Width="30"
+                                    Height="20"
+                                    Source="/Resources/today.png"
+                                    VerticalAlignment="Top"
+                                    HorizontalAlignment="Left"
+                                    Visibility="Hidden" />
+
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CalendarButtonStyle1"
+                TargetType="{x:Type CalendarButton}">
+            <Setter Property="Background"
+                     Value="#FFBADDE9" />
+            <Setter Property="MinWidth"
+                     Value="80" />
+            <Setter Property="MinHeight"
+                     Value="80" />
+            <Setter Property="Margin"
+                     Value="20" />
+            <Setter Property="FontSize"
+                     Value="25" />
+            <Setter Property="HorizontalContentAlignment"
+                     Value="Center" />
+            <Setter Property="VerticalContentAlignment"
+                     Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CalendarButton}">
+                        <Grid>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.1" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To=".5"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="Background" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To=".5"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="Background" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="SelectionStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Unselected" />
+                                    <VisualState x:Name="Selected">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0"
+                                                              To=".75"
+                                                              Storyboard.TargetProperty="Opacity"
+                                                              Storyboard.TargetName="SelectedBackground" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="ActiveStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Active" />
+                                    <VisualState x:Name="Inactive">
+                                        <Storyboard>
+                                            <ColorAnimation Duration="0"
+                                                             To="#FF777777"
+                                                             Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                             Storyboard.TargetName="NormalText" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CalendarButtonFocusStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="CalendarButtonFocused">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Duration="0"
+                                                                            Storyboard.TargetProperty="Visibility"
+                                                                            Storyboard.TargetName="CalendarButtonFocusVisual">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Visible</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="CalendarButtonUnfocused">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Duration="0"
+                                                                            Storyboard.TargetProperty="Visibility"
+                                                                            Storyboard.TargetName="CalendarButtonFocusVisual">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <Visibility>Collapsed</Visibility>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Rectangle x:Name="SelectedBackground"
+                                        Fill="{TemplateBinding Background}"
+                                        Opacity="0"
+                                        RadiusY="1"
+                                        RadiusX="1" />
+                            <Rectangle x:Name="Background"
+                                        Fill="{TemplateBinding Background}"
+                                        Opacity="0"
+                                        RadiusY="1"
+                                        RadiusX="1" />
+                            <ContentPresenter x:Name="NormalText"
+                                               TextElement.Foreground="#FF333333"
+                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                               Margin="1,0,1,1"
+                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <Rectangle x:Name="CalendarButtonFocusVisual"
+                                        IsHitTestVisible="false"
+                                        RadiusY="1"
+                                        RadiusX="1"
+                                        Stroke="#FF45D6FA"
+                                        Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused"
+                                      Value="True">
+                                <Setter Property="Visibility"
+                                         TargetName="CalendarButtonFocusVisual"
+                                         Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CalendarStyle1"
+                TargetType="{x:Type Calendar}">
+            <!--日历控件的背景色,也可以改成绑定的-->
+            <Setter Property="Background"
+                     Value="#f6f6f6" />
+
+            <Setter Property="CalendarItemStyle" Value="{StaticResource CalendarItemStyle1}" />
+            <Setter Property="CalendarButtonStyle" Value="{StaticResource CalendarButtonStyle1}" />
+            <Setter Property="CalendarDayButtonStyle" Value="{StaticResource CalendarDayButtonStyle1}" />
+            <Setter Property="Width"
+                     Value="300" />
+            <Setter Property="Height"
+                     Value="300" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Calendar}">
+
+                        <StackPanel x:Name="PART_Root"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center">
+                            <!--这个是日历控件的主体元件,也是内部元件PART_CalendarItem名称不要更改,可以改它的其它样式属性-->
+                            <CalendarItem x:Name="PART_CalendarItem"
+                                           BorderBrush="{TemplateBinding BorderBrush}"
+                                           BorderThickness="{TemplateBinding BorderThickness}"
+                                           Background="{TemplateBinding Background}"
+                                           Style="{TemplateBinding CalendarItemStyle}"
+                                           Height="{TemplateBinding Height}"
+                                           Width="{TemplateBinding Width}"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Stretch" />
+                        </StackPanel>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Metro:MetroWindow.DataContext>
         <local:MainWindow_Model />
     </Metro:MetroWindow.DataContext>
@@ -73,7 +783,7 @@
     </Metro:MetroWindow.ContextMenu>
     <Grid>
         <Metro:MetroMenuTabControl x:Name="tab" IconMode="True">
-            <Metro:MetroMenuTabItem Header="系统首页" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
+            <Metro:MetroMenuTabItem Header="系统首页" Icon="/Resources/icon/home.png" IconMove="/Resources/icon/home.png"  Height="50">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="100"></RowDefinition>
@@ -117,6 +827,13 @@
                                 </StackPanel>
                                 <Metro:MetroButton Content="读数据" HorizontalAlignment="Left" Margin="22,31,0,0" Grid.Row="2" VerticalAlignment="Top" Click="MetroButton_Click"/>
                                 <Metro:MetroButton Content="写数据" HorizontalAlignment="Left" Margin="171,31,0,0" Grid.Row="2" VerticalAlignment="Top"/>
+                                <Metro:MetroComboBox Grid.Column="1" HorizontalAlignment="Left" Margin="50,19,0,0" VerticalAlignment="Top" Width="120" Grid.Row="1" Icon="/Resources/icon/xray.png" Visibility="Visible">
+                                    <Metro:MetroComboBoxItem Content="111111" Tag="1"/>
+                                    <Metro:MetroComboBoxItem Content="114" Tag="2"/>
+
+                                    <Metro:MetroComboBoxItem Content="122221" Tag="3"/>
+
+                                </Metro:MetroComboBox>
 
 
                             </Grid>
@@ -241,122 +958,314 @@
                 </Grid>
 
             </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="参数配置" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
+            <Metro:MetroMenuTabItem Header="参数配置" Icon="/Resources/icon/dashcode.png" IconMove="/Resources/icon/dashcode.png" Height="50">
                 <Grid>
-                    <Metro:MetroScrollViewer>
-                        <!--<Metro:MetroWaterfallFlow ListWidth="180">
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="500">
-                                    <Metro:MetroTextBlock FontSize="30" Text="1" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="100">
-                                    <Metro:MetroTextBlock FontSize="30" Text="2" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="200">
-                                    <Metro:MetroTextBlock FontSize="30" Text="3" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="300">
-                                    <Metro:MetroTextBlock FontSize="30" Text="4" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="400">
-                                    <Metro:MetroTextBlock FontSize="30" Text="5" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="300">
-                                    <Metro:MetroTextBlock FontSize="30" Text="6" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="200">
-                                    <Metro:MetroTextBlock FontSize="30" Text="7" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="100">
-                                    <Metro:MetroTextBlock FontSize="30" Text="8" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="300">
-                                    <Metro:MetroTextBlock FontSize="30" Text="9" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="200">
-                                    <Metro:MetroTextBlock FontSize="30" Text="10" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="500">
-                                    <Metro:MetroTextBlock FontSize="30" Text="11" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="400">
-                                    <Metro:MetroTextBlock FontSize="30" Text="12" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="200">
-                                    <Metro:MetroTextBlock FontSize="30" Text="13" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="100">
-                                    <Metro:MetroTextBlock FontSize="30" Text="14" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="50">
-                                    <Metro:MetroTextBlock FontSize="30" Text="15" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="50">
-                                    <Metro:MetroTextBlock FontSize="30" Text="16" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="80">
-                                    <Metro:MetroTextBlock FontSize="30" Text="17" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="90">
-                                    <Metro:MetroTextBlock FontSize="30" Text="18" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="40">
-                                    <Metro:MetroTextBlock FontSize="30" Text="19" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                            <Grid>
-                                <Border BorderBrush="#33000000" BorderThickness="1" Height="200">
-                                    <Metro:MetroTextBlock FontSize="30" Text="20" Margin="7,0,0,0" Opacity="0.65" />
-                                </Border>
-                            </Grid>
-                        </Metro:MetroWaterfallFlow>-->
-                    </Metro:MetroScrollViewer>
+
                 </Grid>
             </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="运行状态" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
-            </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="运行流程" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png" Height="40" VerticalAlignment="Top" Width="auto" FontWeight="Bold" >
+            <Metro:MetroMenuTabItem Header="运行状态" Icon="/Resources/icon/xray.png" IconMove="/Resources/icon/xray.png" Height="50">
+                <Metro:MetroTabControl x:Name="Status"  Foreground="#FF2F48B8" FontSize="14">
+                    <Metro:MetroTabItem Header="单个流程" Icon="/Resources/tabIcon.png">
+                        <Grid ClipToBounds="True" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Metro:MetroGroupBox Grid.Column="0" Grid.Row="0" Header="标液流程">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
+                                            <StackPanel Orientation="Vertical">
+                                                <ComboBox>
+                                                    <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                                    <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                                </ComboBox>
+                                                <Metro:MetroTextBox Name="PunpStand" Title="抽取标液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpStand_ButtonClick" />
+                                                <Metro:MetroTextBox Name="PumpCache" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache_ButtonClick" />
+                                                <Metro:MetroTextBox Name="DrainCahce" Title="标液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainCahce_ButtonClick"/>
+                                            </StackPanel>
+
+                                        </Metro:MetroGroupBox>
+
+                                        <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
+                                            <StackPanel>
+                                                <Metro:MetroTextBox Name="StandAll" Title="标液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  />
+                                                <Metro:MetroTextBox Name="Dilution" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0" />
+                                                <Metro:MetroButton Name="StandDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="StandDilution_Click"/>
+
+                                            </StackPanel>
+                                        </Metro:MetroGroupBox>
+                                    </Grid>
+
+                                </StackPanel>
+                            </Metro:MetroGroupBox>
+                            <Metro:MetroGroupBox Grid.Column="2" Grid.Row="0" Header="样液流程"  >
+                                <StackPanel  Orientation="Vertical">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
+                                            <StackPanel>
+                                                <ComboBox>
+                                                    <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                                    <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                                </ComboBox>
+                                                <Metro:MetroTextBox Name="PunpSample" Title="抽取样液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpSample_ButtonClick" />
+                                                <Metro:MetroTextBox Name="PumpWater" Title="抽取清水:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpWater_ButtonClick" />
+                                                <Metro:MetroTextBox Name="PumpCache1" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache1_ButtonClick" />
+                                                <Metro:MetroTextBox Name="DrainSample" Title="样液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainSample_ButtonClick" />
+
+                                            </StackPanel>
+
+                                        </Metro:MetroGroupBox>
+
+                                        <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
+                                            <StackPanel>
+                                                <Metro:MetroTextBox Name="SampleAll" Title="样液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  />
+                                                <Metro:MetroTextBox Name="DilutionSamp" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0" />
+                                                <Metro:MetroButton Name="SampleDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="SampleDilution_Click"/>
+
+                                            </StackPanel>
+                                        </Metro:MetroGroupBox>
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </Metro:MetroGroupBox>
+
+                            <Metro:MetroGroupBox Grid.Column="0" Grid.Row="1" Header="润洗流程" Padding="10,20,10,20">
+                                <StackPanel  Orientation="Vertical" Margin="0,20,0,0">
+                                    <ComboBox>
+                                        <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                        <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                    </ComboBox>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Metro:MetroButton Name="startInit" Content="初始化流程" MetroButtonState ="Green" IsEnabled="True" />
+
+                                        <Metro:MetroTextBox Name="wash" Title="清洗管道" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="wash_ButtonClick" />
+
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                        <Metro:MetroButton Name="sample_start" Content="储水池取样开始" MetroButtonState ="Green" IsEnabled="True" Click="sample_start_Click"/>
+                                        <Metro:MetroButton Name="sample_end" Content="储水池取样停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="sample_end_Click" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                        <Metro:MetroButton Name="drain_start" Content="储水池排水开始" MetroButtonState ="Green" IsEnabled="True" Click="drain_start_Click"/>
+                                        <Metro:MetroButton Name="drain_end" Content="储水池排水停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="drain_end_Click"/>
+                                    </StackPanel>
+
+                                </StackPanel>
+                            </Metro:MetroGroupBox>
+
+                            <Metro:MetroGroupBox Grid.Column="2" Grid.Row="1" Header="BOD流程" Padding="10,20,10,20">
+
+                            </Metro:MetroGroupBox>
+
+                        </Grid>
+                    </Metro:MetroTabItem>
+                    <Metro:MetroTabItem Header="设备状态" Icon="/Resources/tabIcon.png">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Metro:MetroGroupBox Grid.Column="0" Header="Bod状态" FontWeight="Bold"  Margin="0,20,0,0"  VerticalContentAlignment="Top" HorizontalContentAlignment="Center">
+                                <Grid Margin="0,30,0,0"  >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <Metro:MetroImage Grid.Row="1"  x:Name="BOD_Model_Image" Source="/Resources/Bod_Model.png" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                        <Grid Margin="20,0,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="120"/>
+                                                <RowDefinition Height="120"/>
+                                                <RowDefinition Height="120"/>
+                                                <RowDefinition Height="120"/>
+                                                <RowDefinition Height="120"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusComm_Image" Source="/Resources/green.png" Height="80" Width="80" Margin="40,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                <Label IsEnabled="False" Content="运行状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusRun_redImage" Source="/Resources/green.png" Height="80" Width="80" Margin="40,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                <Label IsEnabled="False" Content="告警状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Name="Bod_Alarm_status" Content="无告警" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="Bod_Alarm_status_Image" Source="/Resources/green.png" Height="80" Width="80" Margin="22,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                <Label IsEnabled="False" Content="工作状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Name="Bod_Work_status" Content="空闲" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                <Label IsEnabled="False" Content="做样状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Name="Bod_Sampling_status" Content="做样完成" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                            </StackPanel>
+
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Metro:MetroGroupBox>
+                            <StackPanel Grid.Column="1" Margin="20,20,0,0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <Metro:MetroGroupBox Grid.Row="0" Header="PLC状态"  FontWeight="Bold"  Padding="10,10,10,10" >
+
+                                        <Grid  Margin="0,10,0,0" >
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="PLCImage" Source="/Resources/PLC.jpg" Height="130" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                                <Grid >
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="80"/>
+                                                        <RowDefinition Height="80"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <StackPanel Grid.Row="0" Orientation="Horizontal" >
+                                                        <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusComm_Image" Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="1" Orientation="Horizontal" >
+                                                        <Label IsEnabled="False" Content="运行状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusRun_Image" Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Metro:MetroGroupBox>
+                                    <Metro:MetroGroupBox Grid.Row="1" Header="传感器状态" FontWeight="Bold"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+                                        <Grid Margin="0,20,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="33"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="80"/>
+                                                <RowDefinition Height="80"/>
+                                                <RowDefinition Height="80"/>
+                                                <RowDefinition Height="80"/>
+                                                <RowDefinition Height="80"/>
+                                            </Grid.RowDefinitions>
+
+
+                                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                                <Metro:MetroImage    Source="/Resources/sensor.png" Margin="20,0,0,0"  />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Grid.Column="0">
+                                                <Metro:MetroImage    Source="/Resources/sensor.png" Margin="20,0,0,0"  />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="2" Grid.Column="0">
+                                                <Metro:MetroImage    Source="/Resources/sensor.png" Margin="20,0,0,0"  />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="3" Grid.Column="0">
+                                                <Metro:MetroImage   Source="/Resources/sensor.png" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="4" Grid.Column="0">
+                                                <Metro:MetroImage    Source="/Resources/sensor.png" Margin="20,0,0,0" />
+                                            </StackPanel>
+
+
+                                            <StackPanel Grid.Row="0"  Grid.Column="2" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="2"  Grid.Column="2" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="3"  Grid.Column="2" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="4"  Grid.Column="2" Orientation="Horizontal" >
+                                                <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Metro:MetroGroupBox>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Metro:MetroTabItem>
+                    <Metro:MetroTabItem Header="系统状态" Icon="/Resources/tabIcon.png">
+                        <StackPanel>
+                            <ListView Name="SysStatusList">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
+                                        <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                        <GridViewColumn Header="状态信息" Width="200" DisplayMemberBinding="{Binding StatusInfo}"/>
+                                        <GridViewColumn Header="当前时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <TextBox Text="aaaaaa" Background="Red" TextChanged="TextBox_TextChanged"></TextBox>
+                            <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center">
+
+                            </local:Pager>
+
+                        </StackPanel>
+                    </Metro:MetroTabItem>
+
+                </Metro:MetroTabControl>
+            </Metro:MetroMenuTabItem >
+            <Metro:MetroMenuTabItem Header="运行流程" Icon="/Resources/icon/Automator.png" IconMove="/Resources/icon/Automator.png"  VerticalAlignment="Top" Width="auto" FontWeight="Bold" Height="50">
                 <Viewbox>
                     <DockPanel >
                         <Grid >
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="150"></RowDefinition>
+                                <RowDefinition Height="139.76"></RowDefinition>
+                                <RowDefinition Height="10.24"/>
                                 <RowDefinition Height="150"></RowDefinition>
                                 <RowDefinition Height="150"></RowDefinition>
                                 <RowDefinition Height="200"></RowDefinition>
@@ -367,19 +1276,19 @@
                                 <ColumnDefinition Width="170"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Grid.ColumnSpan="2" Margin="0,0,170,0" Grid.RowSpan="2">
                                 <Metro:MetroImage   x:Name="PumpImage" Content="PumpImage" Source="/Resources/zhushe.png" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center"  Margin="425,0,10,0" />
                                 <Metro:MetroButton Name="PumpAbsorb" MetroButtonState="Red" Content="抽水" MinWidth="50"  Height="50" Width="70" Click="MetroButton_Click_3" />
                                 <Metro:MetroButton Name="PumpDrain" MetroButtonState="green" Content="放水" MinWidth="50" Height="50" Width="70" MouseLeftButtonDown="PumpDrain_MouseLeftButtonDown" Click="PumpDrain_Click"  />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="0,120,0,30" Grid.RowSpan="2">
+                            <StackPanel Orientation="Horizontal" Margin="0,120,170,30" Grid.RowSpan="3" Grid.ColumnSpan="2">
                                 <Metro:MetroImage  Grid.Column="0" x:Name="WaterImage" Content="WaterImage" Source="/Resources/water.png" Margin="225,0,10,0">
                                 </Metro:MetroImage>
                                 <Metro:MetroImage   x:Name="AirImage" Content="AirImage" Source="/Resources/air.png"  Margin="275,0,10,0" />
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <StackPanel Grid.Row="3" Orientation="Horizontal" Grid.ColumnSpan="2" Margin="0,0,170,0">
                                 <Metro:MetroImage    x:Name="StandImage" Content="StandImage" Source="/Resources/biaoding.png"  Height="150" Margin="100,0,0,0" />
                                 <Metro:MetroImage  x:Name="NomaleImage" Content="NomaleImage" Source="/Resources/nomale.png"   Height="150"  Margin="470,0,0,0" Width="250"/>
                                 <StackPanel Orientation="Vertical">
@@ -388,7 +1297,7 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="3" Orientation="Horizontal">
+                            <StackPanel Grid.Row="4" Orientation="Horizontal" Grid.ColumnSpan="2" Margin="0,0,170,0">
                                 <Metro:MetroImage   x:Name="CacheImage" Content="CacheImage" Source="/Resources/huanchong.png" RenderTransformOrigin="0.5,0.5" Margin="200,0,0,0" Height="150" VerticalAlignment="Top">
                                 </Metro:MetroImage>
                                 <Metro:MetroImage   x:Name="SampleImage" Content="SampleImage" Source="/Resources/sample.png" Margin="260,0,0,0" Width="300" Height="150" VerticalAlignment="Bottom"/>
@@ -399,7 +1308,7 @@
 
                             </StackPanel>
 
-                            <StackPanel Grid.Row="4" Orientation="Horizontal" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="1276">
+                            <StackPanel Grid.Row="5" Orientation="Horizontal" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="1276">
                                 <Metro:MetroImage   x:Name="WaterSamplImage" Content="WaterSamplImage" Source="/Resources/shuiyangpng.png" />
                                 <StackPanel  Margin="-10,0,-10,0">
                                     <Metro:MetroButton Name="PumpWaterButton" Content="抽水" MetroButtonState="Green" MinWidth="50" Width="50" Margin="0,50,0,0" Visibility="Visible" Click="PumpWaterButton_Click"/>
@@ -417,9 +1326,9 @@
                             </StackPanel>
 
 
-                            <Metro:MetroImage Margin="382,118,553,2" Grid.RowSpan="2" Grid.Row="1" x:Name="ValveImage" Content="ValveImage" Source="/Resources/fa.png"  Height="180" Width="180" VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="1"/>
+                            <Metro:MetroImage Margin="382,118,0,0" Grid.RowSpan="2" Grid.Row="2" x:Name="ValveImage" Content="ValveImage" Source="/Resources/fa.png"  Height="180" Width="180" VerticalAlignment="Top" HorizontalAlignment="Left" Panel.ZIndex="1"/>
 
-                            <Metro:MetroProgressBar Name="PumpView" ProgressBarHeight="30" RenderTransformOrigin="0.5,0.5" CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Margin="409,44,577,80" Grid.Row="1">
+                            <Metro:MetroProgressBar Name="PumpView" ProgressBarHeight="30" RenderTransformOrigin="0.5,0.5" CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Margin="409,44,577,80" Grid.Row="2">
                                 <Metro:MetroProgressBar.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -430,7 +1339,7 @@
                                 </Metro:MetroProgressBar.RenderTransform>
                             </Metro:MetroProgressBar>
 
-                            <StackPanel Orientation="Vertical" Margin="322,66,673,34" Grid.Row="1">
+                            <StackPanel Orientation="Vertical" Margin="322,66,673,34" Grid.Row="2">
                                 <StackPanel.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -443,7 +1352,7 @@
                                 <Metro:MetroProgressBar Name="WaterView" ProgressBarHeight="30" RenderTransformOrigin="0.5,0.5" CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Height="25"/>
                             </StackPanel>
 
-                            <StackPanel Margin="288,7,677,143" Grid.Row="3">
+                            <StackPanel Margin="288,7,677,143" Grid.Row="4">
                                 <StackPanel.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -458,12 +1367,12 @@
                             </StackPanel>
 
 
-                            <StackPanel Grid.Row="1" Margin="200,138,715,107" Orientation="Vertical" Grid.RowSpan="2">
+                            <StackPanel Grid.Row="2" Margin="200,138,715,107" Orientation="Vertical" Grid.RowSpan="2">
                                 <Metro:MetroSwitch x:Name="StandValve" Content="标液阀" CornerRadius="100" FontSize="15" RenderTransformOrigin="0.296,0.615"  Width="122" Height="25"  HorizontalAlignment="Left" Checked="Valves_Checked"/>
                                 <Metro:MetroProgressBar Name="StandardView" ProgressBarHeight="30" RenderTransformOrigin="0.5,0.5"  CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Height="25" Width="200" Panel.ZIndex="4" />
                             </StackPanel>
 
-                            <StackPanel  Margin="642,57,343,38" Grid.Row="1" Orientation="Vertical">
+                            <StackPanel  Margin="642,57,343,38" Grid.Row="2" Orientation="Vertical">
                                 <StackPanel.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -476,12 +1385,12 @@
                                 <Metro:MetroSwitch x:Name="AirValve" Content="空气/废液阀"  CornerRadius="200" FontSize="13" RenderTransformOrigin="0.296,0.615"  Width="130" Height="25" Checked="Valves_Checked"/>
                             </StackPanel>
 
-                            <StackPanel Orientation="Vertical" Margin="534,57,431,43" Grid.Row="2">
+                            <StackPanel Orientation="Vertical" Margin="534,57,431,43" Grid.Row="3">
                                 <Metro:MetroProgressBar Name="NormalView" ProgressBarHeight="30" RenderTransformOrigin="0.5,0.5" CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Height="25"  />
                                 <Metro:MetroSwitch Name="NormalValve" Content="标液阀"  HorizontalAlignment="Right" CornerRadius="200" FontSize="15"  Width="98" Height="25" Checked="Valves_Checked" IsChecked="False"/>
                             </StackPanel>
 
-                            <StackPanel Orientation="Vertical" Margin="523,102,442,198" Grid.Row="2" Grid.RowSpan="2">
+                            <StackPanel Orientation="Vertical" Margin="523,102,442,198" Grid.Row="3" Grid.RowSpan="2">
                                 <StackPanel.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -495,7 +1404,7 @@
                                 <Metro:MetroSwitch x:Name="Valve" Content="送样(样液)阀" CornerRadius="100" FontSize="15" Width="130" Height="25" HorizontalAlignment="Right" Checked="Valves_Checked"/>
                             </StackPanel>
 
-                            <StackPanel Orientation="Vertical"  Grid.Row="4" Margin="459,5,426,95">
+                            <StackPanel Orientation="Vertical"  Grid.Row="5" Margin="459,5,426,95">
                                 <StackPanel.RenderTransform >
                                     <TransformGroup>
                                         <ScaleTransform/>
@@ -508,8 +1417,8 @@
                                 </Metro:MetroProgressBar>
                                 <Metro:MetroSwitch x:Name="StoreValve" Content="储水池阀门" CornerRadius="100" FontSize="15" Width="150" Height="25" HorizontalAlignment="Left" Checked="Valves_Checked"/>
                             </StackPanel>
-                            <Metro:MetroButton x:Name="sampling" Content="开始取样" MetroButtonState="Green" Click="Sampling_Click_3" Margin="36,31,964,39"/>
-                            <StackPanel Grid.Column="1" Grid.RowSpan="5" Margin="0,0,0,126">
+                            <Metro:MetroButton x:Name="sampling" Content="开始取样" MetroButtonState="Green" Click="Sampling_Click_3" Margin="36,31,964,29"/>
+                            <StackPanel Grid.Column="1" Grid.RowSpan="6" Margin="0,0,0,126">
                                 <Grid  Width="150">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="150"/>
@@ -563,35 +1472,196 @@
                 </Viewbox>
 
             </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="数据展示" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
-                <Metro:MetroTabControl x:Name="Datatabc"  Foreground="#FF2F48B8" FontSize="14">
-                    <Metro:MetroTabItem Header="历史数据" Icon="/Resources/tabIcon.png">
+            <Metro:MetroMenuTabItem Header="数据展示" Icon="/Resources/icon/Briefcase PixelPress Media Design.png" IconMove="/Resources/icon/Briefcase PixelPress Media Design.png" Height="50">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Header="日志数据" Icon="/Resources/tabIcon.png">
+                    <StackPanel Grid.Row="0">
+                        <Metro:MetroImage Grid.Row="0"  Content="BiaotiImage"  HorizontalAlignment="Center"  VerticalAlignment="Top" Source="/Resources/biaoti.png"  />
+                    </StackPanel>
 
-                    </Metro:MetroTabItem>
-                </Metro:MetroTabControl>
+                    <StackPanel Grid.Row="1" Margin="20,0,0,0" >
+                        <Metro:MetroTabControl x:Name="Datatabc"  Foreground="#FF2F48B8" FontSize="14">
+
+                            <Metro:MetroTabItem Header="历史数据" Icon="/Resources/tabIcon.png">
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                        <Label Content="起始时间："  VerticalContentAlignment="Center"></Label>
+                                        <DatePicker CalendarStyle="{DynamicResource CalendarStyle1}" Width="320" Height="30">
+                                        </DatePicker>
+
+                                        <Label Content="结束时间：" Margin="100,0,0,0" VerticalContentAlignment="Center"></Label>
+                                        <DatePicker CalendarStyle="{DynamicResource CalendarStyle1}" Width="320" Height="30">
+                                        </DatePicker>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                        </Grid>
+
+                                        <ListView Name="HisParamList" Grid.Row="0">
+                                            <ListView.View>
+                                                <GridView>
+                                                    <GridViewColumn Header="BOD" Width="50" DisplayMemberBinding="{Binding id}"/>
+                                                    <GridViewColumn Header="COD" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                                    <GridViewColumn Header="浊度值" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
+                                                    <GridViewColumn Header="PH值" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
+                                                    <GridViewColumn Header="温度" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
+                                                    <GridViewColumn Header="采集时间" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
+                                                </GridView>
+                                            </ListView.View>
+                                        </ListView>
+
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+
+                                        </local:Pager>
+
+                                    </StackPanel>
+
+                                </Grid>
+                            </Metro:MetroTabItem>
+                            <Metro:MetroTabItem Header="日志数据" Icon="/Resources/tabIcon.png">
+                                <ListBox x:Name="logList" FontSize="20">
+                                    <ListBoxItem Content="error:PLC 连接异常" ></ListBoxItem>
+                                    <ListBoxItem Content="warning: 传感器连接异常"></ListBoxItem>
+
+                                </ListBox>
+                            </Metro:MetroTabItem>
+                        </Metro:MetroTabControl>
+                    </StackPanel>
+                </Grid>
+            </Metro:MetroMenuTabItem>
+            <Metro:MetroMenuTabItem Header="报警信息" Icon="/Resources/icon/BioHazard.png" IconMove="/Resources/icon/BioHazard.png" Height="50">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <Metro:MetroImage Grid.Row="0"  Content="BiaotiImage"  HorizontalAlignment="Center"  VerticalAlignment="Top" Source="/Resources/biaoti.png"  />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="20,0,0,0">
+                        <Metro:MetroTabControl x:Name="DataAlarm"  Foreground="#FF2F48B8" FontSize="14">
+                            <Metro:MetroTabItem Header="当天报警信息" Icon="/Resources/tabIcon.png">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+
+                                    </Grid.RowDefinitions>
+
+                                    <ListView Name="AlarmList" Grid.Row="0">
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
+                                                <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                                <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
+                                                <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
+                                                <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
+                                                <GridViewColumn Header="是否处理" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+
+                                    <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+
+                                    </local:Pager>
+                                </Grid>
+
+                            </Metro:MetroTabItem>
+                            <Metro:MetroTabItem Header="历史报警数据" Icon="/Resources/tabIcon.png">
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="0">
+                                        <DatePicker CalendarStyle="{DynamicResource CalendarStyle1}" Width="320">
+                                        </DatePicker>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                        </Grid>
+
+                                        <ListView Name="HisAlarmList" Grid.Row="0">
+                                            <ListView.View>
+                                                <GridView>
+                                                    <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
+                                                    <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                                    <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
+                                                    <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
+                                                    <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
+                                                    <GridViewColumn Header="是否处理" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
+                                                </GridView>
+                                            </ListView.View>
+                                        </ListView>
+
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+
+                                        </local:Pager>
+
+                                    </StackPanel>
+
+                                </Grid>
+                            </Metro:MetroTabItem>
+                        </Metro:MetroTabControl>
+                    </StackPanel>
+                </Grid>
+
 
             </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="报警信息" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
+            <Metro:MetroMenuTabItem Header="系统设置" Icon="/Resources/icon/toolbarSites.png" IconMove="/Resources/icon/toolbarSites.png" Height="50">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="150"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-            </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="系统设置" Icon="/Resources/icon.png" IconMove="/Resources/iconMove.png">
-                <Metro:MetroTabControl x:Name="Systabc"  Foreground="#FF2F48B8" FontSize="14">
-                    <Metro:MetroTabItem Header="系统设置" Icon="/Resources/tabIcon.png">
+                    <StackPanel Grid.Row="0">
+                        <Metro:MetroImage Grid.Row="0"  Content="BiaotiImage"  HorizontalAlignment="Center"  VerticalAlignment="Top" Source="/Resources/biaoti.png"  />
+                    </StackPanel>
 
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Header="系统维护" Icon="/Resources/tabIcon.png">
+                    <StackPanel Grid.Row="1">
+                        <Metro:MetroTabControl x:Name="Systabc"  Foreground="#FF2F48B8" FontSize="14">
+                            <Metro:MetroTabItem Header="系统设置" Icon="/Resources/tabIcon.png">
 
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Header="密码设置" Icon="/Resources/tabIcon.png">
+                            </Metro:MetroTabItem>
+                            <Metro:MetroTabItem Header="系统维护" Icon="/Resources/tabIcon.png">
 
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Header="关于本机" Icon="/Resources/tabIcon.png">
+                            </Metro:MetroTabItem>
+                            <Metro:MetroTabItem Header="密码设置" Icon="/Resources/tabIcon.png">
 
-                    </Metro:MetroTabItem>
-                </Metro:MetroTabControl>
+                            </Metro:MetroTabItem>
+                            <Metro:MetroTabItem Header="关于本机" Icon="/Resources/tabIcon.png">
+
+                            </Metro:MetroTabItem>
+                        </Metro:MetroTabControl>
+                    </StackPanel>
+
+
+                </Grid>
+
             </Metro:MetroMenuTabItem>
         </Metro:MetroMenuTabControl>
     </Grid>

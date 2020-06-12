@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BodDetect.BodDataManage;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -11,6 +12,9 @@ namespace BodDetect
     public class MainWindow_Model : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public SysStatusMsg sysStatusMsg; 
+
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -57,6 +61,8 @@ namespace BodDetect
             Title = "Arthas.Demo";
             BtnEnabled = true;
         }));
+
+
     }
 
     #region Command
