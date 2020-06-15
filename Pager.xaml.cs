@@ -22,6 +22,7 @@ namespace BodDetect
         public static RoutedEvent PreviousPageEvent;
         public static RoutedEvent NextPageEvent;
         public static RoutedEvent LastPageEvent;
+        public static RoutedEvent CurrentPageEvent;
 
         public static readonly DependencyProperty CurrentPageProperty;
         public static readonly DependencyProperty TotalPageProperty;
@@ -96,9 +97,7 @@ namespace BodDetect
 
             if (p != null)
             {
-                Run rCurrrent = (Run)p.FindName("rCurrent");
-
-                rCurrrent.Text = (string)e.NewValue;
+                p.rCurrent.Text = (string)e.NewValue;
             }
         }
 
@@ -120,6 +119,16 @@ namespace BodDetect
         private void LastPageButton_Click(object sender, RoutedEventArgs e)
         {
             RaiseEvent(new RoutedEventArgs(LastPageEvent, this));
+        }
+
+        private void rCurrent_LostFocus(object sender, RoutedEventArgs e)
+        {
+            Tool.HideInputPanel();
+        }
+
+        private void rCurrent_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Tool.ShowInputPanel();
         }
     }
 }

@@ -4,7 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BodDetect"
-        xmlns:Metro="https://github.com/1217950746/Arthas-WPFUI" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" x:Class="BodDetect.MainWindow"
+        xmlns:Metro="https://github.com/1217950746/Arthas-WPFUI" 
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+        x:Class="BodDetect.MainWindow"
 
         mc:Ignorable="d"
     
@@ -966,117 +969,121 @@
             <Metro:MetroMenuTabItem Header="运行状态" Icon="/Resources/icon/xray.png" IconMove="/Resources/icon/xray.png" Height="50">
                 <Metro:MetroTabControl x:Name="Status"  Foreground="#FF2F48B8" FontSize="14">
                     <Metro:MetroTabItem Header="单个流程" Icon="/Resources/tabIcon.png">
-                        <Grid ClipToBounds="True" >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition Width="20"></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Metro:MetroGroupBox Grid.Column="0" Grid.Row="0" Header="标液流程">
-                                <StackPanel>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
-                                            <StackPanel Orientation="Vertical">
-                                                <ComboBox>
-                                                    <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
-                                                    <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
-                                                </ComboBox>
-                                                <Metro:MetroTextBox Name="PunpStand" Title="抽取标液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpStand_ButtonClick" />
-                                                <Metro:MetroTextBox Name="PumpCache" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache_ButtonClick" />
-                                                <Metro:MetroTextBox Name="DrainCahce" Title="标液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainCahce_ButtonClick"/>
-                                            </StackPanel>
-
-                                        </Metro:MetroGroupBox>
-
-                                        <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
-                                            <StackPanel>
-                                                <Metro:MetroTextBox Name="StandAll" Title="标液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  />
-                                                <Metro:MetroTextBox Name="Dilution" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0" />
-                                                <Metro:MetroButton Name="StandDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="StandDilution_Click"/>
-
-                                            </StackPanel>
-                                        </Metro:MetroGroupBox>
-                                    </Grid>
-
-                                </StackPanel>
+                        <StackPanel >
+                            <!--<StackPanel>-->
+                                <Metro:MetroGroupBox Header="准备流程">
+                                <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="预处理" Name="PreButton" Click="PreButton_Click"></Metro:MetroButton>
                             </Metro:MetroGroupBox>
-                            <Metro:MetroGroupBox Grid.Column="2" Grid.Row="0" Header="样液流程"  >
-                                <StackPanel  Orientation="Vertical">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
+                            <!--</StackPanel>-->
+                            <Grid ClipToBounds="True" Margin="0,10,0,0" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition Width="20"></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
 
-                                        <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
-                                            <StackPanel>
-                                                <ComboBox>
-                                                    <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
-                                                    <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
-                                                </ComboBox>
-                                                <Metro:MetroTextBox Name="PunpSample" Title="抽取样液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpSample_ButtonClick" />
-                                                <Metro:MetroTextBox Name="PumpWater" Title="抽取清水:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpWater_ButtonClick" />
-                                                <Metro:MetroTextBox Name="PumpCache1" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache1_ButtonClick" />
-                                                <Metro:MetroTextBox Name="DrainSample" Title="样液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainSample_ButtonClick" />
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Metro:MetroGroupBox Grid.Column="0" Grid.Row="0" Header="标液流程">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
+                                                <StackPanel Orientation="Vertical">
+                                                    <ComboBox>
+                                                        <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                                        <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                                    </ComboBox>
+                                                    <Metro:MetroTextBox Name="PunpStand" Title="抽取标液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpStand_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="PumpCache" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache_ButtonClick"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
+                                                    <Metro:MetroTextBox Name="DrainCahce" Title="标液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainCahce_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                </StackPanel>
 
-                                            </StackPanel>
+                                            </Metro:MetroGroupBox>
+                                            <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
+                                                <StackPanel>
+                                                    <Metro:MetroTextBox Name="StandAll" Title="标液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="Dilution" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroButton Name="StandDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="StandDilution_Click" />
 
-                                        </Metro:MetroGroupBox>
+                                                </StackPanel>
+                                            </Metro:MetroGroupBox>
+                                        </Grid>
 
-                                        <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
-                                            <StackPanel>
-                                                <Metro:MetroTextBox Name="SampleAll" Title="样液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  />
-                                                <Metro:MetroTextBox Name="DilutionSamp" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0" />
-                                                <Metro:MetroButton Name="SampleDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="SampleDilution_Click"/>
+                                    </StackPanel>
+                                </Metro:MetroGroupBox>
+                                <Metro:MetroGroupBox Grid.Column="2" Grid.Row="0" Header="样液流程"  >
+                                    <StackPanel  Orientation="Vertical">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
 
-                                            </StackPanel>
-                                        </Metro:MetroGroupBox>
-                                    </Grid>
+                                            <Metro:MetroGroupBox Header="单步操作" Margin="0,20,0,0" Grid.Column="0">
+                                                <StackPanel>
+                                                    <ComboBox>
+                                                        <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                                        <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                                    </ComboBox>
+                                                    <Metro:MetroTextBox Name="PunpSample" Title="抽取样液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PunpSample_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="PumpWater" Title="抽取清水:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpWater_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="PumpCache1" Title="抽取缓冲液:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="PumpCache1_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="DrainSample" Title="样液排水:" TitleForeground="Red" FontSize="15" InputHint="请输入排水次数"  PopupHint="不大于 10次" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="DrainSample_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
 
-                                </StackPanel>
+                                                </StackPanel>
 
-                            </Metro:MetroGroupBox>
+                                            </Metro:MetroGroupBox>
 
-                            <Metro:MetroGroupBox Grid.Column="0" Grid.Row="1" Header="润洗流程" Padding="10,20,10,20">
-                                <StackPanel  Orientation="Vertical" Margin="0,20,0,0">
-                                    <ComboBox>
-                                        <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
-                                        <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
-                                    </ComboBox>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Metro:MetroButton Name="startInit" Content="初始化流程" MetroButtonState ="Green" IsEnabled="True" />
+                                            <Metro:MetroGroupBox Header="标液稀释" Margin="20,20,0,0" Grid.Column="1">
+                                                <StackPanel>
+                                                    <Metro:MetroTextBox Name="SampleAll" Title="样液容量:" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 50ml" Margin="0,20,0,0"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroTextBox Name="DilutionSamp" Title="稀释倍数:" TitleForeground="Red" FontSize="15" InputHint="请输入整数"  Margin="0,20,0,0" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                                                    <Metro:MetroButton Name="SampleDilution" Content="执行" MetroButtonState ="Green" IsEnabled="True" Width="80"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="SampleDilution_Click"/>
 
-                                        <Metro:MetroTextBox Name="wash" Title="清洗管道" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="wash_ButtonClick" />
+                                                </StackPanel>
+                                            </Metro:MetroGroupBox>
+                                        </Grid>
 
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                        <Metro:MetroButton Name="sample_start" Content="储水池取样开始" MetroButtonState ="Green" IsEnabled="True" Click="sample_start_Click"/>
-                                        <Metro:MetroButton Name="sample_end" Content="储水池取样停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="sample_end_Click" />
+                                </Metro:MetroGroupBox>
+                                <Metro:MetroGroupBox Grid.Column="0" Grid.Row="1" Header="润洗流程" Padding="10,20,10,20">
+                                    <StackPanel  Orientation="Vertical" Margin="0,20,0,0">
+                                        <ComboBox>
+                                            <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
+                                            <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
+                                        </ComboBox>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Metro:MetroButton Name="startInit" Content="初始化流程" MetroButtonState ="Green" IsEnabled="True" />
+
+                                            <Metro:MetroTextBox Name="wash" Title="清洗管道" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="wash_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                            <Metro:MetroButton Name="sample_start" Content="储水池取样开始" MetroButtonState ="Green" IsEnabled="True" Click="sample_start_Click"/>
+                                            <Metro:MetroButton Name="sample_end" Content="储水池取样停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="sample_end_Click" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                            <Metro:MetroButton Name="drain_start" Content="储水池排水开始" MetroButtonState ="Green" IsEnabled="True" Click="drain_start_Click"/>
+                                            <Metro:MetroButton Name="drain_end" Content="储水池排水停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="drain_end_Click"/>
+                                        </StackPanel>
+
                                     </StackPanel>
+                                </Metro:MetroGroupBox>
+                                <Metro:MetroGroupBox Grid.Column="2" Grid.Row="1" Header="BOD流程" Padding="10,20,10,20">
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                        <Metro:MetroButton Name="drain_start" Content="储水池排水开始" MetroButtonState ="Green" IsEnabled="True" Click="drain_start_Click"/>
-                                        <Metro:MetroButton Name="drain_end" Content="储水池排水停止" MetroButtonState ="None" IsEnabled="False" Margin="20,0,0,0" Click="drain_end_Click"/>
-                                    </StackPanel>
+                                </Metro:MetroGroupBox>
 
-                                </StackPanel>
-                            </Metro:MetroGroupBox>
-
-                            <Metro:MetroGroupBox Grid.Column="2" Grid.Row="1" Header="BOD流程" Padding="10,20,10,20">
-
-                            </Metro:MetroGroupBox>
-
-                        </Grid>
+                            </Grid>
+                        </StackPanel>
                     </Metro:MetroTabItem>
                     <Metro:MetroTabItem Header="设备状态" Icon="/Resources/tabIcon.png">
                         <Grid>
@@ -1475,7 +1482,7 @@
             <Metro:MetroMenuTabItem Header="数据展示" Icon="/Resources/icon/Briefcase PixelPress Media Design.png" IconMove="/Resources/icon/Briefcase PixelPress Media Design.png" Height="50">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="150"/>
+                        <RowDefinition Height="110"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
 
@@ -1511,21 +1518,43 @@
                                             </Grid.RowDefinitions>
                                         </Grid>
 
-                                        <ListView Name="HisParamList" Grid.Row="0">
+                                        <ListView Name="HisParamList" Grid.Row="0" ItemsSource="{Binding FakeSource}">
                                             <ListView.View>
                                                 <GridView>
-                                                    <GridViewColumn Header="BOD" Width="50" DisplayMemberBinding="{Binding id}"/>
+                                                    <GridViewColumn  Header="Item Id" DisplayMemberBinding="{Binding Id}" Width="80"/>
+                                                    <GridViewColumn  Header="Item Name" DisplayMemberBinding="{Binding ItemName}" Width="180"/>
+                                                    <!--<GridViewColumn Header="BOD" Width="50" DisplayMemberBinding="{Binding id}"/>
                                                     <GridViewColumn Header="COD" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
                                                     <GridViewColumn Header="浊度值" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
                                                     <GridViewColumn Header="PH值" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
                                                     <GridViewColumn Header="温度" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
-                                                    <GridViewColumn Header="采集时间" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
+                                                    <GridViewColumn Header="采集时间" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>-->
                                                 </GridView>
                                             </ListView.View>
                                         </ListView>
 
-                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+                                        <!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
+                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>-->
 
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="FirstPage">
+                                                    <i:InvokeCommandAction Command="{Binding FirstPageCommand}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="PreviousPage">
+                                                    <i:InvokeCommandAction Command="{Binding PreviousPageCommand}"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="NextPage">
+                                                    <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="LastPage">
+                                                    <i:InvokeCommandAction Command="{Binding LastPageCommand}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
                                         </local:Pager>
 
                                     </StackPanel>

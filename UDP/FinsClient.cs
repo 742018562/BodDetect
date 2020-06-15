@@ -30,7 +30,7 @@ namespace BodDetect.UDP
         {
             _udpClient = new UdpClient();
             _udpClient.Connect(remoteIpEndPoint);
-
+            
             remoteIp = RemoteIp;
 
             string[] value = remoteIp.Split('.');

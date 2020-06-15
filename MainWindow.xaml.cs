@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,7 +107,7 @@ namespace BodDetect
         }
 
 
-        public void init() 
+        public void init()
         {
             mainWindow_Model = new MainWindow_Model();
 
@@ -120,16 +119,12 @@ namespace BodDetect
 
             for (int i = 0; i < 10; i++)
             {
-                AlarmList.Items.Add(new AlarmData(i, "test0", i+10,"test1", "test2",true));
+                AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
             }
 
             for (int i = 0; i < 10; i++)
             {
                 HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                HisParamList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
             }
 
 
@@ -184,8 +179,8 @@ namespace BodDetect
 
                 string ip = IP_textbox.Text;
 
-                string[] value =  ip.Split('.');
-                if (value.Length < 4) 
+                string[] value = ip.Split('.');
+                if (value.Length < 4)
                 {
                     MessageBox.Show("异常ip!");
                 }
@@ -244,7 +239,6 @@ namespace BodDetect
             //bitAdress = 0X00;
             //float[] floatData = finsClient.ReadBigFloatData(596, bitAdress, 2, Dr);
         }
-
 
         private void Sampling_Click_3(object sender, RoutedEventArgs e)
         {
@@ -307,7 +301,7 @@ namespace BodDetect
         /// Bod部分的进度条委托
         /// </summary>
         /// <param name="param"></param>
-        public void BodProcessCtrl(DelegateParam param) 
+        public void BodProcessCtrl(DelegateParam param)
         {
 
 
@@ -545,15 +539,15 @@ namespace BodDetect
                     return;
                 }
 
-                var CheckedVavle = ValveDic.Where(t => t.Value.IsChecked == true ).ToList();
+                var CheckedVavle = ValveDic.Where(t => t.Value.IsChecked == true).ToList();
 
-                if (CheckedVavle == null) 
+                if (CheckedVavle == null)
                 {
                     MessageBox.Show(" 请打开任意一个阀门.", "提示", MessageBoxButton.OK);
                     return;
                 }
 
-                if (CheckedVavle.Count > 2) 
+                if (CheckedVavle.Count > 2)
                 {
                     MessageBox.Show(" 只能打开一个阀门,请关闭阀门.", "提示", MessageBoxButton.OK);
                     return;
@@ -643,7 +637,7 @@ namespace BodDetect
         {
             try
             {
-                
+
                 if (bodHelper.IsSampling == true)
                 {
                     MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
@@ -654,7 +648,7 @@ namespace BodDetect
                 PumpStopButton.Visibility = Visibility.Visible;
                 byte[] data = { PLCConfig.CisternPumpBit };
 
-                bool success =bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+                bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             }
             catch (Exception)
             {
@@ -677,7 +671,7 @@ namespace BodDetect
 
                 PumpWaterButton.Visibility = Visibility.Visible;
                 PumpStopButton.Visibility = Visibility.Collapsed;
-                byte[] data = {0};
+                byte[] data = { 0 };
 
                 bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             }
@@ -760,20 +754,20 @@ namespace BodDetect
                     extraTimes--;
                 }
 
-                byte[] data1 = {0};
+                byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
             catch (Exception)
             {
 
-                
+
             }
         }
 
 
-        private void PumpProcess(List<byte[]> data, List<ushort> address, PunpCapType punpCapType) 
+        private void PumpProcess(List<byte[]> data, List<ushort> address, PunpCapType punpCapType)
         {
-            if (data == null || data.Count < 2 || address == null || address.Count < 2) 
+            if (data == null || data.Count < 2 || address == null || address.Count < 2)
             {
                 return;
             }
@@ -782,7 +776,7 @@ namespace BodDetect
 
             success = bodHelper.ValveControl(address[0], data[0]);
 
-            if (!success) 
+            if (!success)
             {
                 MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
             }
@@ -1165,7 +1159,7 @@ namespace BodDetect
 
         private void sample_end_Click(object sender, RoutedEventArgs e)
         {
-            byte[] data = { 0};
+            byte[] data = { 0 };
 
             byte bitAddress = PLCConfig.CisternPumpBit;
 
@@ -1208,8 +1202,8 @@ namespace BodDetect
             TextBox textBox = (TextBox)sender;
             string value = textBox.Text;
 
-            int a = SysStatusList.Items.Count; 
-            SysStatusList.Items.Add(new SysStatusMsg(a+1, "2", value, value));
+            int a = SysStatusList.Items.Count;
+            SysStatusList.Items.Add(new SysStatusMsg(a + 1, "2", value, value));
         }
 
         private void StandDilution_Click(object sender, RoutedEventArgs e)
@@ -1360,6 +1354,24 @@ namespace BodDetect
             {
 
 
+            }
+        }
+
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Tool.ShowInputPanel();
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            Tool.HideInputPanel();
+        }
+
+        private void PreButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null) 
+            {
+                MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
             }
         }
     }

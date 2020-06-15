@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace BodDetect
 {
-
-
 
     public enum RecDataType
     {
@@ -29,8 +29,80 @@ namespace BodDetect
 
     class Tool
     {
-       public static string  StringtoHex(byte[] myBytes)
-       {
+
+        private const Int32 WM_SYSCOMMAND = 274;
+        private const UInt32 SC_CLOSE = 61536;
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, int Msg, uint wParam, uint lParam);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int RegisterWindowMessage(string lpString);
+
+
+        #region 虚拟键盘控制
+
+        public static int ShowInputPanel()
+        {
+            try
+            {
+                //C:\\Windows\\System32\\osk.exe  C:\\Program Files\\Common Files\\microsoft shared\\ink\\TabTip.exe
+                string file = "C:\\Program Files\\Common Files\\microsoft shared\\ink\\TabTip.exe";
+
+                if (System.IO.File.Exists(file))
+                {
+                    return -1;
+                }
+                //Process.Start(@"C:\Windows\System32\osk.exe");
+
+                ProcessStartInfo procStartInfo = new ProcessStartInfo()
+                {
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    Verb = "runas",
+                    FileName = file,
+                    Arguments = "/user:Administrator cmd /K "
+                };
+
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo = procStartInfo;
+                    proc.Start();
+                    string output = proc.StandardOutput.ReadToEnd();
+                    if (string.IsNullOrEmpty(output))
+                        output = proc.StandardError.ReadToEnd();
+
+                }
+                //    Process.Start(file);
+                //return SetUnDock(); //不知SetUnDock()是什么，所以直接注释返回1
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                return 255;
+            }
+        }
+
+        public static void HideInputPanel()
+        {
+            IntPtr TouchhWnd = new IntPtr(0);
+            TouchhWnd = FindWindow("IPTip_Main_Window", null);
+            if (TouchhWnd == IntPtr.Zero)
+                return;
+            PostMessage(TouchhWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+        }
+
+        #endregion
+
+        #region 不同数据类型字节
+        public static string StringtoHex(byte[] myBytes)
+        {
             string result = null;
             foreach (byte b in myBytes)
             {
@@ -51,25 +123,25 @@ namespace BodDetect
             return r;
         }
 
-        public static float[] BigToFloats(byte[] data) 
+        public static float[] BigToFloats(byte[] data)
         {
             float[] r = new float[data.Length / 4];
             for (int i = 0; i < r.Length; i++)
             {
                 byte[] floats = new byte[4];
-                floats[0] = data[i*4];
-                floats[1] = data[i*4 + 1];
-                floats[2] = data[i*4 + 2];
-                floats[3] = data[i*4 + 3];
+                floats[0] = data[i * 4];
+                floats[1] = data[i * 4 + 1];
+                floats[2] = data[i * 4 + 2];
+                floats[3] = data[i * 4 + 3];
 
-                r[i] = BitConverter.ToSingle(floats,0);
+                r[i] = BitConverter.ToSingle(floats, 0);
                 //r[i] = data[i * 2 + 1]; 
                 //r[i] = (ushort)(r[i] | data[i * 2] << 8);
             }
             return r;
         }
 
-        public static float[] LitToFloats(byte[] data) 
+        public static float[] LitToFloats(byte[] data)
         {
             float[] r = new float[data.Length / 4];
             for (int i = 0; i < r.Length; i++)
@@ -80,7 +152,7 @@ namespace BodDetect
                 floats[1] = data[i * 4 + 2];
                 floats[0] = data[i * 4 + 3];
 
-                r[i] = BitConverter.ToSingle(floats,0);
+                r[i] = BitConverter.ToSingle(floats, 0);
                 //r[i] = data[i * 2 + 1]; 
                 //r[i] = (ushort)(r[i] | data[i * 2] << 8);
             }
@@ -88,7 +160,7 @@ namespace BodDetect
         }
 
 
-        public static float[] DoFloats(byte[] data) 
+        public static float[] DoFloats(byte[] data)
         {
             float[] r = new float[data.Length / 4];
             for (int i = 0; i < r.Length; i++)
@@ -105,17 +177,17 @@ namespace BodDetect
             return r;
         }
 
-        public static uint[] ToInt32(byte[] data) 
+        public static uint[] ToInt32(byte[] data)
         {
             uint[] r = new uint[data.Length / 4];
             for (int i = 0; i < r.Length; i++)
             {
                 byte[] int32s = new byte[4];
-                int32s[3] = data[i*4];
+                int32s[3] = data[i * 4];
                 int32s[2] = data[i * 4 + 1];
                 int32s[1] = data[i * 4 + 2];
                 int32s[0] = data[i * 4 + 3];
-                r[i] = BitConverter.ToUInt32(int32s,0);
+                r[i] = BitConverter.ToUInt32(int32s, 0);
             }
             return r;
 
@@ -132,6 +204,10 @@ namespace BodDetect
 
             return r;
         }
+        #endregion
+
+
+        #region 本地网络数据
         /// <summary>
         /// 取本机主机ip
         /// </summary>
@@ -162,7 +238,7 @@ namespace BodDetect
                 return ex.Message;
             }
         }
-
+        #endregion
 
     }
 }
