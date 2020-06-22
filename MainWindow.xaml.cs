@@ -871,9 +871,9 @@ namespace BodDetect
                 int times = capData;
 
 
-                byte[] StandValve = { PLCConfig.NormalValveBit };
+                byte[] StandValve = { PLCConfig.WaterValveBit };
 
-                byte[] StandBodValve = { PLCConfig.AirValveBit };
+                byte[] StandBodValve = { PLCConfig.NormalValveBit };
 
                 List<byte[]> data = new List<byte[]>();
                 List<ushort> address = new List<ushort>();
@@ -1373,6 +1373,90 @@ namespace BodDetect
             {
                 MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
             }
+
+            bodHelper.PreInit();
+        }
+
+        private void PreButton2ml_Click(object sender, RoutedEventArgs e)
+        {
+            if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null)
+            {
+                MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
+            }
+
+            byte[] StandBodValve = { PLCConfig.NormalValveBit };
+
+            byte[] waterValve = { PLCConfig.WaterValveBit };
+
+            byte[] AirValve = { PLCConfig.AirValveBit };
+
+            List<byte[]> data = new List<byte[]>();
+            List<ushort> address = new List<ushort>();
+            data.Add(waterValve);
+            data.Add(StandBodValve);
+
+            address.Add(PLCConfig.Valve2Address);
+            address.Add(PLCConfig.Valve2Address);
+
+            PumpProcess(data, address, PunpCapType.Point2ml);
+
+            data[0] = AirValve;
+
+            PumpProcess(data, address, PunpCapType.fiveml);
+
+        }
+
+        private void Pre2ml_Click(object sender, RoutedEventArgs e)
+        {
+            bodHelper.PunpAbsorb(PunpCapType.Point2ml);
+        }
+
+        private void Pumpdrain2ml_Click(object sender, RoutedEventArgs e)
+        {
+            bodHelper.PumpDrain();
+        }
+
+        private void PrePumpAri_Click(object sender, RoutedEventArgs e)
+        {
+            //bodHelper.ChangePunpValve(PumpValveType.pre);
+            //bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+
+
+            byte[] data = { PLCConfig.AirValveBit };
+
+            bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+            data[0] = 0X01;
+
+            bodHelper.ChangePunpValve(PumpValveType.pre);
+            bodHelper.finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
+
+            //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+            bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+            Thread.Sleep(5000);
+            bodHelper.PumpDrain();
+
+        }
+
+        private void PrePumpwater_Click(object sender, RoutedEventArgs e)
+        {
+            //bodHelper.ChangePunpValve(PumpValveType.pre);
+            //bodHelper.PrePumpCtrl(PrePumpWork.preDrain);
+
+            byte[] data = { PLCConfig.WaterValveBit };
+
+            bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+            data[0] = 0X01;
+
+            bodHelper.ChangePunpValve(PumpValveType.pre);
+
+            bodHelper.finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
+
+            //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+            bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+
+            Thread.Sleep(5000);
+            bodHelper.PumpDrain();
+
         }
     }
 }

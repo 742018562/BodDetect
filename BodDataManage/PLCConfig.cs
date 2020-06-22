@@ -7,7 +7,8 @@ namespace BodDetect.BodDataManage
     public enum PunpCapType
     {
         oneml,
-        fiveml
+        fiveml,
+        Point2ml
     }
 
     public enum FunType
@@ -57,6 +58,7 @@ namespace BodDetect.BodDataManage
 
         public const ushort Data_Status = 640;
 
+        public const ushort PumpAbsorbAddress_02ml = 234;
         public const ushort PumpAbsorbAddress_1ml = 233;
         public const ushort PumpAbsorb5mlAddress_5ml = 231;
         public const ushort PumpDrainAddress = 232;
@@ -90,8 +92,12 @@ namespace BodDetect.BodDataManage
         /// </summary>
         public const byte CisternPumpBit = 0X04;
 
-        #endregion
+        /// <summary>
+        /// 初始化阶段注射泵另外一个阀门对应的三通阀 0表示阀门常闭在空气口，1表示阀门打到清水口
+        /// </summary>
+        public const byte PrePumpValveAir = 0X07;
 
+        #endregion
 
         #region 101管道IO输出
 
@@ -131,9 +137,6 @@ namespace BodDetect.BodDataManage
         /// </summary>
         public const byte SampleValveBit = 0X06;
         #endregion
-
-
-
 
     }
 }

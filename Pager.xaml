@@ -15,7 +15,7 @@
             <Setter Property="Height" Value="22"/>
         </Style>
         <Style TargetType="{x:Type Metro:MetroButton}">
-            <Setter Property="MetroButtonState" Value="Green"/>
+            <Setter Property="MetroButtonState" Value="None"/>
             <Setter Property="MinWidth" Value="22"/>
             <Setter Property="MinHeight" Value="22"/>
             <Setter Property="Width" Value="60"/>
@@ -29,10 +29,12 @@
     <Grid>
         <StackPanel Orientation="Horizontal">
             <Metro:MetroButton x:Name="FirstPageButton" Margin="5,0" Click="FirstPageButton_Click">
-                <Path Width="27" Height="30" Data="M0,0L0,10 M0,5L6,2 6,8 0,5" Stroke="Black" StrokeThickness="1" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" />
+                <Image Source="/Resources/first_page.png" Width="27" Height="30"></Image>
+                <!--<Path Width="27" Height="30" Data="M0,0L0,10 M0,5L6,2 6,8 0,5" Stroke="Black" StrokeThickness="1" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" />-->
             </Metro:MetroButton>
             <Metro:MetroButton x:Name="PreviousPageButton" Margin="10,0,5,0" Click="PreviousPageButton_Click">
-                <Path Width="27" Height="30" Data="M0,4L8,0 8,8z" Stroke="Black" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" />
+                <Image Source="/Resources/keyboard_arrow_left.png" Width="27" Height="30"></Image>
+             <!--<Path  Width="27" Height="30" Data="M0,4L8,0 8,8z" Stroke="Black" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" />-->
             </Metro:MetroButton>
             <Metro:MetroTextBlock VerticalAlignment="Center" Width="80" Margin="10,0,0,0">
                 <Run Text="第"/>
@@ -41,7 +43,9 @@
                 <Run Text="页"/>
             </Metro:MetroTextBlock>
             <Metro:MetroButton Margin="10,0,5,0" x:Name="NextPageButton" Click="NextPageButton_Click">
-                <Path Width="27" Height="30" Data="M0,4L8,0 8,8z" Stroke="Black" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" RenderTransformOrigin="0.5,0.5" >
+                <Image Source="/Resources/navigate_next.png" Width="27" Height="30"></Image>
+
+                <!--<Path Width="27" Height="30" Data="M0,4L8,0 8,8z" Stroke="Black" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" RenderTransformOrigin="0.5,0.5" >
                     <Path.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -50,13 +54,15 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </Path.RenderTransform>
-                    <!--<Path.RenderTransform>
+                    --><!--<Path.RenderTransform>
                         <RotateTransform Angle="180" CenterX="4" CenterY="4" />
-                    </Path.RenderTransform>-->
-                </Path>
+                    </Path.RenderTransform>--><!--
+                </Path>-->
             </Metro:MetroButton>
             <Metro:MetroButton Margin="10,0,5,0" x:Name="LastPageButton" Click="LastPageButton_Click">
-                <Path x:Name="MainPath" Width="27" Height="30" Data="M0,0L0,10 M0,5 L6,2 6,8 0,5" Stroke="Black" StrokeThickness="1" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" RenderTransformOrigin="0.5,0.5">
+                <Image Source="/Resources/last_page.png" Width="27" Height="30"></Image>
+
+                <!--<Path x:Name="MainPath" Width="27" Height="30" Data="M0,0L0,10 M0,5 L6,2 6,8 0,5" Stroke="Black" StrokeThickness="1" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" RenderTransformOrigin="0.5,0.5">
                     <Path.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -65,10 +71,10 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </Path.RenderTransform>
-                    <!--<Path.RenderTransform>
+                    --><!--<Path.RenderTransform>
                         <RotateTransform Angle="180" CenterX="3" CenterY="5" />
-                    </Path.RenderTransform>-->
-                </Path>
+                    </Path.RenderTransform>--><!--
+                </Path>-->
             </Metro:MetroButton>
             <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
                 <Run Text="共"/>

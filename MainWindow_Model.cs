@@ -179,6 +179,10 @@ namespace BodDetect
             _nextPageCommand = new DelegateCommand(NextPageAction);
 
             _lastPageCommand = new DelegateCommand(LastPageAction);
+
+            Hour = 1;
+            Minute = 2;
+            Seccond = 3;
         }
 
         private void FirstPageAction()
@@ -247,6 +251,28 @@ namespace BodDetect
             _fakeSoruce.Clear();
 
             _fakeSoruce.AddRange(result);
+        }
+
+
+        private int _Hour;
+        public int Hour
+        {
+            get { return _Hour; }
+            set { _Hour = value; OnPropertyChanged("Hour"); }
+        }
+
+        private int _Minute;
+        public int Minute
+        {
+            get { return _Minute; }
+            set { _Minute = value; OnPropertyChanged("Minute"); }
+        }
+
+        private int _Seccond;
+        public int Seccond
+        {
+            get { return _Seccond; }
+            set { _Seccond = value; OnPropertyChanged("Seccond"); }
         }
 
         //private void OnPropertyChanged([CallerMemberName] string propertyName = null)

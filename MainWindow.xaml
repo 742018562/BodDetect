@@ -722,6 +722,7 @@
             </Setter>
         </Style>
     </Window.Resources>
+
     <Metro:MetroWindow.DataContext>
         <local:MainWindow_Model />
     </Metro:MetroWindow.DataContext>
@@ -794,53 +795,6 @@
                     </Grid.RowDefinitions>
                     <Metro:MetroImage Grid.Row="0" Name="BiaotiImage" Content="BiaotiImage"  HorizontalAlignment="Center"  VerticalAlignment="Top" Source="/Resources/biaoti.png"  />
                     <Metro:MetroTabControl x:Name="tabc" Foreground="#FF2F48B8" FontSize="14" Grid.Row="1" >
-                        <Metro:MetroTabItem Header="测试标签" Icon="/Resources/tabIcon.png">
-                            <Grid Height="381" VerticalAlignment="Top" Margin="0,20,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition MinWidth="160" Width="Auto" />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <Metro:MetroGroupBox Header="连接PLC" Width="500" Grid.Column="0" Grid.Row="0" Height="80">
-                                    <Grid>
-                                        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Height="40" Width="480">
-                                            <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.16.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
-                                            <Metro:MetroTextBox x:Name="Port_TextBox"  Text="9600" Title="Port" HorizontalAlignment="Right" Height="30" Width="Auto" InputHint="InputHint..."  VerticalAlignment="Center" Margin="0,10,0,0"  />
-                                            <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Green" Content="连接" Command="{Binding CmdSampleWithParam}" CommandParameter="Good" IsEnabled="{Binding BtnEnabled}" VerticalAlignment="Center"   Width="25" Height="30" Margin="60,0,0,-10" Padding="8,6,8,6" ScrollViewer.CanContentScroll="True" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" Click="MetroButton_Click_1"/>
-                                        </StackPanel>
-
-                                    </Grid>
-                                </Metro:MetroGroupBox>
-
-                                <ComboBox Name="MemoryAreaCode_combo" HorizontalAlignment="Left" Margin="344,13,0,0" Grid.Row="1" VerticalAlignment="Top" Width="120" Background="{x:Null}">
-                                    <ComboBoxItem Content="DR" Tag="1"></ComboBoxItem>
-                                    <ComboBoxItem Content="WR" Tag="2"></ComboBoxItem>
-                                    <ComboBoxItem Content="IO" Tag="3"></ComboBoxItem>
-                                </ComboBox>
-
-                                <StackPanel HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Width="300">
-                                    <Metro:MetroTextBox Name="address_TextBox" Title="数据地址" InputHint="InputHint..." PopupHint="这是一个多行编辑框!" Margin="0,10,0,0" MultipleLine="True" />
-                                    <Metro:MetroTextBox Name="Bit_TextBox" Title="位地址" InputHint="InputHint..."  PopupHint="Length is more than 10!" Margin="0,10,0,0"  />
-                                    <Metro:MetroTextBox Name="DataCount_TextBox" Title="数据个数" InputHint="InputHint..."   PopupHint="Length is more than 10!" Margin="0,10,0,0" />
-                                    <Metro:MetroTextBox Name="Data_TextBox" Title="数据值" InputHint="InputHint..."   PopupHint="Length is more than 10!" Margin="0,10,0,0" />
-                                </StackPanel>
-                                <Metro:MetroButton Content="读数据" HorizontalAlignment="Left" Margin="22,31,0,0" Grid.Row="2" VerticalAlignment="Top" Click="MetroButton_Click"/>
-                                <Metro:MetroButton Content="写数据" HorizontalAlignment="Left" Margin="171,31,0,0" Grid.Row="2" VerticalAlignment="Top"/>
-                                <Metro:MetroComboBox Grid.Column="1" HorizontalAlignment="Left" Margin="50,19,0,0" VerticalAlignment="Top" Width="120" Grid.Row="1" Icon="/Resources/icon/xray.png" Visibility="Visible">
-                                    <Metro:MetroComboBoxItem Content="111111" Tag="1"/>
-                                    <Metro:MetroComboBoxItem Content="114" Tag="2"/>
-
-                                    <Metro:MetroComboBoxItem Content="122221" Tag="3"/>
-
-                                </Metro:MetroComboBox>
-
-
-                            </Grid>
-                        </Metro:MetroTabItem>
                         <Metro:MetroTabItem Header="参数3D显示" Icon="/Resources/tabIcon.png">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                                 <Grid.ColumnDefinitions>
@@ -961,18 +915,22 @@
                 </Grid>
 
             </Metro:MetroMenuTabItem>
-            <Metro:MetroMenuTabItem Header="参数配置" Icon="/Resources/icon/dashcode.png" IconMove="/Resources/icon/dashcode.png" Height="50">
-                <Grid>
-
-                </Grid>
-            </Metro:MetroMenuTabItem>
             <Metro:MetroMenuTabItem Header="运行状态" Icon="/Resources/icon/xray.png" IconMove="/Resources/icon/xray.png" Height="50">
                 <Metro:MetroTabControl x:Name="Status"  Foreground="#FF2F48B8" FontSize="14">
                     <Metro:MetroTabItem Header="单个流程" Icon="/Resources/tabIcon.png">
                         <StackPanel >
                             <!--<StackPanel>-->
-                                <Metro:MetroGroupBox Header="准备流程">
-                                <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="预处理" Name="PreButton" Click="PreButton_Click"></Metro:MetroButton>
+                            <Metro:MetroGroupBox Header="准备流程">
+                                <StackPanel Orientation="Horizontal">
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="预处理" Name="PreButton" Click="PreButton_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml到标液" Name="PreButton2ml" Click="PreButton2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml" Name="Pre2ml" Click="Pre2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="排水0.2ml" Name="Pumpdrain2ml" Click="Pumpdrain2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="泵预备阀抽取空气" Name="PrePumpAri" Click="PrePumpAri_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="泵预备阀抽取清水" Name="PrePumpwater" Click="PrePumpwater_Click" Margin="20,0,0,0"></Metro:MetroButton>
+
+                                </StackPanel>
+
                             </Metro:MetroGroupBox>
                             <!--</StackPanel>-->
                             <Grid ClipToBounds="True" Margin="0,10,0,0" >
@@ -1519,16 +1477,17 @@
                                         </Grid>
 
                                         <ListView Name="HisParamList" Grid.Row="0" ItemsSource="{Binding FakeSource}">
+
                                             <ListView.View>
                                                 <GridView>
                                                     <GridViewColumn  Header="Item Id" DisplayMemberBinding="{Binding Id}" Width="80"/>
                                                     <GridViewColumn  Header="Item Name" DisplayMemberBinding="{Binding ItemName}" Width="180"/>
                                                     <!--<GridViewColumn Header="BOD" Width="50" DisplayMemberBinding="{Binding id}"/>
-                                                    <GridViewColumn Header="COD" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
-                                                    <GridViewColumn Header="浊度值" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
-                                                    <GridViewColumn Header="PH值" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
-                                                    <GridViewColumn Header="温度" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
-                                                    <GridViewColumn Header="采集时间" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>-->
+                                                        <GridViewColumn Header="COD" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                                        <GridViewColumn Header="浊度值" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
+                                                        <GridViewColumn Header="PH值" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
+                                                        <GridViewColumn Header="温度" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
+                                                        <GridViewColumn Header="采集时间" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>-->
                                                 </GridView>
                                             </ListView.View>
                                         </ListView>
@@ -1674,6 +1633,96 @@
                     <StackPanel Grid.Row="1">
                         <Metro:MetroTabControl x:Name="Systabc"  Foreground="#FF2F48B8" FontSize="14">
                             <Metro:MetroTabItem Header="系统设置" Icon="/Resources/tabIcon.png">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <Metro:MetroGroupBox Header="网口参数">
+                                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Height="40" Width="480">
+                                                <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.16.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                <Metro:MetroTextBox x:Name="Port_TextBox"  Text="9600" Title="Port" HorizontalAlignment="Right" Height="30" Width="Auto" InputHint="InputHint..."  VerticalAlignment="Center" Margin="0,10,0,0"  />
+                                                <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Green" Content="连接" Command="{Binding CmdSampleWithParam}" CommandParameter="Good" IsEnabled="{Binding BtnEnabled}" VerticalAlignment="Center"   Width="25" Height="30" Margin="60,0,0,-10" Padding="8,6,8,6" ScrollViewer.CanContentScroll="True" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" Click="MetroButton_Click_1"/>
+                                            </StackPanel>
+                                        </Metro:MetroGroupBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1">
+                                        <Metro:MetroGroupBox Header="参数配置">
+
+                                        </Metro:MetroGroupBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
+                                        <Metro:MetroGroupBox Header="流程配置">
+                                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="300"/>
+                                                        <ColumnDefinition Width="auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition/>
+                                                                <RowDefinition/>
+                                                                <RowDefinition/>
+                                                            </Grid.RowDefinitions>
+
+                                                            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="-2,0,2,40" Grid.RowSpan="2" >
+                                                                <!--<RadioButton Content="出厂模式" ClickMode="Release" IsChecked="True" FontSize="14" FontWeight="Bold" Foreground="Red" Margin="20" GroupName="model" ></RadioButton>
+                                                                <RadioButton Content="调试模式" ClickMode="Release" FontSize="14" FontWeight="Bold" Foreground="Red" Margin="20" GroupName="model"  ></RadioButton>-->
+                                                                <RadioButton Style="{StaticResource BoxRadioButton}" Margin="1" Content="aaaa" Width="78" Background="#FF567F83" FontSize="20"></RadioButton>
+                                                                <RadioButton Style="{StaticResource BoxRadioButton}" Margin="1" FontWeight="Bold" FontSize="20" Background="#FF4A8389">近7天</RadioButton>
+
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                                                                <Metro:MetroTextBox  Text="1" Title="刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                                <Label Content="(单位：秒)" VerticalContentAlignment="Center"></Label>
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Grid.Row="2">
+                                                                <Metro:MetroTextBox  Text="1" Title="采样间隔" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                                <Label Content="(单位：分)" VerticalContentAlignment="Center"></Label>
+                                                            </StackPanel>
+
+                                                        </Grid>
+
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1">
+                                                        <local:TimeEditer Hour="{Binding Hour,Mode=TwoWay}" Minute="{Binding Minute,Mode=TwoWay}" Second="{Binding Seccond,Mode=TwoWay}" Width="250" Height="120" HorizontalAlignment="Left"/>
+                                                        <TextBlock Margin="0 10 0 0">
+                                                            <Run Text="当前时间："/>
+                                                            <Run Text="{Binding Hour}"/>
+                                                            <Run Text="时"/>
+                                                            <Run Text="{Binding Minute}"/>
+                                                            <Run Text="分"/>
+                                                            <Run Text="{Binding Seccond}"/>
+                                                            <Run Text="秒"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </Grid>
+
+
+                                            </StackPanel>
+                                        </Metro:MetroGroupBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="1">
+
+                                    </StackPanel>
+
+
+                                </Grid>
+
 
                             </Metro:MetroTabItem>
                             <Metro:MetroTabItem Header="系统维护" Icon="/Resources/tabIcon.png">

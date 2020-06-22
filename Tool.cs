@@ -27,6 +27,19 @@ namespace BodDetect
         IO = 0X81
     }
 
+
+    public enum PumpValveType 
+    {
+        work = 1,
+        pre = 2
+    }
+
+    public enum PrePumpWork 
+    {
+        preAbsorb = 1,
+        preDrain 
+    }
+
     class Tool
     {
 

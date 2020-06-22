@@ -188,6 +188,9 @@ namespace BodDetect
                 case PunpCapType.fiveml:
                     address = PLCConfig.PumpAbsorb5mlAddress_5ml;
                     break;
+                case PunpCapType.Point2ml:
+                    address = PLCConfig.PumpAbsorbAddress_02ml;
+                    break;
                 default:
                     break;
             }
@@ -354,11 +357,6 @@ namespace BodDetect
 
             Thread.Sleep(1000);
 
-
-
-
-
-
             //while (!asyncResult.IsCompleted)
             //{
             //    id = pLCParams[1].data[0];
@@ -369,6 +367,128 @@ namespace BodDetect
             return success;
         }
 
+        public bool ChangePunpValve(PumpValveType pumpValveType) 
+        {
+            bool success = false;
+            try
+            {
+                byte bitAdress = 0X00;
+                switch (pumpValveType)
+                {
+                    case PumpValveType.work:
+                        bitAdress = 11;
+                        break;
+                    case PumpValveType.pre:
+                        bitAdress = 12;
+                        break;
+                    default:
+                        break;
+                }
+
+                byte[] wValue = { 0X01 };
+                success = finsClient.WriteBitData(0, bitAdress, wValue, PLCConfig.Wr);
+            }
+            catch (Exception ex)
+            {
+
+                return false;
+            }
+
+            return success;
+        }
+
+        public bool PrePumpCtrl(PrePumpWork prePumpWork) 
+        {
+            bool success = false;
+            try
+            {
+                byte bitAdress = 0X00;
+                switch (prePumpWork)
+                {
+                    case PrePumpWork.preAbsorb:
+                        bitAdress = 13;
+                        break;
+                    case PrePumpWork.preDrain:
+                        bitAdress = 14;
+                        break;
+                    default:
+                        break;
+                }
+
+                byte[] wValue = { 0X01 };
+                success = finsClient.WriteBitData(0, bitAdress, wValue, PLCConfig.Wr);
+            }
+            catch (Exception ex)
+            {
+
+                return false;
+            }
+
+            return success;
+        }
+
+        public bool PreInit() 
+        {
+            //【1.用清水填满储液环】
+            //【2.排出储液环5ml清水】
+            //【3.将清水,样液,标液，缓冲液管道填满相应溶液】
+            try
+            {
+                //【1.用清水填满储液环】
+                int counts = 5;
+                byte[] data = { PLCConfig.AirValveBit };
+
+                ValveControl(PLCConfig.Valve2Address, data);
+                data[0] = 0X01;
+
+                //【1.用清水填满储液环】
+                for (int i = 0; i < counts; i++)
+                {
+                    ChangePunpValve(PumpValveType.pre);
+                    ValveControl(PLCConfig.Valve1Address,PLCConfig.PrePumpValveAir, data);
+                    PrePumpCtrl(PrePumpWork.preAbsorb);
+
+                    ChangePunpValve(PumpValveType.work);
+                    PrePumpCtrl(PrePumpWork.preDrain);
+                }
+
+                //【2.排出储液环5ml清水】
+                data[0] = 0X00;
+                ChangePunpValve(PumpValveType.pre);
+                ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                PrePumpCtrl(PrePumpWork.preAbsorb);
+
+                ChangePunpValve(PumpValveType.work);
+                PrePumpCtrl(PrePumpWork.preDrain);
+
+
+                //【3.将清水,样液,标液，缓冲液管道填满相应溶液】
+                data[0] = 0X01;
+                byte[] valve = { PLCConfig.WaterValveBit, PLCConfig.StandardValveBit, PLCConfig.DepositValveBit, PLCConfig.bufferValveBit };
+                foreach (var item in valve)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        ValveControl(PLCConfig.Valve2Address, item, data);
+                        PunpAbsorb(PunpCapType.fiveml);
+                        ValveControl(PLCConfig.Valve2Address, PLCConfig.AirValveBit, data);
+                        PumpDrain();
+                    }
+
+                    ValveControl(PLCConfig.Valve2Address, PLCConfig.WaterValveBit, data);
+                    PunpAbsorb(PunpCapType.fiveml);
+                    ValveControl(PLCConfig.Valve2Address, PLCConfig.AirValveBit, data);
+                    PumpDrain();
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return false;
+            }
+            return true;
+        }
 
         public void StartBodDetect()
         {
