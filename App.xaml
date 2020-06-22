@@ -6,7 +6,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Generic.xaml"/>
+                <ResourceDictionary Source="style/Generic.xaml"/>
+                <ResourceDictionary Source="style/DataGridCom.xaml"/>
+                <ResourceDictionary Source="style/Color.xaml"/>
+                <ResourceDictionary Source="style/BoxRadioButton.xaml"/>
+                <ResourceDictionary Source="style/TimeEditer.xaml"/>
+                <ResourceDictionary Source="style/ListView.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

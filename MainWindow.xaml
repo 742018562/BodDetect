@@ -721,6 +721,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        
     </Window.Resources>
 
     <Metro:MetroWindow.DataContext>
@@ -1593,7 +1595,11 @@
                                         </Grid>
 
                                         <ListView Name="HisAlarmList" Grid.Row="0">
+                                        
+
                                             <ListView.View>
+                                                
+                                                
                                                 <GridView>
                                                     <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
                                                     <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
@@ -1654,18 +1660,22 @@
                                         </Metro:MetroGroupBox>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="1">
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,0" >
                                         <Metro:MetroGroupBox Header="参数配置">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Metro:MetroTextBox Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox Title="样液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0"/>
 
+                                            </StackPanel>
                                         </Metro:MetroGroupBox>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
-                                        <Metro:MetroGroupBox Header="流程配置">
-                                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Metro:MetroGroupBox  Header="系统配置">
+                                            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="300"/>
+                                                        <ColumnDefinition Width="250"/>
                                                         <ColumnDefinition Width="auto"/>
                                                     </Grid.ColumnDefinitions>
 
@@ -1677,14 +1687,14 @@
                                                                 <RowDefinition/>
                                                             </Grid.RowDefinitions>
 
-                                                            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="-2,0,2,40" Grid.RowSpan="2" >
+                                                            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="-2,-2,2,40" Grid.RowSpan="2" >
                                                                 <!--<RadioButton Content="出厂模式" ClickMode="Release" IsChecked="True" FontSize="14" FontWeight="Bold" Foreground="Red" Margin="20" GroupName="model" ></RadioButton>
                                                                 <RadioButton Content="调试模式" ClickMode="Release" FontSize="14" FontWeight="Bold" Foreground="Red" Margin="20" GroupName="model"  ></RadioButton>-->
                                                                 <RadioButton Style="{StaticResource BoxRadioButton}" Margin="1" Content="aaaa" Width="78" Background="#FF567F83" FontSize="20"></RadioButton>
                                                                 <RadioButton Style="{StaticResource BoxRadioButton}" Margin="1" FontWeight="Bold" FontSize="20" Background="#FF4A8389">近7天</RadioButton>
 
                                                             </StackPanel>
-                                                            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                                                            <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,20,0,0">
                                                                 <Metro:MetroTextBox  Text="1" Title="刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
                                                                 <Label Content="(单位：秒)" VerticalContentAlignment="Center"></Label>
                                                             </StackPanel>
@@ -1716,8 +1726,54 @@
                                         </Metro:MetroGroupBox>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="1">
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,20,0,0">
 
+                                        <Metro:MetroGroupBox Header="流程配置" >
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,20">
+                                                    <Metro:MetroTextBox  Title="预热时间:" Width="150" FontWeight="Bold"/>
+                                                    <Label Content="(单位：秒)"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,20,0,20">
+                                                    <Metro:MetroTextBox  Title="预热时间:" Width="150" FontWeight="Bold"/>
+                                                    <Label Content="(单位：秒)"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                                                    <Metro:MetroTextBox  Title="进水超时:" Width="150" FontWeight="Bold"/>
+                                                    <Label Content="(单位：秒)"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                                    <Metro:MetroTextBox  Title="沉淀时间:" Width="150" FontWeight="Bold"/>
+                                                    <Label Content="(单位：秒)"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                    <Metro:MetroTextBox  Title="清洗频率:" Width="150" FontWeight="Bold"/>
+                                                    <Label Content="(次)"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,20,0,0" >
+                                                    <Metro:MetroTextBox  Title="润洗次数:" Width="150" FontWeight="Bold" />
+                                                    <Label Content="(次)"></Label>
+                                                </StackPanel>
+
+
+                                            </Grid>
+                                        </Metro:MetroGroupBox>
                                     </StackPanel>
 
 
@@ -1726,10 +1782,78 @@
 
                             </Metro:MetroTabItem>
                             <Metro:MetroTabItem Header="系统维护" Icon="/Resources/tabIcon.png">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
 
+                                    <StackPanel Grid.Row="0" Orientation="Vertical">
+                                        <Label Content="系统维护表单" HorizontalAlignment="Center" FontSize="22" FontWeight="Bold" Foreground="Red" Margin="0,20,0,0" Background="{x:Null}"/>
+                                        <DataGrid  ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False"  Name="dataGrid1"  VerticalAlignment="Top"
+                  CanUserSortColumns="False"   Margin="5" IsReadOnly="True"
+                  CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
+                  CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False">
+                                            
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
+                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Margin="0,20,0,20" >
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="FirstPage">
+                                                    <i:InvokeCommandAction Command="{Binding FirstPageCommand}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="PreviousPage">
+                                                    <i:InvokeCommandAction Command="{Binding PreviousPageCommand}"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="NextPage">
+                                                    <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="LastPage">
+                                                    <i:InvokeCommandAction Command="{Binding LastPageCommand}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </local:Pager>
+                                    </StackPanel>
+                                </Grid>
                             </Metro:MetroTabItem>
                             <Metro:MetroTabItem Header="密码设置" Icon="/Resources/tabIcon.png">
 
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                                        <Label Content="当前密码:"/>
+                                        <PasswordBox PasswordChar="*" Width="250"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                                        <Label Content="修改密码:"/>
+                                        <PasswordBox PasswordChar="*" Width="250"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                                        <Label Content="确认密码:"/>
+                                        <PasswordBox PasswordChar="*" Width="250"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal"  HorizontalAlignment="Center" Margin="0,40,0,0">
+                                        <Metro:MetroButton  Content="保存" MetroButtonState="Red" HorizontalAlignment="Left"/>
+                                        <Metro:MetroButton  Content="重置" MetroButtonState="None" HorizontalAlignment="Right" Margin="120,0,0,0"/>
+                                    </StackPanel>
+                                    
+                                </Grid>
+                                
                             </Metro:MetroTabItem>
                             <Metro:MetroTabItem Header="关于本机" Icon="/Resources/tabIcon.png">
 

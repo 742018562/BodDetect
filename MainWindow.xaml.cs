@@ -91,8 +91,6 @@ namespace BodDetect
             //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
             //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
 
-
-
             bodData.TemperatureData = (float)16.0;
             bodData.DoData = (float)4.3;
             bodData.TurbidityData = (float)101;
@@ -103,6 +101,8 @@ namespace BodDetect
 
 
             init();
+
+            
 
         }
 
