@@ -25,7 +25,7 @@ namespace BodDetect
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MahApps.Metro.Controls.MetroWindow
+    public partial class MainWindow : MetroWindow
     {
 
         BodHelper bodHelper;
@@ -1482,12 +1482,20 @@ namespace BodDetect
             int standDil = Convert.ToInt32(StandDil.Text);
             int sampVol = Convert.ToInt32(SampVol.Text);
             int sampDil = Convert.ToInt32(SampDil.Text);
+            int precipitateTime = Convert.ToInt32(PrecipitateTime.Text);
+            int inietTime = Convert.ToInt32(InietTime.Text);
+            int emptyTime = Convert.ToInt32(EmptyTime.Text);
+
 
             ConfigData configData = new ConfigData();
             configData.SampDil = sampDil;
             configData.SampVol = sampVol;
             configData.StandDil = standDil;
             configData.StandVol = standVol;
+            configData.EmptyTime = emptyTime;
+            configData.InietTime = inietTime;
+            configData.PrecipitateTime = precipitateTime;
+
             bodHelper.configData = configData;
 
             RunTimer.Tick += BodRun;

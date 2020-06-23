@@ -11,6 +11,10 @@ namespace BodDetect.BodDataManage
         public int SampVol { get; set; }
         public int SampDil { get; set; }
 
+        public int InietTime { get; set; }
+        public int EmptyTime { get; set; }
+        public int PrecipitateTime { get; set; }
+
         public ConfigData() { }
     }
 }

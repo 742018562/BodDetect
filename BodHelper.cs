@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using BodDetect.BodDataManage;
 using System.Threading;
+using System.Windows;
 
 namespace BodDetect
 {
@@ -34,6 +35,10 @@ namespace BodDetect
         BodData bodData = new BodData();
 
         public ConfigData configData;
+
+        //进水完成
+        bool HasIniet = false;
+        Timer timer;
 
         public BodHelper(string plcIP, int port)
         {
@@ -512,6 +517,7 @@ namespace BodDetect
                     return;
                 }
                 IsSampling = true;
+                HasIniet = false;
 
                 bool success = false;
                 //    byte[] data = { PLCConfig.CisternPumpBit };
@@ -521,6 +527,12 @@ namespace BodDetect
                 //    {
                 //        return;
                 //    }
+                //    HasIniet = true;
+                // timer = new Timer(PrecipitateIsTimeOut,null,Timeout.Infinite,configData.InietTime * 1000);
+                // timer.Change(0, configData.InietTime);
+
+                //沉淀池沉淀
+                Thread.Sleep(configData.PrecipitateTime * 1000); 
 
                 //[ 2. 调用BOD接口使用缓冲液清洗 ]
 
@@ -709,6 +721,69 @@ namespace BodDetect
                 IsSampling = false;
             }
 
+        }
+
+        public void PrecipitateIsTimeOut(object time) 
+        {
+            if (HasIniet)
+            {
+                timer.Change(Timeout.Infinite, configData.InietTime * 1000);
+            }
+            else 
+            {
+                byte bitAddresss = 0X04;
+                byte[] data = { 0 };
+                ValveControl(PLCConfig.Valve1Address, bitAddresss, data);
+                MessageBox.Show(" 进水超时,水泵已关.", "提示", MessageBoxButton.OK);
+            }
+
+        }
+
+
+        public bool ClearSolution() 
+        {
+            bool success = false;
+            List<PLCParam> pLCParams = new List<PLCParam>();
+
+            PLCParam pLCParam1 = new PLCParam
+            {
+                address = PLCConfig.Valve2Address
+            };
+            pLCParam1.data.Add(PLCConfig.SampleValveBit);
+            pLCParams.Add(pLCParam1);
+
+            PLCParam pLCParam2 = new PLCParam
+            {
+                address = PLCConfig.Valve2Address
+            };
+            pLCParam2.data.Add(PLCConfig.AirValveBit);
+            pLCParams.Add(pLCParam2);
+
+            //抽空样液
+            for (int i = 0; i < 10; i++)
+            {
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success) 
+                {
+                    return success;
+                }
+            }
+
+            pLCParams[0].data[0] = PLCConfig.NormalValveBit;
+
+            for (int i = 0; i < 10; i++)
+            {
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                if (!success)
+                {
+                    return success;
+                }
+            }
+
+            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
+            return success;
         }
     }
 

@@ -9,7 +9,6 @@
         <Setter Property="Minute" Value="00"/>
         <Setter Property="Second" Value="00"/>
         <Setter Property="Height" Value="60"/>
-        <Setter Property="FontSize" Value="30"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TimeEditer}">
@@ -25,11 +24,11 @@
                                 <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="PART_TXTHOUR" HorizontalContentAlignment="Center" Cursor="Arrow" BorderThickness="0" SelectionBrush="White" AutoWordSelection="False" Text="{Binding Hour,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}"  Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False"  VerticalAlignment="Center"  Height="60" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                            <TextBox x:Name="PART_TXTHOUR" HorizontalContentAlignment="Center" Cursor="Arrow" BorderThickness="0" SelectionBrush="White" AutoWordSelection="False" Text="{Binding Hour,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}"  Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False"  VerticalAlignment="Center"  Height="80" FontWeight="Bold" VerticalContentAlignment="Center" FontSize="30" />
                             <TextBlock Text=":" VerticalAlignment="Center" Grid.Column="1" FontWeight="Bold" FontSize="30" />
-                            <TextBox x:Name="PART_TXTMINUTE" HorizontalContentAlignment="Center" Cursor="Arrow" Grid.Column="2" BorderThickness="0" AutoWordSelection="False" Text="{Binding Minute,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}" Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False" VerticalAlignment="Center" Height="60" FontWeight="Bold"  VerticalContentAlignment="Center"/>
+                            <TextBox x:Name="PART_TXTMINUTE" HorizontalContentAlignment="Center" Cursor="Arrow" Grid.Column="2" BorderThickness="0" AutoWordSelection="False" Text="{Binding Minute,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}" Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False" VerticalAlignment="Center" Height="80" FontWeight="Bold"  VerticalContentAlignment="Center" FontSize="30" />
                             <TextBlock Text=":" VerticalAlignment="Center" Grid.Column="3" FontWeight="Bold" FontSize="30" />
-                            <TextBox x:Name="PART_TXTSECOND" HorizontalContentAlignment="Center" Cursor="Arrow" Grid.Column="4" BorderThickness="0" AutoWordSelection="False" Text="{Binding Second,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}" Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False"  VerticalAlignment="Center" Height="60" FontWeight="Bold"  VerticalContentAlignment="Center"/>
+                            <TextBox x:Name="PART_TXTSECOND" HorizontalContentAlignment="Center" Cursor="Arrow" Grid.Column="4" BorderThickness="0" AutoWordSelection="False" Text="{Binding Second,RelativeSource={RelativeSource TemplatedParent},StringFormat={}{0:00},UpdateSourceTrigger=PropertyChanged}" Foreground="Black" Focusable="True" IsReadOnly="True" IsReadOnlyCaretVisible="False"  VerticalAlignment="Center" Height="80" FontWeight="Bold"  VerticalContentAlignment="Center" FontSize="30" />
                             <TextBox x:Name="PART_TXT4" Grid.Column="5" Background="Transparent" BorderThickness="0" IsReadOnly="True" AutoWordSelection="False" IsReadOnlyCaretVisible="False" Cursor="Arrow" FontWeight="Bold" Margin="20,0,0,0"/>
 
                             <Grid Grid.Column="5" HorizontalAlignment="Right" x:Name="numIncrease" Visibility="{TemplateBinding NumIncreaseVisible}">
