@@ -12,7 +12,7 @@ namespace BodDetect
         private float uv254Data;
         private float bod;
 
-
+        public BodData() { }
         private int deviceStatus;
 
         public float PHData

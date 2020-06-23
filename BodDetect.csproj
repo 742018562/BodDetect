@@ -59,6 +59,7 @@
     <None Remove="Resources\icon\home.png" />
     <None Remove="Resources\icon\toolbarSites.png" />
     <None Remove="Resources\icon\xray.png" />
+    <None Remove="Resources\icon_player.png" />
     <None Remove="Resources\keyboard_arrow_down.png" />
     <None Remove="Resources\keyboard_arrow_left.png" />
     <None Remove="Resources\keyboard_arrow_up.png" />
@@ -83,6 +84,8 @@
     <None Remove="Resources\up.png" />
     <None Remove="Resources\water.png" />
     <None Remove="Resources\yellow.png" />
+    <None Remove="Resources\zanting.png" />
+    <None Remove="Resources\zhongzhi.png" />
     <None Remove="Resources\zhushe.png" />
     <None Remove="Resources\zhushe_up.png" />
     <None Remove="Resources\悬浮物.png" />
@@ -136,6 +139,7 @@
     <Resource Include="Resources\icon\home.png" />
     <Resource Include="Resources\icon\toolbarSites.png" />
     <Resource Include="Resources\icon\xray.png" />
+    <Resource Include="Resources\icon_player.png" />
     <Resource Include="Resources\keyboard_arrow_down.png" />
     <Resource Include="Resources\keyboard_arrow_left.png" />
     <Resource Include="Resources\keyboard_arrow_up.png" />
@@ -160,6 +164,8 @@
     <Resource Include="Resources\up.png" />
     <Resource Include="Resources\water.png" />
     <Resource Include="Resources\yellow.png" />
+    <Resource Include="Resources\zanting.png" />
+    <Resource Include="Resources\zhongzhi.png" />
     <Resource Include="Resources\zhushe.png" />
     <Resource Include="Resources\zhushe_up.png" />
     <Resource Include="Resources\悬浮物.png" />
@@ -172,6 +178,10 @@
   <ItemGroup>
     <Folder Include="Control\" />
     <Folder Include="Serialport\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MahApps.Metro" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>

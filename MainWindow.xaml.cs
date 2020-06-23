@@ -25,7 +25,7 @@ namespace BodDetect
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MetroWindow
+    public partial class MainWindow : MahApps.Metro.Controls.MetroWindow
     {
 
         BodHelper bodHelper;
@@ -44,6 +44,8 @@ namespace BodDetect
         DispatcherTimer BodTimer = new DispatcherTimer();
 
         DispatcherTimer WaterSampleTimer = new DispatcherTimer();
+
+        DispatcherTimer RunTimer = new  DispatcherTimer();
 
 
         public BodData bodData = new BodData();
@@ -1458,5 +1460,50 @@ namespace BodDetect
             bodHelper.PumpDrain();
 
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+            //this.WindowState = WindowState.Maximized;
+
+            //this.WindowStyle = WindowStyle.None;
+            
+            ////this.ResizeMode = ResizeMode.NoResize;
+
+
+            //this.Topmost = true;
+
+        }
+
+        private void start_Click(object sender, RoutedEventArgs e)
+        {
+            int SpaceHour = Convert.ToInt32(sampleSpac.Text);
+            int standVol = Convert.ToInt32(StandVol.Text);
+            int standDil = Convert.ToInt32(StandDil.Text);
+            int sampVol = Convert.ToInt32(SampVol.Text);
+            int sampDil = Convert.ToInt32(SampDil.Text);
+
+            ConfigData configData = new ConfigData();
+            configData.SampDil = sampDil;
+            configData.SampVol = sampVol;
+            configData.StandDil = standDil;
+            configData.StandVol = standVol;
+            bodHelper.configData = configData;
+
+            RunTimer.Tick += BodRun;
+            RunTimer.Interval = new TimeSpan(0, SpaceHour, 0, 0, 0);
+            RunTimer.Start();
+
+            BodRun(sender,e);
+        }
+
+
+        public void BodRun(object sender, EventArgs e) 
+        {
+            Thread BodDectThread = new Thread(new ThreadStart(bodHelper.StartBodDetect));
+            BodDectThread.IsBackground = true;
+            BodDectThread.Start();
+        }
+
     }
 }

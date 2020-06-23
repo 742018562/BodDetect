@@ -31,7 +31,9 @@ namespace BodDetect
         Dictionary<byte, int> Valve1Pairs = new Dictionary<byte, int>();
         Dictionary<byte, int> Valve2Pairs = new Dictionary<byte, int>();
 
-        BodData bodData;
+        BodData bodData = new BodData();
+
+        public ConfigData configData;
 
         public BodHelper(string plcIP, int port)
         {
@@ -296,8 +298,8 @@ namespace BodDetect
             }
 
             bool success = ValveControl(pLCParams[0].address, pLCParams[0].data.ToArray());
-            //if (!success)
-            //    return false;
+            if (!success)
+                return false;
             success = PunpAbsorb(punpCapType);
 
             byte id = pLCParams[0].data[0];
@@ -311,8 +313,8 @@ namespace BodDetect
             //IAsyncResult asyncResult = refreshProcess.BeginInvoke(param, null, null);
 
             Thread.Sleep(5000);
-            //if (!success)
-            //    return false;
+            if (!success)
+                return false;
 
             id = pLCParams[0].data[0];
             param = new DelegateParam(id, 0, ProcessState.ShowData, UiType.ProcessBar);
@@ -322,8 +324,8 @@ namespace BodDetect
             Thread.Sleep(1000);
 
             success = ValveControl(pLCParams[1].address, pLCParams[1].data.ToArray());
-            //if (!success)
-            //    return false;
+            if (!success)
+                return false;
             success = PumpDrain();
 
 
@@ -539,29 +541,66 @@ namespace BodDetect
                 pLCParam2.data.Add(PLCConfig.NormalValveBit);
                 pLCParams.Add(pLCParam2);
 
-                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-                if (!success)
+                int waterVol = configData.StandVol - (configData.StandVol / configData.StandDil);
+                int Times1 = configData.StandVol / configData.StandDil / 5;
+                int Times2 = configData.StandVol / configData.StandDil % 5;
+
+                for (int i = 0; i < Times1; i++)
                 {
-                    return;
+                    success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                    if (!success)
+                    {
+                        return;
+                    }
                 }
 
-                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-                pLCParams[1].data[0] = PLCConfig.AirValveBit;
-
-                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-                if (!success)
+                for (int i = 0; i < Times2; i++)
                 {
-                    return;
+                    success = PumpOnceProcess(pLCParams, PunpCapType.oneml);
+                    if (!success)
+                    {
+                        return;
+                    }
                 }
+
+                pLCParams[0].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
                 //[ 固定5ml的缓冲液]
                 pLCParams[0].data[0] = PLCConfig.bufferValveBit;
                 pLCParams[1].data[0] = PLCConfig.NormalValveBit;
-                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                success = PumpOnceProcess(pLCParams, PunpCapType.Point2ml);
                 if (!success)
                 {
                     return;
                 }
+
+                Times1 = waterVol / 5;
+                Times2 = waterVol % 5;
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+                pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+
+                for (int i = 0; i < Times1; i++)
+                {
+                    success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                    if (!success)
+                    {
+                        return;
+                    }
+                }
+
+                for (int i = 0; i < Times2; i++)
+                {
+                    success = PumpOnceProcess(pLCParams, PunpCapType.oneml);
+                    if (!success)
+                    {
+                        return;
+                    }
+                }
+
+
+                pLCParams[0].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
                 pLCParams[0].data[0] = PLCConfig.WaterValveBit;
                 pLCParams[1].data[0] = PLCConfig.AirValveBit;
@@ -583,23 +622,64 @@ namespace BodDetect
                 bodData.PHData = PHData[1];
                 bodData.CodData = (float)CODData[0] / 100;
 
+
                 //[ 5. 抽取样液进行稀释后放入样液池]
+
+                waterVol = configData.SampVol - (configData.SampVol / configData.SampDil);
+                Times1 = configData.SampVol / configData.SampDil / 5;
+                Times2 = configData.SampVol / configData.SampDil % 5;
                 pLCParams[0].data[0] = PLCConfig.DepositValveBit;
                 pLCParams[1].data[0] = PLCConfig.SampleValveBit;
-                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
-                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-                pLCParams[1].data[0] = PLCConfig.AirValveBit;
-                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-                if (!success)
+                for (int i = 0; i < Times1; i++)
                 {
-                    return;
+                    success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                    if (!success)
+                    {
+                        return;
+                    }
                 }
 
-                //[ 固定5ml的缓冲液]
-                pLCParams[0].data[0] = PLCConfig.bufferValveBit;
-                pLCParams[1].data[0] = PLCConfig.SampleValveBit;
+                for (int i = 0; i < Times2; i++)
+                {
+                    success = PumpOnceProcess(pLCParams, PunpCapType.oneml);
+                    if (!success)
+                    {
+                        return;
+                    }
+                }
+
+                pLCParams[0].data[0] = PLCConfig.AirValveBit;
                 success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                //[ 固定0.2ml的缓冲液]
+                pLCParams[0].data[0] = PLCConfig.bufferValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.Point2ml);
+
+                Times1 = waterVol / 5;
+                Times2 = waterVol % 5;
+                pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+
+                for (int i = 0; i < Times1; i++)
+                {
+                    success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                    if (!success)
+                    {
+                        return;
+                    }
+                }
+
+                for (int i = 0; i < Times2; i++)
+                {
+                    success = PumpOnceProcess(pLCParams, PunpCapType.oneml);
+                    if (!success)
+                    {
+                        return;
+                    }
+                }
+
+                pLCParams[0].data[0] = PLCConfig.AirValveBit;
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
 
                 pLCParams[0].data[0] = PLCConfig.WaterValveBit;
                 pLCParams[1].data[0] = PLCConfig.AirValveBit;
