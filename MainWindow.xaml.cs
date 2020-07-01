@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -50,9 +51,11 @@ namespace BodDetect
 
         public BodData bodData = new BodData();
 
-        MainWindow_Model mainWindow_Model;
+        MainWindow_Model mainWindow_Model = new MainWindow_Model();
 
+        Thread BodDetectRun;
 
+        ConfigData configData = new ConfigData();
 
         public MainWindow()
         {
@@ -111,8 +114,6 @@ namespace BodDetect
 
         public void init()
         {
-            mainWindow_Model = new MainWindow_Model();
-
 
             for (int i = 0; i < 10; i++)
             {
@@ -244,6 +245,9 @@ namespace BodDetect
 
         private void Sampling_Click_3(object sender, RoutedEventArgs e)
         {
+            MessageBox.Show("sssss");
+            return;
+
             Thread BodDectThread = new Thread(new ThreadStart(bodHelper.StartBodDetect));
             BodDectThread.IsBackground = true;
             BodDectThread.Start();
@@ -521,7 +525,6 @@ namespace BodDetect
 
                     byte[] data = { key };
                     bodHelper.ValveControl(PLCConfig.Valve2Address, data);
-
                 }
             }
             catch (Exception)
@@ -1477,41 +1480,167 @@ namespace BodDetect
 
         private void start_Click(object sender, RoutedEventArgs e)
         {
-            int SpaceHour = Convert.ToInt32(sampleSpac.Text);
-            int standVol = Convert.ToInt32(StandVol.Text);
-            int standDil = Convert.ToInt32(StandDil.Text);
-            int sampVol = Convert.ToInt32(SampVol.Text);
-            int sampDil = Convert.ToInt32(SampDil.Text);
-            int precipitateTime = Convert.ToInt32(PrecipitateTime.Text);
-            int inietTime = Convert.ToInt32(InietTime.Text);
-            int emptyTime = Convert.ToInt32(EmptyTime.Text);
+            ToggleButton toggleButton = sender as ToggleButton;
+            if ((bool)toggleButton.IsChecked)
+            {
+                StartBod(sender, e);
+            }
+            else 
+            {
 
+                AbortBod(sender, e);
+            }
 
-            ConfigData configData = new ConfigData();
-            configData.SampDil = sampDil;
-            configData.SampVol = sampVol;
-            configData.StandDil = standDil;
-            configData.StandVol = standVol;
-            configData.EmptyTime = emptyTime;
-            configData.InietTime = inietTime;
-            configData.PrecipitateTime = precipitateTime;
-
-            bodHelper.configData = configData;
-
-            RunTimer.Tick += BodRun;
-            RunTimer.Interval = new TimeSpan(0, SpaceHour, 0, 0, 0);
-            RunTimer.Start();
-
-            BodRun(sender,e);
         }
 
 
         public void BodRun(object sender, EventArgs e) 
         {
-            Thread BodDectThread = new Thread(new ThreadStart(bodHelper.StartBodDetect));
-            BodDectThread.IsBackground = true;
-            BodDectThread.Start();
+            BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
+            BodDetectRun.IsBackground = true;
+            BodDetectRun.Start();
         }
 
+
+        public void AbortBod(object sender, RoutedEventArgs e) 
+        {
+            bodHelper.manualevent.Reset();
+        }
+
+        public void StartBod(object sender, RoutedEventArgs e) 
+        {
+            try
+            {
+                if (BodDetectRun == null)
+                {
+
+                    initConfig();
+                    RunTimer.Tick += BodRun;
+                    RunTimer.Interval = new TimeSpan(0, configData.SpaceHour, 0, 0, 0);
+                    RunTimer.Start();
+
+                    BodRun(sender, e);
+
+                    _loading.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    bodHelper.manualevent.Set();
+                    _loading.Visibility = Visibility.Collapsed;
+
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
+
+
+        public void initConfig() 
+        {
+            if ( string.IsNullOrEmpty(sampleSpac.Text) ||
+                string.IsNullOrEmpty(InietTime.Text) ||
+                string.IsNullOrEmpty(PrecipitateTime.Text) ||
+                string.IsNullOrEmpty(EmptyTime.Text) ||
+                string.IsNullOrEmpty(WarmUpTime.Text))
+            {
+                MessageBox.Show(" 流程配置有参数未设置,请设置后再启动.", "提示", MessageBoxButton.OK);
+            }
+
+
+            configData.SampDil = Convert.ToInt32(sampleSpac.Text);
+            configData.SampVol  = Convert.ToInt32(StandVol.Text);
+            configData.StandDil    = Convert.ToInt32(StandDil.Text);
+            configData.StandVol    = Convert.ToInt32(SampVol.Text);
+            configData.EmptyTime   = Convert.ToInt32(SampDil.Text);
+            configData.InietTime = Convert.ToInt32(InietTime.Text);
+            configData.PrecipitateTime = Convert.ToInt32(PrecipitateTime.Text);
+            configData.SpaceHour = Convert.ToInt32(EmptyTime.Text);
+            configData.WarmUpTime  = Convert.ToInt32(WarmUpTime.Text);
+
+            bodHelper.configData = configData;
+        }
+
+        private void start_Checked(object sender, RoutedEventArgs e)
+        {
+            string path = @"pack://application:,,,/Resources/zanting.png";
+            BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
+            BodRunImg.Source = image;
+            BodRunImg1.Source = image;
+
+            RunStatuLab.Content = "暂停运行";
+        }
+
+        private void start_Unchecked(object sender, RoutedEventArgs e)
+        {
+            string path = @"pack://application:,,,/Resources/icon_player.png";
+            BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
+            BodRunImg.Source = image;
+            BodRunImg1.Source = image;
+
+            RunStatuLab.Content = "开始运行";
+        }
+
+        private void restart_Click(object sender, RoutedEventArgs e)
+        {
+            _loading.Visibility = Visibility.Visible;
+        }
+
+        private void DrainEmpty_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
+
+            List<byte[]> data = new List<byte[]>();
+            byte[] tem = { PLCConfig.SampleValveBit };
+            byte[] tem1 = { PLCConfig.AirValveBit };
+            data.Add(tem);
+            data.Add(tem1);
+
+            List<ushort> Address = new List<ushort>();
+            Address.Add(PLCConfig.Valve2Address);
+            Address.Add(PLCConfig.Valve2Address);
+
+            foreach (var item in Valves)
+            {
+                data[0][0] = item;
+                for (int i = 0; i < 10; i++)
+                {
+                    PumpProcess(data, Address, PunpCapType.fiveml);
+                }
+            }
+
+            byte[] data1 = { 0X01 };
+            bodHelper.ValveControl(100, PLCConfig.CisternValveBit, data1);
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (SingleProcessTab == null) 
+            {
+                return;
+            }
+            // mainWindow_Model.DebugMode = true;
+
+            SingleProcessTab.Visibility = Visibility.Visible;
+            SingleProcessTab.IsSelected = false;
+            DevStaus.IsSelected = true;
+        }
+
+        private void RadioButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (SingleProcessTab == null)
+            {
+                return;
+            }
+
+            // mainWindow_Model.DebugMode = false;
+
+            SingleProcessTab.Visibility = Visibility.Collapsed;
+            SingleProcessTab.IsSelected = false;
+            DevStaus.IsSelected = true;
+
+        }
     }
 }

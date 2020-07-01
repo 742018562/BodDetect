@@ -93,6 +93,11 @@ namespace BodDetect.BodDataManage
         public const byte CisternPumpBit = 0X04;
 
         /// <summary>
+        /// 传感器电源开关,0表示关闭电源,1表示打开电源
+        /// </summary>
+        public const byte SensorPower = 0X05;
+
+        /// <summary>
         /// 初始化阶段注射泵另外一个阀门对应的三通阀 0表示阀门常闭在空气口，1表示阀门打到清水口
         /// </summary>
         public const byte PrePumpValveAir = 0X07;

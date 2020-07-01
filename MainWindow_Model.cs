@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 
@@ -128,6 +129,25 @@ namespace BodDetect
                 {
                     _totalPage = value;
                     OnPropertyChanged("TotalPage");
+                }
+            }
+        }
+
+
+        public Visibility _debugMode;
+
+        public Visibility DebugMode 
+        {
+            get 
+            {
+                return _debugMode;
+            }
+            set 
+            {
+                if (_debugMode != value) 
+                {
+                    _debugMode = value;
+                    OnPropertyChanged("DebugMode");
                 }
             }
         }
