@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -46,7 +47,7 @@ namespace BodDetect
 
         DispatcherTimer WaterSampleTimer = new DispatcherTimer();
 
-        DispatcherTimer RunTimer = new  DispatcherTimer();
+        DispatcherTimer RunTimer = new DispatcherTimer();
 
 
         public BodData bodData = new BodData();
@@ -96,42 +97,63 @@ namespace BodDetect
             //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
             //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
 
-            bodData.TemperatureData = (float)16.0;
-            bodData.DoData = (float)4.3;
-            bodData.TurbidityData = (float)101;
-            bodData.PHData = (float)7.20;
-            bodData.CodData = 250;
-            bodData.Bod = 150;
-            bodData.Uv254Data = 200;
-
 
             init();
 
-            
+
 
         }
 
 
         public void init()
         {
-
-            for (int i = 0; i < 10; i++)
+            try
             {
-                SysStatusList.Items.Add(new SysStatusMsg(i, "test0", "test1", "test2"));
-            }
+                for (int i = 0; i < 10; i++)
+                {
+                    SysStatusList.Items.Add(new SysStatusMsg(i, "test0", "test1", "test2"));
+                }
 
-            for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 10; i++)
+                {
+                    AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+                }
+
+                for (int i = 0; i < 10; i++)
+                {
+                    HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+                }
+
+
+                logList.Items.Add("test");
+
+                string ip = IP_textbox.Text;
+
+                string[] value = ip.Split('.');
+                if (value.Length < 4)
+                {
+                    MessageBox.Show("异常ip!");
+                }
+
+                int port = Convert.ToInt32(Port_TextBox.Text);
+
+                bodHelper = new BodHelper(ip, port);
+                bool success = bodHelper.ConnectPlc();
+
+
+
+                bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
+                bodHelper.refreshStaus = new BodHelper.RefreshStaus(RefreshStatus);
+
+                bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
+
+
+                bodHelper.mainWindow = this;
+            }
+            catch (Exception)
             {
-                AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+                MessageBox.Show("连接PLC异常!");
             }
-
-            for (int i = 0; i < 10; i++)
-            {
-                HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
-            }
-
-
-            logList.Items.Add("test");
         }
 
         private void MetroButton_Click(object sender, RoutedEventArgs e)
@@ -178,8 +200,6 @@ namespace BodDetect
         {
             try
             {
-
-
                 string ip = IP_textbox.Text;
 
                 string[] value = ip.Split('.');
@@ -193,16 +213,41 @@ namespace BodDetect
                 bodHelper = new BodHelper(ip, port);
                 bool success = bodHelper.ConnectPlc();
 
-
-
                 bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
+                bodHelper.refreshStaus = new BodHelper.RefreshStaus(RefreshStatus);
+
+                bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
                 bodHelper.mainWindow = this;
+
+                
+
+                //bodData.TemperatureData = (float)16.0;
+                //bodData.DoData = (float)4.3;
+                //bodData.TurbidityData = (float)101;
+                //bodData.PHData = (float)7.20;
+                //bodData.CodData = 250;
+                //bodData.Bod = 150;
+                //bodData.Uv254Data = 200;
+                //RefreshData(bodData);
 
             }
             catch (Exception)
             {
                 MessageBox.Show("连接PLC异常!");
             }
+
+        }
+
+        private void RefreshData(BodData data)
+        {
+            DOTem.Content = data.Uv254Data.ToString();
+            DO.Content = data.DoData.ToString();
+            PH.Content = data.PHData.ToString();
+            COD.Content = data.CodData.ToString();
+            PHTem.Content = data.TemperatureData.ToString();
+            Turbidity.Content = data.TurbidityData.ToString();
+
+            BOD.Content = data.Bod.ToString();
 
         }
 
@@ -1151,11 +1196,9 @@ namespace BodDetect
 
         private void sample_start_Click(object sender, RoutedEventArgs e)
         {
-            byte[] data = { 1 };
+            byte[] data = { PLCConfig.CisternPumpBit };
 
-            byte bitAddress = PLCConfig.CisternPumpBit;
-
-            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             if (!success)
             {
                 MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
@@ -1166,9 +1209,7 @@ namespace BodDetect
         {
             byte[] data = { 0 };
 
-            byte bitAddress = PLCConfig.CisternPumpBit;
-
-            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             if (!success)
             {
                 MessageBox.Show(" 抽水样泵关闭失败.", "提示", MessageBoxButton.OK);
@@ -1177,14 +1218,12 @@ namespace BodDetect
 
         private void drain_start_Click(object sender, RoutedEventArgs e)
         {
-            byte[] data = { 1 };
+            byte[] data = { PLCConfig.CisternValveBit };
 
-            byte bitAddress = PLCConfig.CisternValveBit;
-
-            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             if (!success)
             {
-                MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
+                MessageBox.Show(" 沉淀池排水阀打开失败.", "提示", MessageBoxButton.OK);
             }
         }
 
@@ -1192,12 +1231,10 @@ namespace BodDetect
         {
             byte[] data = { 0 };
 
-            byte bitAddress = PLCConfig.CisternValveBit;
-
-            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, bitAddress, data);
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             if (!success)
             {
-                MessageBox.Show(" 抽水样泵打开失败.", "提示", MessageBoxButton.OK);
+                MessageBox.Show(" 沉淀池排水阀关闭失败.", "提示", MessageBoxButton.OK);
             }
         }
 
@@ -1374,7 +1411,7 @@ namespace BodDetect
 
         private void PreButton_Click(object sender, RoutedEventArgs e)
         {
-            if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null) 
+            if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null)
             {
                 MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
             }
@@ -1470,7 +1507,7 @@ namespace BodDetect
             //this.WindowState = WindowState.Maximized;
 
             //this.WindowStyle = WindowStyle.None;
-            
+
             ////this.ResizeMode = ResizeMode.NoResize;
 
 
@@ -1485,7 +1522,7 @@ namespace BodDetect
             {
                 StartBod(sender, e);
             }
-            else 
+            else
             {
 
                 AbortBod(sender, e);
@@ -1494,24 +1531,31 @@ namespace BodDetect
         }
 
 
-        public void BodRun(object sender, EventArgs e) 
+        public void BodRun(object sender, EventArgs e)
         {
+            if (BodDetectRun != null && BodDetectRun.IsAlive)
+            {
+                BodDetectRun.Abort();
+            }
+
             BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
             BodDetectRun.IsBackground = true;
             BodDetectRun.Start();
+
+
         }
 
 
-        public void AbortBod(object sender, RoutedEventArgs e) 
+        public void AbortBod(object sender, RoutedEventArgs e)
         {
             bodHelper.manualevent.Reset();
         }
 
-        public void StartBod(object sender, RoutedEventArgs e) 
+        public void StartBod(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (BodDetectRun == null)
+                if (BodDetectRun == null || !BodDetectRun.IsAlive || !bodHelper.IsSampling)
                 {
 
                     initConfig();
@@ -1538,9 +1582,9 @@ namespace BodDetect
         }
 
 
-        public void initConfig() 
+        public void initConfig()
         {
-            if ( string.IsNullOrEmpty(sampleSpac.Text) ||
+            if (string.IsNullOrEmpty(sampleSpac.Text) ||
                 string.IsNullOrEmpty(InietTime.Text) ||
                 string.IsNullOrEmpty(PrecipitateTime.Text) ||
                 string.IsNullOrEmpty(EmptyTime.Text) ||
@@ -1551,14 +1595,14 @@ namespace BodDetect
 
 
             configData.SampDil = Convert.ToInt32(sampleSpac.Text);
-            configData.SampVol  = Convert.ToInt32(StandVol.Text);
-            configData.StandDil    = Convert.ToInt32(StandDil.Text);
-            configData.StandVol    = Convert.ToInt32(SampVol.Text);
-            configData.EmptyTime   = Convert.ToInt32(SampDil.Text);
+            configData.SampVol = Convert.ToInt32(StandVol.Text);
+            configData.StandDil = Convert.ToInt32(StandDil.Text);
+            configData.StandVol = Convert.ToInt32(SampVol.Text);
+            configData.EmptyTime = Convert.ToInt32(SampDil.Text);
             configData.InietTime = Convert.ToInt32(InietTime.Text);
             configData.PrecipitateTime = Convert.ToInt32(PrecipitateTime.Text);
             configData.SpaceHour = Convert.ToInt32(EmptyTime.Text);
-            configData.WarmUpTime  = Convert.ToInt32(WarmUpTime.Text);
+            configData.WarmUpTime = Convert.ToInt32(WarmUpTime.Text);
 
             bodHelper.configData = configData;
         }
@@ -1568,7 +1612,6 @@ namespace BodDetect
             string path = @"pack://application:,,,/Resources/zanting.png";
             BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
             BodRunImg.Source = image;
-            BodRunImg1.Source = image;
 
             RunStatuLab.Content = "暂停运行";
         }
@@ -1578,10 +1621,11 @@ namespace BodDetect
             string path = @"pack://application:,,,/Resources/icon_player.png";
             BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
             BodRunImg.Source = image;
-            BodRunImg1.Source = image;
 
             RunStatuLab.Content = "开始运行";
         }
+
+
 
         private void restart_Click(object sender, RoutedEventArgs e)
         {
@@ -1611,13 +1655,13 @@ namespace BodDetect
                 }
             }
 
-            byte[] data1 = { 0X01 };
-            bodHelper.ValveControl(100, PLCConfig.CisternValveBit, data1);
+            byte[] data1 = { PLCConfig.CisternValveBit };
+            bodHelper.ValveControl(PLCConfig.Valve1Address, data1);
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (SingleProcessTab == null) 
+            if (SingleProcessTab == null)
             {
                 return;
             }
@@ -1641,6 +1685,212 @@ namespace BodDetect
             SingleProcessTab.IsSelected = false;
             DevStaus.IsSelected = true;
 
+        }
+
+        private void WashValve_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = { 0 };
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+
+        }
+
+        private void BodSample_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                byte[] data = { PLCConfig.WashValveBit, PLCConfig.SelectValveBit };
+                bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+
+                SerialPortHelp serialPortHelp = new SerialPortHelp();
+                serialPortHelp.OpenPort();
+                serialPortHelp.StartSampleMes();
+                serialPortHelp.ClosePort();
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
+
+        private void BodStand_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                byte[] data = { PLCConfig.WashValveBit };
+                bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+                SerialPortHelp serialPortHelp = new SerialPortHelp();
+                serialPortHelp.OpenPort();
+                serialPortHelp.StartStandMeas();
+                serialPortHelp.ClosePort();
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+
+        }
+
+        private void BodWash_Click(object sender, RoutedEventArgs e)
+        {
+
+            try
+            {
+                byte[] data = { 0 };
+
+                bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+
+                SerialPortHelp serialPortHelp = new SerialPortHelp();
+                serialPortHelp.OpenPort();
+                serialPortHelp.StartWash();
+                serialPortHelp.ClosePort();
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+        }
+
+
+        public void RefreshStatus(SysStatus sysStatus)
+        {
+            switch (sysStatus)
+            {
+                case SysStatus.Sampling:
+                    start.IsChecked = true;
+                    break;
+                case SysStatus.Pause:
+                    start.IsChecked = false;
+                    break;
+                case SysStatus.Complete:
+                    start.IsChecked = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        private void GetBodData_Click(object sender, RoutedEventArgs e)
+        {
+            StreamWriter streamWriter = File.CreateText("D:\\test1111.txt");
+            try
+            {
+                byte[] data = { 0 };
+
+
+
+                bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+
+                //bodHelper.serialPortHelp.OpenPort();
+                streamWriter.WriteLine("开始读数据");
+
+                bodHelper.serialPortHelp.ReadBodFun(RegStatus.CurrentBod, 3);
+
+                data = bodHelper.serialPortHelp.ReadData();
+                streamWriter.WriteLine("读取数据完成");
+
+                if (data == null)
+                {
+                    streamWriter.WriteLine("data == null");
+
+                    return;
+                }
+
+                int iLength = data.Length;
+                foreach (var item in data)
+                {
+                    streamWriter.WriteLine(item.ToString());
+                }
+
+                if (iLength != 11)
+                {
+
+                    streamWriter.WriteLine("iLength != 11");
+                    return;
+                }
+
+                int iCount = Convert.ToInt32(data[2]);
+
+                byte[] BodValue = { data[3], data[4], data[5], data[6] };
+                float Bod = Tool.ToInt32(BodValue)[0];
+
+
+            //    float Bod = bodHelper.serialPortHelp.BodCurrentData();
+
+
+
+                streamWriter.WriteLine(Bod.ToString());
+                streamWriter.Close();
+
+                //bodHelper.serialPortHelp.ClosePort();
+            }
+            catch (Exception ex)
+            {
+                streamWriter.WriteLine(ex.Message);
+                streamWriter.WriteLine(ex.StackTrace);
+
+                streamWriter.Close();
+            }
+
+        }
+
+        private void UpdataData_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] Temp = { PLCConfig.SensorPower };
+            bool success = bodHelper.ValveControl(100, Temp);
+            if (!success)
+            {
+                return;
+            }
+            //int warmUpTime = Convert.ToInt32(WarmUpTime.Text);
+            //Thread.Sleep(warmUpTime * 1000);
+            float[] DoDota = bodHelper.GetDoData();
+            uint[] TurbidityData = bodHelper.GetTurbidityData();
+            float[] PHData = bodHelper.GetPHData();
+            ushort[] CODData = bodHelper.GetCodData();
+
+
+
+            bodData.TemperatureData = DoDota[0]; 
+            bodData.DoData = DoDota[1];
+            bodData.TurbidityData = (float)TurbidityData[0] / 1000;
+            bodData.PHData = PHData[1];
+            bodData.CodData = (float)CODData[0] / 100;
+
+
+            DOTem.Content = bodData.Uv254Data.ToString("F1");
+            DO.Content = bodData.DoData.ToString("F1");
+            PH.Content = bodData.PHData.ToString();
+            COD.Content = bodData.CodData.ToString();
+            PHTem.Content = bodData.TemperatureData.ToString();
+            Turbidity.Content = bodData.TurbidityData.ToString();
+
+            BOD.Content = bodData.Bod.ToString();
+        }
+
+        private void MetroWindow_Closed(object sender, EventArgs e)
+        {
+            timer.Stop();
+            BodTimer.Stop();
+            WaterSampleTimer.Stop();
+            RunTimer.Stop();
+            _loading.animationTimer.Stop();
+            bodHelper.Dispose();
+            if (BodDetectRun != null) 
+            {
+                BodDetectRun.Abort();
+
+            }
+
+            //DispatcherTimer timer = new DispatcherTimer();
+            //DispatcherTimer BodTimer = new DispatcherTimer();
+            //DispatcherTimer WaterSampleTimer = new DispatcherTimer();
+            //DispatcherTimer RunTimer = new DispatcherTimer();
         }
     }
 }

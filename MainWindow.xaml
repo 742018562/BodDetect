@@ -15,7 +15,7 @@
 
         mc:Ignorable="d"
     
-        Title="{Binding Title}" >
+        Title="{Binding Title}" Closed="MetroWindow_Closed" >
     <!--ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" WindowState="Maximized" IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
 
     <Window.Resources>
@@ -841,16 +841,16 @@
                                             </Grid.RowDefinitions>
                                             <StackPanel Grid.Row="0" Orientation="Horizontal">
 
-                                                <Metro:MetroTextBox Name="StandVol" Title="标液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold">
+                                                <Metro:MetroTextBox Name="StandVol" Title="标液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50">
                                                 </Metro:MetroTextBox>
                                                 <Label Content="(单位:ml)"></Label>
-                                                <Metro:MetroTextBox Name="StandDil" Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0"/>
+                                                <Metro:MetroTextBox Name="StandDil" Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10"/>
                                             </StackPanel>
                                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
-                                                <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50"/>
                                                 <Label Content="(单位:ml)"></Label>
 
-                                                <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0"/>
+                                                <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10"/>
 
                                             </StackPanel>
 
@@ -929,38 +929,38 @@
                                             </Grid.RowDefinitions>
 
                                             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,20">
-                                                <Metro:MetroTextBox Name="WarmUpTime"  Title="预热时间:" Width="150" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox Name="WarmUpTime"  Title="预热时间:" Width="150" FontWeight="Bold" Text="60"/>
                                                 <Label Content="(单位：秒)"></Label>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,20,0,20">
-                                                <Metro:MetroTextBox  Name="PrecipitateTime" Title="沉淀时间:" Width="150" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox  Name="PrecipitateTime" Title="沉淀时间:" Width="150" FontWeight="Bold" Text="10"/>
                                                 <Label Content="(单位：秒)"></Label>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
-                                                <Metro:MetroTextBox Name="InietTime" Title="进水超时:" Width="150" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox Name="InietTime" Title="进水超时:" Width="150" FontWeight="Bold" Text="120"/>
                                                 <Label Content="(单位：秒)"></Label>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                                <Metro:MetroTextBox Name="EmptyTime" Title="排空超时:" Width="150" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox Name="EmptyTime" Title="排空超时:" Width="150" FontWeight="Bold" Text="300"/>
                                                 <Label Content="(单位：秒)"></Label>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                <Metro:MetroTextBox  Title="清洗频率:" Width="150" FontWeight="Bold"/>
+                                                <Metro:MetroTextBox  Title="清洗频率:" Width="150" FontWeight="Bold" Text="5"/>
                                                 <Label Content="(次)"></Label>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                <Metro:MetroTextBox  Title="润洗次数:" Width="150" FontWeight="Bold" />
+                                                <Metro:MetroTextBox  Title="润洗次数:" Width="150" FontWeight="Bold" Text="5" />
                                                 <Label Content="(次)"></Label>
                                             </StackPanel>
 
 
                                             <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                <Metro:MetroTextBox  Title="采样间隔:" Width="150" FontWeight="Bold" x:Name="sampleSpac"/>
+                                                <Metro:MetroTextBox  Title="采样间隔:" Width="150" FontWeight="Bold" x:Name="sampleSpac" Text="1"/>
                                                 <Label Content="(单位：时)"></Label>
                                             </StackPanel>
 
@@ -984,7 +984,7 @@
                                                             Name="start"
                                                             Style="{DynamicResource MahApps.Styles.ToggleButton.Circle}"  HorizontalAlignment="Center" Click="start_Click" Checked="start_Checked" Unchecked="start_Unchecked">
                                                     <Image x:Name="BodRunImg" Source="/Resources/icon_player.png"/>
-                                                    
+
                                                 </ToggleButton>
                                             </StackPanel>
 
@@ -1021,7 +1021,6 @@
                                 <!--</Grid>-->
                             </Metro:MetroWaterfallFlow>
                         </Metro:MetroTabItem>
-
                         <Metro:MetroTabItem Header="参数3D显示" Icon="/Resources/tabIcon.png">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                                 <Grid.ColumnDefinitions>
@@ -1030,7 +1029,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" >
-                                    <Label FontSize="36" Name="BOD" HorizontalAlignment="Center"  Content="150"></Label>
+                                    <Label FontSize="36" Name="BOD" HorizontalAlignment="Center"  Content="0"></Label>
                                     <Metro:MetroImage Grid.Column="0"  Name="BODImage" Content="BODImage"  Source="/Resources/2D/BOD.png"  />
                                 </StackPanel>
 
@@ -1047,30 +1046,30 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="DOTem" HorizontalAlignment="Center" Content="200" />
+                                            <Label FontSize="36" Name="DOTem" HorizontalAlignment="Center" Content="0" />
                                             <Metro:MetroImage Grid.Column="0"  x:Name="DOTemImage" Source="/Resources/2D/uv254.png"  >
                                             </Metro:MetroImage>
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="DO" HorizontalAlignment="Center" Content="4.3" />
+                                            <Label FontSize="36" Name="DO" HorizontalAlignment="Center" Content="0" />
                                             <Metro:MetroImage Grid.Column="0"  Name="DOImage" Content="DOImage"  Source="/Resources/2D/DO.png"  />
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="COD" HorizontalAlignment="Center" Content="250" />
+                                            <Label FontSize="36" Name="COD" HorizontalAlignment="Center" Content="0" />
                                             <Metro:MetroImage Grid.Column="0"  Name="CDOImage" Content="CDOImage"   Source="/Resources/COD.png"  />
                                         </StackPanel>
 
 
                                         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0"  HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="PHTem" HorizontalAlignment="Center"  Content="16.0"></Label>
+                                            <Label FontSize="36" Name="PHTem" HorizontalAlignment="Center"  Content="0"></Label>
                                             <Metro:MetroImage Grid.Column="0"  Name="PHTemImage" Content="PHTemImage"   Source="/Resources/水温1.png"  />
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="PH" HorizontalAlignment="Center"   Content="7.20"></Label>
+                                            <Label FontSize="36" Name="PH" HorizontalAlignment="Center"   Content="0"></Label>
                                             <Metro:MetroImage Grid.Column="0"  Name="PHImage" Content="PH_Image" Source="/Resources/PH.png"  />
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
-                                            <Label FontSize="36" Name="Turbidity" HorizontalAlignment="Center"  Content="101"></Label>
+                                            <Label FontSize="36" Name="Turbidity" HorizontalAlignment="Center"  Content="0"></Label>
                                             <Metro:MetroImage Grid.Column="0"  Name="TurbidityImage" Content="TurbidityImage"  Source="/Resources/悬浮物.png"  />
                                         </StackPanel>
 
@@ -1154,12 +1153,12 @@
 
             </Metro:MetroMenuTabItem>
             <Metro:MetroMenuTabItem Name="RunstatusTab" Header="运行状态" Icon="/Resources/icon/xray.png" IconMove="/Resources/icon/xray.png" Height="50" TabIndex="2">
-                <Metro:MetroTabControl x:Name="Status"  Foreground="#FF2F48B8" FontSize="14">
-                    <Metro:MetroTabItem Name="SingleProcessTab" Header="单个流程" Icon="/Resources/tabIcon.png">
+                <TabControl  x:Name="Status"  Foreground="#FF2F48B8" FontSize="14" Style="{StaticResource MahApps.Styles.TabControl.AnimatedSingleRow}">
+                    <TabItem Name="SingleProcessTab" Header="单个流程" Style="{StaticResource MahApps.Styles.TabItem}" >
                         <StackPanel >
                             <!--<StackPanel>-->
-                            <Metro:MetroGroupBox Header="准备流程">
-                                <StackPanel Orientation="Horizontal">
+                            <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="准备流程">
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="预处理" Name="PreButton" Click="PreButton_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml到标液" Name="PreButton2ml" Click="PreButton2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml" Name="Pre2ml" Click="Pre2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
@@ -1167,9 +1166,10 @@
                                     <Metro:MetroButton Width="150" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="泵预备阀抽取空气" Name="PrePumpAri" Click="PrePumpAri_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="150" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="泵预备阀抽取清水" Name="PrePumpwater" Click="PrePumpwater_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="排空溶液" Name="DrainEmpty"  Margin="20,0,0,0" Click="DrainEmpty_Click"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="更新传感器数据" Name="UpdataData"  Margin="20,0,0,0" Click="UpdataData_Click"></Metro:MetroButton>
                                 </StackPanel>
 
-                            </Metro:MetroGroupBox>
+                            </GroupBox>
                             <!--</StackPanel>-->
                             <Grid  Margin="0,10,0,0" >
                                 <Grid.ColumnDefinitions>
@@ -1182,7 +1182,7 @@
                                     <RowDefinition></RowDefinition>
                                     <RowDefinition></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <Metro:MetroGroupBox Grid.Column="0" Grid.Row="0" Header="标液流程">
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Grid.Column="0" Grid.Row="0" Header="标液流程">
                                     <StackPanel>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -1212,8 +1212,8 @@
                                         </Grid>
 
                                     </StackPanel>
-                                </Metro:MetroGroupBox>
-                                <Metro:MetroGroupBox Grid.Column="2" Grid.Row="0" Header="样液流程"  >
+                                </GroupBox>
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Grid.Column="2" Grid.Row="0" Header="样液流程"  >
                                     <StackPanel  Orientation="Vertical">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -1248,18 +1248,15 @@
 
                                     </StackPanel>
 
-                                </Metro:MetroGroupBox>
-                                <Metro:MetroGroupBox Grid.Column="0" Grid.Row="1" Header="润洗流程" Padding="10,20,10,20">
-                                    <StackPanel  Orientation="Vertical" Margin="0,20,0,0">
-                                        <ComboBox>
+                                </GroupBox>
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Grid.Column="0" Grid.Row="1" Header="润洗流程" Padding="10,20,10,20" Margin="0,20,0,0">
+                                    <StackPanel  Orientation="Vertical">
+                                        <ComboBox Width="200" HorizontalAlignment="Left" Margin="10,10,0,0" Style="{StaticResource MahApps.Styles.ComboBox}">
                                             <ComboBoxItem  Content="1ml" Tag="1"></ComboBoxItem>
                                             <ComboBoxItem  Content="5ml" Tag="2"></ComboBoxItem>
                                         </ComboBox>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Metro:MetroButton Name="startInit" Content="初始化流程" MetroButtonState ="Green" IsEnabled="True" />
-
-                                            <Metro:MetroTextBox Name="wash" Title="清洗管道" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定" Margin="0,20,0,0" ButtonClick="wash_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
-
+                                        <StackPanel Orientation="Horizontal" Margin="0,13,0,0" >
+                                            <Metro:MetroTextBox Name="wash" Title="清洗管道" TitleForeground="Red" FontSize="15" InputHint="请输入整数(ml)"  PopupHint="不大于 10ml" ButtonTitle="确定"  ButtonClick="wash_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
                                         </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
@@ -1273,15 +1270,73 @@
                                         </StackPanel>
 
                                     </StackPanel>
-                                </Metro:MetroGroupBox>
-                                <Metro:MetroGroupBox Grid.Column="2" Grid.Row="1" Header="BOD流程" Padding="10,20,10,20">
+                                </GroupBox>
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Grid.Column="2" Grid.Row="1" Header="BOD流程" Padding="10,20,10,20" Margin="0,20,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
 
-                                </Metro:MetroGroupBox>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Metro:MetroGroupBox Header="控制流程"  Grid.Column="0" BorderThickness="10" Width="300">
+                                            <StackPanel Grid.Row="0" Grid.Column="0">
+
+                                                <Metro:MetroTextBox Width="280" Name="SetSampleDli" Title="设置BOD稀释倍数:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定" ButtonClick="DrainSample_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
+                                                <Metro:MetroTextBox Width="280" Name="SetStandData" Title="设置BOD标准值:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" Margin="0,20,0,0" />
+
+                                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0" >
+                                                    <Metro:MetroButton Name="BodSample" Content="Bod开始测量样品" Width="130" Height="40" Click="BodSample_Click" MetroButtonState="None"/>
+
+                                                    <Metro:MetroButton Name="BodStand" Content="Bod开始标准测量" Width="130" Height="40" Click="BodStand_Click" MetroButtonState="None" Margin="20,0,0,0"/>
+                                                </StackPanel>
+                                                <Metro:MetroButton Name="BodWash" Content="Bod开始清洗" Width="100" Height="40" Click="BodWash_Click" MetroButtonState="None" Margin="0,20,0,0" HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                        </Metro:MetroGroupBox>
+
+                                        <Metro:MetroGroupBox Header="获取BOD状态"  Grid.Column="1" Margin="10,0,0,0" >
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                    <Metro:MetroButton Name="GetBodStatus" Content="获取bod状态" Width="120" Height="40"></Metro:MetroButton>
+                                                    <TextBlock x:Name="BodStatus" Text="0" Width="100" Height="20" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                                    
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                                    <Metro:MetroButton Name="GetBodStandData" Content="获取bod标准值" Width="120" Height="40"></Metro:MetroButton>
+                                                    <TextBlock x:Name="BodStandData" Text="0" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></TextBlock>
+                                                    <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                                    <Metro:MetroButton Name="GetBodData" Content="获取当前bod数值" Width="120" Height="40" Click="GetBodData_Click"></Metro:MetroButton>
+                                                    <TextBlock x:Name="BodData" Text="0" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="50"></TextBlock>
+                                                    <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
+                                                </StackPanel>
+                                            </Grid>
+
+
+
+                                            
+                                        </Metro:MetroGroupBox>
+
+
+                                    </Grid>
+
+
+                                </GroupBox>
 
                             </Grid>
                         </StackPanel>
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Name="DevStaus" Header="设备状态" Icon="/Resources/tabIcon.png">
+                    </TabItem>
+                    <TabItem Style="{StaticResource MahApps.Styles.TabItem}"  Name="DevStaus" Header="设备状态" >
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
@@ -1447,8 +1502,8 @@
                                 </Grid>
                             </StackPanel>
                         </Grid>
-                    </Metro:MetroTabItem>
-                    <Metro:MetroTabItem Header="系统状态" Icon="/Resources/tabIcon.png">
+                    </TabItem>
+                    <TabItem Style="{StaticResource MahApps.Styles.TabItem}"  Header="系统状态" >
                         <StackPanel>
                             <ListView Name="SysStatusList">
                                 <ListView.View>
@@ -1467,15 +1522,15 @@
                             </local:Pager>
 
                         </StackPanel>
-                    </Metro:MetroTabItem>
+                    </TabItem>
 
-                </Metro:MetroTabControl>
+                </TabControl>
             </Metro:MetroMenuTabItem >
             <Metro:MetroMenuTabItem Name="RunProcessTab" Header="运行流程" Icon="/Resources/icon/Automator.png" IconMove="/Resources/icon/Automator.png"  VerticalAlignment="Top" Width="auto" FontWeight="Bold" >
 
                 <Viewbox>
                     <DockPanel>
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="10,10,0,0" >
+                        <!--<StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="10,10,0,0" >
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="0">
                                 <Label Name="RunStatuLab1" Content="开始运行" FontWeight="Bold" FontSize="16"/>
                                 <ToggleButton Width="60"
@@ -1487,20 +1542,6 @@
 
                                 </ToggleButton>
                             </StackPanel>
-
-
-                            <!--<StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="1">
-                                                <Label Content="暂停运行" FontWeight="Bold" FontSize="16"/>
-                                                <Button Width="80"
-                                                            Height="80"
-                                                            Margin="0, 10, 0, 0"
-                                                            Name="stop"
-                                                            Style="{DynamicResource MahApps.Styles.Button.Circle}"  HorizontalAlignment="Center">
-                                                    <Image Source="/Resources/zanting.png"/>
-
-                                                </Button>
-                                            </StackPanel>-->
-
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="1" Margin="40,0,0,0">
                                 <Label Content="重置运行" FontWeight="Bold" FontSize="16"/>
                                 <Button Width="60"
@@ -1513,8 +1554,57 @@
                                 </Button>
                             </StackPanel>
 
-                        </StackPanel>
-                        <Grid  DockPanel.Dock="Right" >
+                        </StackPanel>--><!--<StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="10,10,0,0" >
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="0">
+                                <Label Name="RunStatuLab1" Content="开始运行" FontWeight="Bold" FontSize="16"/>
+                                <ToggleButton Width="60"
+                                                            Height="60"
+                                                            Margin="0, 10, 0, 0"
+                                                            Name="start1"
+                                                            Style="{DynamicResource MahApps.Styles.ToggleButton.Circle}"  HorizontalAlignment="Center" Click="start_Click" Checked="start_Checked" Unchecked="start_Unchecked">
+                                    <Image x:Name="BodRunImg1" Source="/Resources/icon_player.png"/>
+
+                                </ToggleButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="1" Margin="40,0,0,0">
+                                <Label Content="重置运行" FontWeight="Bold" FontSize="16"/>
+                                <Button Width="60"
+                                                            Height="60"
+                                                            Margin="0, 10, 0, 0"
+                                                            Name="restart1"
+                                                            Style="{DynamicResource MahApps.Styles.Button.Circle}"  HorizontalAlignment="Center" Click="restart_Click">
+                                    <Image Source="/Resources/zhongzhi.png"/>
+
+                                </Button>
+                            </StackPanel>
+
+                        </StackPanel>--><!--<StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="10,10,0,0" >
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="0">
+                                <Label Name="RunStatuLab1" Content="开始运行" FontWeight="Bold" FontSize="16"/>
+                                <ToggleButton Width="60"
+                                                            Height="60"
+                                                            Margin="0, 10, 0, 0"
+                                                            Name="start1"
+                                                            Style="{DynamicResource MahApps.Styles.ToggleButton.Circle}"  HorizontalAlignment="Center" Click="start_Click" Checked="start_Checked" Unchecked="start_Unchecked">
+                                    <Image x:Name="BodRunImg1" Source="/Resources/icon_player.png"/>
+
+                                </ToggleButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Grid.Column="1" Margin="40,0,0,0">
+                                <Label Content="重置运行" FontWeight="Bold" FontSize="16"/>
+                                <Button Width="60"
+                                                            Height="60"
+                                                            Margin="0, 10, 0, 0"
+                                                            Name="restart1"
+                                                            Style="{DynamicResource MahApps.Styles.Button.Circle}"  HorizontalAlignment="Center" Click="restart_Click">
+                                    <Image Source="/Resources/zhongzhi.png"/>
+
+                                </Button>
+                            </StackPanel>
+
+                        </StackPanel>-->
+                        <Grid>
+                            <Label Content="系统运转状态：正在采样中........" FontSize="22" FontWeight="Bold" Margin="20"></Label>
                             <Grid >
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="139.76"></RowDefinition>
@@ -1694,7 +1784,7 @@
                                                 </TransformGroup>
                                             </StackPanel.LayoutTransform>
                                             <Metro:MetroProgressBar Name="WashView" ProgressBarHeight="27"   CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Height="30" Margin="0,70,0,0" Width="155" />
-                                            <Metro:MetroSwitch x:Name="WashValve" Content="清洗阀门"  CornerRadius="100" FontSize="15" Width="116" Height="26" RenderTransformOrigin="0.5,0.5"/>
+                                            <Metro:MetroSwitch x:Name="WashValve" Content="清洗阀门"  CornerRadius="100" FontSize="15" Width="116" Height="26" RenderTransformOrigin="0.5,0.5" Click="WashValve_Click"/>
 
 
                                             <!--<Metro:MetroProgressBar ProgressBarHeight="25"   CornerRadius="0" ProgressBarState="None"  ShowHit="False" Value="1" Height="20" />-->
@@ -1722,8 +1812,7 @@
 
 
                             </Grid>
-
-                            <local:LoadingWait x:Name="_loading"  Visibility="Collapsed"/>
+                            <local:LoadingWait x:Name="_loading"  Visibility="Visible"  Background="{x:Null}" />
 
                         </Grid>
                     </DockPanel>
@@ -2014,6 +2103,22 @@
                 </Grid>
 
             </Metro:MetroMenuTabItem>
+            <!--<Metro:MetroMenuTabItem Header="数据调试">
+                <Grid>
+                    <StackPanel>
+                        <GroupBox Style="{StaticResource MahApps.Styles.GroupBox}">
+                            <StackPanel>
+
+                                <Metro:MetroTextBox Title=""/>
+
+                                <Metro:MetroButton>
+                                    
+                                </Metro:MetroButton>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </Grid>
+            </Metro:MetroMenuTabItem>-->
         </Metro:MetroMenuTabControl>
     </Grid>
 </Metro:MetroWindow>

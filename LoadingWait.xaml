@@ -14,14 +14,14 @@
     </UserControl.Resources>
 
     <Viewbox Width="200" Height="200"  
-            HorizontalAlignment="Center"  
-            VerticalAlignment="Center">
-        <Grid x:Name="LayoutRoot"   
-                Background="Transparent"  
+            HorizontalAlignment="Center"
+             
+            VerticalAlignment="Center" OpacityMask="White">
+        <Grid x:Name="LayoutRoot"  
                 ToolTip="Please wait...."  
                 HorizontalAlignment="Center"  
                 VerticalAlignment="Center">
-            <TextBlock Text="正在采样..."  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Foreground="#FFEC2299" FontWeight="Bold" />
+            <TextBlock Text="正在采样..."  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" Foreground="#FFEC2299" FontWeight="Bold"  Visibility="Collapsed"/>
             <Canvas RenderTransformOrigin="0.5,0.5"  
                     HorizontalAlignment="Center"  
                     VerticalAlignment="Center" Width="220"  

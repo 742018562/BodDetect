@@ -8,6 +8,12 @@ using System.Text;
 
 namespace BodDetect
 {
+    public enum SysStatus 
+    {
+        Sampling = 1,
+        Pause,
+        Complete
+    }
 
     public enum RecDataType
     {
@@ -20,7 +26,7 @@ namespace BodDetect
     }
 
 
-    public enum MemoryAreaCode 
+    public enum MemoryAreaCode
     {
         WR = 0X31,
         DR = 0X80,
@@ -28,16 +34,16 @@ namespace BodDetect
     }
 
 
-    public enum PumpValveType 
+    public enum PumpValveType
     {
         work = 1,
         pre = 2
     }
 
-    public enum PrePumpWork 
+    public enum PrePumpWork
     {
         preAbsorb = 1,
-        preDrain 
+        preDrain
     }
 
     class Tool
@@ -216,6 +222,42 @@ namespace BodDetect
             }
 
             return r;
+        }
+
+        public static byte[] ToBytes(int shorts)
+        {
+            byte[] r = new byte[2];
+
+            r[0] = (byte)(shorts >> 8);
+            r[1] = (byte)shorts;
+
+            return r;
+        }
+
+        public static bool CompareBytes(byte[] LeftData,byte[] RightData) 
+        {
+            if (LeftData == null || RightData == null) 
+            {
+                return false;
+            }
+
+            int leftCount = LeftData.Length;
+            int RightCount = RightData.Length;
+
+            if (leftCount != RightCount) 
+            {
+                return false;
+            }
+
+            for (int i = 0; i < leftCount; i++)
+            {
+                if (LeftData[i] != RightData[i]) 
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         #endregion
 

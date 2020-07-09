@@ -20,7 +20,7 @@ namespace BodDetect
     public partial class LoadingWait : UserControl
     {
         #region Data
-        private readonly DispatcherTimer animationTimer;
+        public readonly DispatcherTimer animationTimer;
         #endregion
 
         #region Constructor

@@ -1,251 +1,357 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.IO.Ports;
-//using System.Linq;
-//using System.Text;
-//using System.Threading;
-////using System.Threading.Tasks;
-//using System.Windows;
-//using System.Windows.Threading;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO.Ports;
+using System.Linq;
+using System.Text;
+using System.Threading;
+//using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
-//namespace BodDetect.Serialport
-//{
-//    public partial class MainWindow : Window
-//    {
-//        /// <summary>
-//        /// SerialPort对象
-//        /// </summary>
-//        private SerialPort serialPort = new SerialPort();
+namespace BodDetect
+{
+    public  class SerialPortHelp : IDisposable
+    {
+        /// <summary>
+        /// SerialPort对象
+        /// </summary>
+        private SerialPort serialPort = new SerialPort();
 
-//        // 需要一个定时器用来，用来保证即使缓冲区没满也能够及时将数据处理掉，防止一直没有到达
-//        // 阈值，而导致数据在缓冲区中一直得不到合适的处理。
-//        private DispatcherTimer checkTimer = new DispatcherTimer();
+        // 需要一个定时器用来，用来保证即使缓冲区没满也能够及时将数据处理掉，防止一直没有到达
+        // 阈值，而导致数据在缓冲区中一直得不到合适的处理。
+        private DispatcherTimer checkTimer = new DispatcherTimer();
 
-//        private void InitSerialPort()
-//        {
-//            serialPort.DataReceived += SerialPort_DataReceived;
-//            InitCheckTimer();
-//        }
+        //private void InitSerialPort()
+        //{
+        //    serialPort.DataReceived += SerialPort_DataReceived;
+        //    InitCheckTimer();
+        //}
 
-//        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-//        {
-//            throw new NotImplementedException();
-//        }
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
 
-//        private bool OpenPort()
-//        {
-//            bool flag = false;
-//            ConfigurePort();
+        public bool OpenPort()
+        {
+            bool flag = false;
+            ConfigurePort();
 
-//            try
-//            {
-//                serialPort.Open();
-//                serialPort.DiscardInBuffer();
-//                serialPort.DiscardOutBuffer();
-//                flag = true;
-//            }
-//            catch (Exception ex)
-//            {
+            try
+            {
+                serialPort.Open();
+                serialPort.DiscardInBuffer();
+                serialPort.DiscardOutBuffer();
+                flag = true;
+            }
+            catch (Exception ex)
+            {
 
-//            }
+            }
 
-//            return flag;
-//        }
+            return flag;
+        }
 
-//        private bool ClosePort()
-//        {
-//            bool flag = false;
+        public bool ClosePort()
+        {
+            bool flag = false;
 
-//            try
-//            {
-//                StopAutoSendDataTimer();
-//                progressBar.Visibility = Visibility.Collapsed;
-//                serialPort.Close();
-//                Information(string.Format("成功关闭端口{0}。", serialPort.PortName));
-//                flag = true;
-//            }
-//            catch (Exception ex)
-//            {
-//                Alert(ex.Message);
-//            }
+            try
+            {
+                serialPort.Close();
+                flag = true;
+            }
+            catch (Exception ex)
+            {
 
-//            return flag;
-//        }
+            }
 
-//        private void ConfigurePort()
-//        {
-//            serialPort.PortName = GetSelectedPortName();
-//            serialPort.BaudRate = GetSelectedBaudRate();
-//            serialPort.Parity = GetSelectedParity();
-//            serialPort.DataBits = GetSelectedDataBits();
-//            serialPort.StopBits = GetSelectedStopBits();
-//            serialPort.Encoding = GetSelectedEncoding();
-//        }
+            return flag;
+        }
 
-//        private string GetSelectedPortName()
-//        {
-//            return portsComboBox.Text;
-//        }
+        private void ConfigurePort()
+        {
+            serialPort.PortName = "COM1";
+            serialPort.BaudRate = 9600;
+            serialPort.Parity = Parity.None;
+            serialPort.DataBits = 8;
+            serialPort.StopBits = StopBits.One;
+        }
 
-//        private int GetSelectedBaudRate()
-//        {
-//            int baudRate = 9600;
-//            //string conv = baudRateComboBox.Text;
-//            int.TryParse(baudRateComboBox.Text, out baudRate);
-//            return baudRate;
-//        }
+        public void ReadBodFun(RegStatus regStatus, Int32 iRegCount) 
+        {
+            List<byte> Message = new List<byte>();
 
-//        private Parity GetSelectedParity()
-//        {
-//            string select = parityComboBox.Text;
+            byte Address = SerialPortConfig.Address;
+            byte FunCode = SerialPortConfig.Fun_Red_Code;
+            ushort temp = (ushort)regStatus;
+            byte RegHighAddress = (byte)(temp >> 8);
+            byte RegLowAddress = (byte)temp;
+            byte RegCountHighAddress =(byte)(iRegCount >> 8);
+            byte RegCountLowAddress = (byte)iRegCount;
 
-//            Parity p = Parity.None;
-//            if (select.Contains("Odd"))
-//            {
-//                p = Parity.Odd;
-//            }
-//            else if (select.Contains("Even"))
-//            {
-//                p = Parity.Even;
-//            }
-//            else if (select.Contains("Space"))
-//            {
-//                p = Parity.Space;
-//            }
-//            else if (select.Contains("Mark"))
-//            {
-//                p = Parity.Mark;
-//            }
+            Message.Add(Address);
+            Message.Add(FunCode);
+            Message.Add(RegHighAddress);
+            Message.Add(RegLowAddress);
+            Message.Add(RegCountHighAddress);
+            Message.Add(RegCountLowAddress);
 
-//            return p;
-//        }
+            byte[] Crc16 = CRC.CRC16(Message.ToArray());
 
-//        private int GetSelectedDataBits()
-//        {
-//            int dataBits = 8;
-//            int.TryParse(dataBitsComboBox.Text, out dataBits);
+            Message.Add(Crc16[1]);
+            Message.Add(Crc16[0]);
 
-//            return dataBits;
-//        }
+            SerialPortWrite(Message.ToArray());
+        }
 
-//        private StopBits GetSelectedStopBits()
-//        {
-//            StopBits stopBits = StopBits.None;
-//            string select = stopBitsComboBox.Text.Trim();
+        public void StartStandMeas() 
+        {
+            List<byte> Message = new List<byte>();
 
-//            if (select.Equals("1"))
-//            {
-//                stopBits = StopBits.One;
-//            }
-//            else if (select.Equals("1.5"))
-//            {
-//                stopBits = StopBits.OnePointFive;
-//            }
-//            else if (select.Equals("2"))
-//            {
-//                stopBits = StopBits.Two;
-//            }
+            byte Address = SerialPortConfig.Address;
+            byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            byte RegHighAddress = (int)RegCtrl.Start_Stand >> 8;
 
-//            return stopBits;
-//        }
+            ushort temp = (ushort)RegCtrl.Start_Stand;
+            byte RegLowAddress = (byte)temp;
+            byte DataHighAddress = 0X00;
+            byte DataLowAddress = 0x01;
 
-//        //private Encoding GetSelectedEncoding()
-//        //{
-//        //    string select = encodingComboBox.Text;
-//        //    Encoding enc = Encoding.Default;
+            Message.Add(Address);
+            Message.Add(FunCode);
+            Message.Add(RegHighAddress);
+            Message.Add(RegLowAddress);
+            Message.Add(DataHighAddress);
+            Message.Add(DataLowAddress);
 
-//        //    if (select.Contains("UTF-8"))
-//        //    {
-//        //        enc = Encoding.UTF8;
-//        //    }
-//        //    else if (select.Contains("ASCII"))
-//        //    {
-//        //        enc = Encoding.ASCII;
-//        //    }
-//        //    else if (select.Contains("Unicode"))
-//        //    {
-//        //        enc = Encoding.Unicode;
-//        //    }
+            byte[] Crc16 = CRC.CRC16(Message.ToArray());
 
-//        //    return enc;
-//        //}
+            Message.Add(Crc16[1]);
+            Message.Add(Crc16[0]);
 
-//        private bool SerialPortWrite(string textData)
-//        {
-//            SerialPortWrite(textData, false);
-//            return false;
-//        }
+            SerialPortWrite(Message.ToArray());
+        }
 
-//        private string appendContent = "\n";
-//        private bool SerialPortWrite(string textData, bool reportEnable)
-//        {
-//            if (serialPort == null)
-//            {
-//                return false;
-//            }
 
-//            if (serialPort.IsOpen == false)
-//            {
-//                return false;
-//            }
+        public void StartSampleMes() 
+        {
+            List<byte> Message = new List<byte>();
 
-//            try
-//            {
-//                //serialPort.DiscardOutBuffer();
-//                //serialPort.DiscardInBuffer();
+            byte Address = SerialPortConfig.Address;
+            byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            byte RegHighAddress = (int)RegCtrl.Start_Sample >> 8;
+            ushort temp = (ushort)RegCtrl.Start_Sample;
+            byte RegLowAddress = (byte)temp;
+            byte DataHighAddress = 0X00;
+            byte DataLowAddress = 0x01;
 
-//                if (sendMode == SendMode.Character)
-//                {
-//                    serialPort.Write(textData + appendContent);
-//                }
-//                else if (sendMode == SendMode.Hex)
-//                {
-//                    string[] grp = textData.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            Message.Add(Address);
+            Message.Add(FunCode);
+            Message.Add(RegHighAddress);
+            Message.Add(RegLowAddress);
+            Message.Add(DataHighAddress);
+            Message.Add(DataLowAddress);
 
-//                    List<byte> list = new List<byte>();
+            byte[] Crc16 = CRC.CRC16(Message.ToArray());
 
-//                    foreach (var item in grp)
-//                    {
-//                        list.Add(Convert.ToByte(item, 16));
-//                    }
+            Message.Add(Crc16[1]);
+            Message.Add(Crc16[0]);
 
-//                    serialPort.Write(list.ToArray(), 0, list.Count);
-//                }
+            SerialPortWrite(Message.ToArray());
+        }
 
-//            }
-//            catch (Exception ex)
-//            {
-//                return false;
-//            }
+        public bool SetSampleDil(ushort Dil) 
+        {
+           return SetData(Dil, RegCtrl.Sample_Dil);
+        }
 
-//            return true;
-//        }
 
-//        #region 定时器
-//        /// <summary>
-//        /// 超时时间为50ms
-//        /// </summary>
-//        private const int TIMEOUT = 50;
-//        private void InitCheckTimer()
-//        {
-//            // 如果缓冲区中有数据，并且定时时间达到前依然没有得到处理，将会自动触发处理函数。
-//            checkTimer.Interval = new TimeSpan(0, 0, 0, 0, TIMEOUT);
-//            checkTimer.IsEnabled = false;
-//            checkTimer.Tick += CheckTimer_Tick;
-//        }
+        public void SetStandDeep(ushort data) 
+        {
+            SetData(data, RegCtrl.Stand_Deep);
+        }
 
-//        private void StartCheckTimer()
-//        {
-//            checkTimer.IsEnabled = true;
-//            checkTimer.Start();
-//        }
+        public void StartWash() 
+        {
+            List<byte> Message = new List<byte>();
 
-//        private void StopCheckTimer()
-//        {
-//            checkTimer.IsEnabled = false;
-//            checkTimer.Stop();
-//        }
-//        #endregion
-//    }
-//}
+            byte Address = SerialPortConfig.Address;
+            byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            byte RegHighAddress = (int)RegCtrl.Stop_All >> 8;
+            ushort temp = (ushort)RegCtrl.Stop_All;
+            byte RegLowAddress = (byte)temp;
+            byte DataHighAddress = 0X00;
+            byte DataLowAddress = 0x01;
+
+            Message.Add(Address);
+            Message.Add(FunCode);
+            Message.Add(RegHighAddress);
+            Message.Add(RegLowAddress);
+            Message.Add(DataHighAddress);
+            Message.Add(DataLowAddress);
+
+            byte[] Crc16 = CRC.CRC16(Message.ToArray());
+
+            Message.Add(Crc16[1]);
+            Message.Add(Crc16[0]);
+
+            SerialPortWrite(Message.ToArray());
+        }
+
+
+        public bool SetData(ushort Data, RegCtrl regCtrl) 
+        {
+            try
+            {
+                List<byte> Message = new List<byte>();
+                byte[] RegCtrl = Tool.ToBytes(Convert.ToInt32(regCtrl));
+
+                byte Address = SerialPortConfig.Address;
+                byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+                byte RegHighAddress = RegCtrl[0];
+                byte RegLowAddress = RegCtrl[1];
+                byte DataHighAddress = (byte)(Data >> 8);
+                byte DataLowAddress = (byte)Data;
+
+                Message.Add(Address);
+                Message.Add(FunCode);
+                Message.Add(RegHighAddress);
+                Message.Add(RegLowAddress);
+                Message.Add(DataHighAddress);
+                Message.Add(DataLowAddress);
+
+                byte[] Crc16 = CRC.CRC16(Message.ToArray());
+
+                Message.Add(Crc16[1]);
+                Message.Add(Crc16[0]);
+
+                SerialPortWrite(Message.ToArray());
+
+                byte[] revData = ReadData();
+
+                if (revData == null)
+                {
+                    return false;
+                }
+
+                return Tool.CompareBytes(revData, Message.ToArray());
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+                
+            }
+
+
+        }
+
+        private bool SerialPortWrite(byte[] textData)
+        {
+            if (serialPort == null)
+            {
+                return false;
+            }
+
+            if (serialPort.IsOpen == false)
+            {
+                return false;
+            }
+
+            try
+            {
+               serialPort.Write(textData, 0, textData.Length);
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public byte[] ReadData()
+        {
+            int bytesToRead = serialPort.BytesToRead;
+            byte[] tempBuffer = new byte[bytesToRead];
+            try
+            {
+                int count = serialPort.Read(tempBuffer, 0, bytesToRead);
+
+                if (count == 0) 
+                {
+                    return null;
+                }
+
+                return tempBuffer;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+        }
+
+
+        public float BodCurrentData()
+        {
+            ReadBodFun(RegStatus.CurrentBod, 3);
+
+            byte[] data = ReadData();
+
+            if (data == null) 
+            {
+                return 0;
+            }
+
+            int iLength = data.Length;
+
+            if (iLength != 11) 
+            {
+                return 0;
+            }
+
+            int iCount = Convert.ToInt32(data[2]);
+
+            byte[] BodValue = { data[3],data[4],data[5],data[6]};
+            float Value =  Tool.ToInt32(BodValue)[0] ;
+
+            return Value / 1000;
+        }
+
+        public void Dispose()
+        {
+            ClosePort();
+        }
+
+        #region 定时器
+        ///// <summary>
+        ///// 超时时间为50ms
+        ///// </summary>
+        //private const int TIMEOUT = 50;
+        //private void InitCheckTimer()
+        //{
+        //    // 如果缓冲区中有数据，并且定时时间达到前依然没有得到处理，将会自动触发处理函数。
+        //    checkTimer.Interval = new TimeSpan(0, 0, 0, 0, TIMEOUT);
+        //    checkTimer.IsEnabled = false;
+        //    checkTimer.Tick += CheckTimer_Tick;
+        //}
+
+        //private void StartCheckTimer()
+        //{
+        //    checkTimer.IsEnabled = true;
+        //    checkTimer.Start();
+        //}
+
+        //private void StopCheckTimer()
+        //{
+        //    checkTimer.IsEnabled = false;
+        //    checkTimer.Stop();
+        //}
+        #endregion
+    }
+}
