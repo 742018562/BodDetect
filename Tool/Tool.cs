@@ -102,7 +102,7 @@ namespace BodDetect
                 //return SetUnDock(); //不知SetUnDock()是什么，所以直接注释返回1
                 return 1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return 255;
             }

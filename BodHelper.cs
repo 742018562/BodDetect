@@ -418,7 +418,7 @@ namespace BodDetect
                 byte[] wValue = { 0X01 };
                 success = finsClient.WriteBitData(0, bitAdress, wValue, PLCConfig.Wr);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
 
                 return false;
@@ -448,7 +448,7 @@ namespace BodDetect
                 byte[] wValue = { 0X01 };
                 success = finsClient.WriteBitData(0, bitAdress, wValue, PLCConfig.Wr);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 return false;
@@ -567,7 +567,7 @@ namespace BodDetect
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 return false;
@@ -985,29 +985,18 @@ namespace BodDetect
 
         }
 
-        public void SerialportClose() 
-        {
-            try
-            {
-                if (serialPortHelp != null) 
-                {
-                    serialPortHelp.Dispose();
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
+                    timer.Dispose();
                     ClosePLC();
-                    SerialportClose();
+                    if (serialPortHelp != null)
+                    {
+                        serialPortHelp.Dispose();
+                    }
                     manualevent.Dispose();
                 }
 

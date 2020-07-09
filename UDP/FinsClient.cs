@@ -322,6 +322,7 @@ namespace BodDetect.UDP
         public void Dispose()
         {
             _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource.Dispose();
             _readerThread?.Join();
             _udpClient?.Dispose();
         }

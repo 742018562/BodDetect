@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Resources;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace BodDetect.UDP
 {
+    [SerializableAttribute]
     public class FinsException : Exception
     {
         public FinsException()

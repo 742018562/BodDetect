@@ -46,7 +46,7 @@ namespace BodDetect
                 serialPort.DiscardOutBuffer();
                 flag = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -63,7 +63,7 @@ namespace BodDetect
                 serialPort.Close();
                 flag = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -240,7 +240,7 @@ namespace BodDetect
                 return Tool.CompareBytes(revData, Message.ToArray());
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
                 
@@ -266,7 +266,7 @@ namespace BodDetect
                serialPort.Write(textData, 0, textData.Length);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -289,7 +289,7 @@ namespace BodDetect
 
                 return tempBuffer;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -325,7 +325,7 @@ namespace BodDetect
 
         public void Dispose()
         {
-            ClosePort();
+            serialPort.Dispose();
         }
 
         #region 定时器
