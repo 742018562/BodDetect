@@ -17,65 +17,91 @@ namespace BodDetect
 
         public SysStatusMsg sysStatusMsg;
 
-        private ICommand _firstPageCommand;
-
-        public ICommand FirstPageCommand
+        private float _bodData;
+        public float BodData 
         {
             get
             {
-                return _firstPageCommand;
+                return _bodData;
             }
-
             set
             {
-                _firstPageCommand = value;
+                if (_bodData != value)
+                {
+                    _bodData = value;
+                    OnPropertyChanged("BodData");
+                }
             }
         }
 
-        private ICommand _previousPageCommand;
-
-        public ICommand PreviousPageCommand
+        private float _codData;
+        public float CodData 
         {
             get
             {
-                return _previousPageCommand;
+                return _codData;
             }
-
             set
             {
-                _previousPageCommand = value;
+                if (_codData != value)
+                {
+                    _codData = value;
+                    OnPropertyChanged("CodData");
+                }
             }
         }
 
-        private ICommand _nextPageCommand;
-
-        public ICommand NextPageCommand
+        private float _phData;
+        public float PHData 
         {
             get
             {
-                return _nextPageCommand;
+                return _phData;
             }
-
             set
             {
-                _nextPageCommand = value;
+                if (_phData != value)
+                {
+                    _phData = value;
+                    OnPropertyChanged("PHData");
+                }
             }
         }
 
-        private ICommand _lastPageCommand;
-
-        public ICommand LastPageCommand
+        private float _temperatureData;
+        public float TemperatureData 
         {
             get
             {
-                return _lastPageCommand;
+                return _temperatureData;
             }
-
             set
             {
-                _lastPageCommand = value;
+                if (_temperatureData != value)
+                {
+                    _temperatureData = value;
+                    OnPropertyChanged("TemperatureData");
+                }
             }
         }
+
+        private float _doData;
+        public float DoData
+        {
+            get
+            {
+                return _doData;
+            }
+            set
+            {
+                if (_doData != value)
+                {
+                    _doData = value;
+                    OnPropertyChanged("DoData");
+                }
+            }
+        }
+
 
         private int _pageSize;
 
@@ -91,6 +117,37 @@ namespace BodDetect
                 {
                     _pageSize = value;
                     OnPropertyChanged("PageSize");
+                }
+            }
+        }
+
+        private float _uv254Data;
+        public float Uv254Data
+        {
+            get => _uv254Data;
+            set
+            {
+                if (_uv254Data != value)
+                {
+                    _uv254Data = value;
+                    OnPropertyChanged("Uv254Data");
+
+                }
+
+            }
+        }
+
+        private float _turbidityData;
+        public float TurbidityData
+        {
+            get => _turbidityData;
+            set
+            {
+                if (_turbidityData != value)
+                {
+                    _turbidityData = value;
+                    OnPropertyChanged("TurbidityData");
+
                 }
             }
         }
@@ -151,6 +208,69 @@ namespace BodDetect
                 }
             }
         }
+
+
+
+        private ICommand _firstPageCommand;
+
+        public ICommand FirstPageCommand
+        {
+            get
+            {
+                return _firstPageCommand;
+            }
+
+            set
+            {
+                _firstPageCommand = value;
+            }
+        }
+
+        private ICommand _previousPageCommand;
+
+        public ICommand PreviousPageCommand
+        {
+            get
+            {
+                return _previousPageCommand;
+            }
+
+            set
+            {
+                _previousPageCommand = value;
+            }
+        }
+
+        private ICommand _nextPageCommand;
+
+        public ICommand NextPageCommand
+        {
+            get
+            {
+                return _nextPageCommand;
+            }
+
+            set
+            {
+                _nextPageCommand = value;
+            }
+        }
+
+        private ICommand _lastPageCommand;
+
+        public ICommand LastPageCommand
+        {
+            get
+            {
+                return _lastPageCommand;
+            }
+
+            set
+            {
+                _lastPageCommand = value;
+            }
+        }
+
 
         private ObservableCollection<FakeDatabase> _fakeSoruce;
 

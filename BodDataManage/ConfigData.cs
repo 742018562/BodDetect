@@ -46,6 +46,16 @@ namespace BodDetect.BodDataManage
         /// </summary>
         public int WarmUpTime { get; set; }
 
+        /// <summary>
+        /// 润洗次数
+        /// </summary>
+        public int WashTimes { get; set; }
+
+        /// <summary>
+        /// 五餐传感器和BOD采集比例
+        /// </summary>
+        public int SampleScale { get; set; }
+
 
         public int SpaceHour { get; set; }
 

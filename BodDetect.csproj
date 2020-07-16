@@ -80,6 +80,7 @@
     <None Remove="Resources\stard.png" />
     <None Remove="Resources\store.png" />
     <None Remove="Resources\tabIcon.png" />
+    <None Remove="Resources\tingzhi.png" />
     <None Remove="Resources\titleMuenIcon.png" />
     <None Remove="Resources\today.png" />
     <None Remove="Resources\up.png" />
@@ -160,6 +161,7 @@
     <Resource Include="Resources\stard.png" />
     <Resource Include="Resources\store.png" />
     <Resource Include="Resources\tabIcon.png" />
+    <Resource Include="Resources\tingzhi.png" />
     <Resource Include="Resources\titleMuenIcon.png" />
     <Resource Include="Resources\today.png" />
     <Resource Include="Resources\up.png" />
@@ -174,10 +176,6 @@
     <Resource Include="Resources\水温1.png" />
     <Resource Include="Resources\浊度.png" />
     <Resource Include="Resources\溶解氧.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Control\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -46,6 +46,18 @@ namespace BodDetect
         preDrain
     }
 
+    public enum ProcessType 
+    {
+        init,
+        SampleWater,
+        StandDil,
+        SampleDil,
+        BodStand,
+        BodSample,
+        DrainEmpty,
+        Waitding
+    }
+
     class Tool
     {
 

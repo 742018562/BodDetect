@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,16 +19,18 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Arthas.Controls;
+using Arthas.Utility.Media;
 using BodDetect.BodDataManage;
 using BodDetect.Event;
 using BodDetect.UDP;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace BodDetect
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MetroWindow, IDisposable
+    public partial class MainWindow : MahApps.Metro.Controls.MetroWindow, IDisposable
     {
         private Dictionary<byte, MetroProgressBar> metroProgressBars = new Dictionary<byte, MetroProgressBar>();
 
@@ -48,14 +51,14 @@ namespace BodDetect
         DispatcherTimer RunTimer = new DispatcherTimer();
 
 
+        private BodHelper bodHelper;
         public BodData bodData = new BodData();
 
-        private BodHelper bodHelper;
+        public ProgressDialogController progressDialog;
 
+        private CancellationTokenSource StopCts = new CancellationTokenSource();
 
         MainWindow_Model mainWindow_Model = new MainWindow_Model();
-
-        Thread BodDetectRun;
 
         ConfigData configData = new ConfigData();
         private bool disposedValue;
@@ -102,10 +105,9 @@ namespace BodDetect
 
             init();
 
-
+            this.DataContext = mainWindow_Model;
 
         }
-
 
         public void init()
         {
@@ -126,7 +128,6 @@ namespace BodDetect
                     HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
                 }
 
-
                 logList.Items.Add("test");
 
                 string ip = IP_textbox.Text;
@@ -134,27 +135,24 @@ namespace BodDetect
                 string[] value = ip.Split('.');
                 if (value.Length < 4)
                 {
-                    MessageBox.Show("异常ip!");
+                    this.ShowMessageAsync("Error","异常ip!");
                 }
-
                 int port = Convert.ToInt32(Port_TextBox.Text,10);
 
                 bodHelper = new BodHelper(ip, port);
-                bool success = bodHelper.ConnectPlc();
-
-
+                bodHelper.Init();
 
                 bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
                 bodHelper.refreshStaus = new BodHelper.RefreshStaus(RefreshStatus);
 
                 bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
-
+                bodHelper.refreshProcessStatus = new BodHelper.RefreshProcessStatus(RefreshProcessStatus);
 
                 bodHelper.mainWindow = this;
             }
             catch (Exception)
             {
-                MessageBox.Show("连接PLC异常!");
+                this.ShowMessageAsync("Error", "连接PLC异常!");
             }
         }
 
@@ -207,50 +205,33 @@ namespace BodDetect
                 string[] value = ip.Split('.');
                 if (value.Length < 4)
                 {
-                    MessageBox.Show("异常ip!");
+                     this.ShowMessageAsync("Error", "异常ip!");
                 }
 
                 int port = Convert.ToInt32(Port_TextBox.Text);
-
-                bodHelper = new BodHelper(ip, port);
                 bool success = bodHelper.ConnectPlc();
 
-                bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
-                bodHelper.refreshStaus = new BodHelper.RefreshStaus(RefreshStatus);
-
-                bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
-                bodHelper.mainWindow = this;
-
-                
-
-                //bodData.TemperatureData = (float)16.0;
-                //bodData.DoData = (float)4.3;
-                //bodData.TurbidityData = (float)101;
-                //bodData.PHData = (float)7.20;
-                //bodData.CodData = 250;
-                //bodData.Bod = 150;
-                //bodData.Uv254Data = 200;
-                //RefreshData(bodData);
-
+                if (success) 
+                {
+                     this.ShowMessageAsync("与PLC通讯", "连接成功！",MessageDialogStyle.Affirmative);
+                }               
             }
             catch (Exception)
             {
-                MessageBox.Show("连接PLC异常!");
+                this.ShowMessageAsync("Error", "连接PLC异常!");
             }
 
         }
 
         private void RefreshData(BodData data)
         {
-            DOTem.Content = data.Uv254Data.ToString();
-            DO.Content = data.DoData.ToString();
-            PH.Content = data.PHData.ToString();
-            COD.Content = data.CodData.ToString();
-            PHTem.Content = data.TemperatureData.ToString();
-            Turbidity.Content = data.TurbidityData.ToString();
-
-            BOD.Content = data.Bod.ToString();
-
+            mainWindow_Model.BodData = data.Bod;
+            mainWindow_Model.CodData = data.CodData;
+            mainWindow_Model.DoData = data.DoData;
+            mainWindow_Model.PHData = data.PHData;
+            mainWindow_Model.TemperatureData = data.TemperatureData;
+            mainWindow_Model.TurbidityData = data.TurbidityData;
+            mainWindow_Model.Uv254Data = data.Uv254Data;
         }
 
         private void MetroButton_Click_2(object sender, RoutedEventArgs e)
@@ -300,7 +281,7 @@ namespace BodDetect
         //    BodDectThread.Start();
         //}
 
-
+        #region 委托处理
         public void RefeshProcess(DelegateParam param)
         {
             try
@@ -359,7 +340,6 @@ namespace BodDetect
 
 
         //}
-
 
         public void RefeshWaterProcessEvent(object sender, EventArgs e)
         {
@@ -459,6 +439,63 @@ namespace BodDetect
             WaterSampleView.Value++;
         }
 
+        public void RefreshStatus(SysStatus sysStatus)
+        {
+            switch (sysStatus)
+            {
+                case SysStatus.Sampling:
+                    start.IsChecked = true;
+                    break;
+                case SysStatus.Pause:
+                    start.IsChecked = false;
+                    break;
+                case SysStatus.Complete:
+                    start.IsChecked = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        public void RefreshProcessStatus(ProcessType processType) 
+        {
+            string text = "系统运转状态：";
+            switch (processType)
+            {
+                case ProcessType.init:
+                    text += "正在初始化...";
+                    break;
+                case ProcessType.SampleWater:
+                    text += "正在取水样...";
+                    break;
+                case ProcessType.StandDil:
+                    text += "正在稀释标定液...";
+                    break;
+                case ProcessType.SampleDil:
+                    text += "正在稀释样液...";
+                    break;
+                case ProcessType.BodStand:
+                    text += "正在标定BOD...";
+                    break;
+                case ProcessType.BodSample:
+                    text += "正在测量BOD...";
+                    break;
+                case ProcessType.DrainEmpty:
+                    text += "测量完成,正在排空溶液...";
+                    break;
+                case ProcessType.Waitding:
+                    text += "系统空闲...";
+                    break;
+                default:
+                    break;
+            }
+
+            SysStaus.Content = text;
+        }
+
+        #endregion
+
         //private void StoreValve_Checked(object sender, RoutedEventArgs e)
         //{
         //    MetroSwitch a = (MetroSwitch)sender;
@@ -506,7 +543,6 @@ namespace BodDetect
 
         //}
 
-
         private void Valve_Checked(object sender, RoutedEventArgs e)
         {
             try
@@ -520,8 +556,7 @@ namespace BodDetect
             catch (Exception)
             {
                 Valve.IsChecked = false;
-                MessageBox.Show(" 送样(样液)阀门打开失败.");
-
+                this.ShowMessageAsync("Error", "送样(样液)阀门打开失败.");
             }
         }
 
@@ -538,8 +573,7 @@ namespace BodDetect
             catch (Exception)
             {
                 NormalValve.IsChecked = false;
-                MessageBox.Show(" 送样(标液)阀门打开失败.");
-
+                this.ShowMessageAsync("Error", "送样(标液)阀门打开失败.");
             }
         }
 
@@ -552,7 +586,8 @@ namespace BodDetect
 
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     valve.IsChecked = false;
                     return;
                 }
@@ -577,7 +612,7 @@ namespace BodDetect
             catch (Exception)
             {
                 StoreValve.IsChecked = false;
-                MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
+                this.ShowMessageAsync("Error", "阀门打开失败.");
             }
         }
 
@@ -587,7 +622,8 @@ namespace BodDetect
             {
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作..");
+
                     return;
                 }
 
@@ -595,13 +631,14 @@ namespace BodDetect
 
                 if (CheckedVavle == null)
                 {
-                    MessageBox.Show(" 请打开任意一个阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "只能打开一个阀门,请关闭阀门.");
+
                     return;
                 }
 
                 if (CheckedVavle.Count > 2)
                 {
-                    MessageBox.Show(" 只能打开一个阀门,请关闭阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "只能打开一个阀门,请关闭阀门.");
                     return;
                 }
 
@@ -625,7 +662,8 @@ namespace BodDetect
             {
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     return;
                 }
 
@@ -633,13 +671,13 @@ namespace BodDetect
 
                 if (CheckedVavle == null)
                 {
-                    MessageBox.Show(" 请打开任意一个阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "请打开任意一个阀门.");
                     return;
                 }
 
                 if (CheckedVavle.Count > 2)
                 {
-                    MessageBox.Show(" 只能打开一个阀门,请关闭阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "只能打开一个阀门,请关闭阀门.");
                     return;
                 }
 
@@ -658,7 +696,8 @@ namespace BodDetect
             {
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     return;
                 }
 
@@ -666,13 +705,15 @@ namespace BodDetect
 
                 if (CheckedVavle == null)
                 {
-                    MessageBox.Show(" 请打开任意一个阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "请打开任意一个阀门.");
+
                     return;
                 }
 
                 if (CheckedVavle.Count > 2)
                 {
-                    MessageBox.Show(" 只能打开一个阀门,请关闭阀门.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "只能打开一个阀门,请关闭阀门.");
+
                     return;
                 }
 
@@ -692,7 +733,8 @@ namespace BodDetect
 
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     return;
                 }
 
@@ -717,7 +759,8 @@ namespace BodDetect
 
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     return;
                 }
 
@@ -741,7 +784,8 @@ namespace BodDetect
             {
                 if (bodHelper.IsSampling == true)
                 {
-                    MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Error", "现在正在采样过程中,禁止相关操作.");
+
                     return;
                 }
 
@@ -772,7 +816,8 @@ namespace BodDetect
                 string cap = PunpStand.Text;
                 if (string.IsNullOrEmpty(cap))
                 {
-                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                    this.ShowMessageAsync("Tips", "请输入抽取容量.");
+
                 }
 
                 int capData = Convert.ToInt32(cap);
@@ -815,7 +860,6 @@ namespace BodDetect
 
             }
         }
-
 
         private void PumpProcess(List<byte[]> data, List<ushort> address, PunpCapType punpCapType)
         {
@@ -1515,6 +1559,7 @@ namespace BodDetect
 
             //this.Topmost = true;
 
+            this.Background = new SolidColorBrush( Color.FromRgb((byte)255, (byte)255, (byte)255));
         }
 
         private void start_Click(object sender, RoutedEventArgs e)
@@ -1532,21 +1577,30 @@ namespace BodDetect
 
         }
 
-
-        public void BodRun(object sender, EventArgs e)
+        public async void BodRun(object sender, EventArgs e)
         {
-            if (BodDetectRun != null && BodDetectRun.IsAlive)
-            {
-                BodDetectRun.Abort();
-            }
+            //try
+            //{
 
-            BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
-            BodDetectRun.IsBackground = true;
-            BodDetectRun.Start();
+            //    if (BodDetectRun != null && BodDetectRun.IsAlive)
+            //    {
+            //        BodDetectRun.Abort();
+            //    }
 
+            //}
+            //catch (Exception)
+            //{
+
+            //}
+            await Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
+            
+
+
+            //BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
+            //BodDetectRun.IsBackground = true;
+            //BodDetectRun.Start();
 
         }
-
 
         public void AbortBod(object sender, RoutedEventArgs e)
         {
@@ -1557,12 +1611,14 @@ namespace BodDetect
         {
             try
             {
-                if (BodDetectRun == null || !BodDetectRun.IsAlive || !bodHelper.IsSampling)
+                int SpaceHour = Convert.ToInt32(sampleSpac.Text);
+
+                if (!bodHelper.IsSampling)
                 {
 
                     initConfig();
                     RunTimer.Tick += BodRun;
-                    RunTimer.Interval = new TimeSpan(0, configData.SpaceHour, 0, 0, 0);
+                    RunTimer.Interval = new TimeSpan(0, SpaceHour, 0);
                     RunTimer.Start();
 
                     BodRun(sender, e);
@@ -1573,7 +1629,6 @@ namespace BodDetect
                 {
                     bodHelper.manualevent.Set();
                     _loading.Visibility = Visibility.Collapsed;
-
                 }
             }
             catch (Exception)
@@ -1583,28 +1638,31 @@ namespace BodDetect
 
         }
 
-
         public void initConfig()
         {
             if (string.IsNullOrEmpty(sampleSpac.Text) ||
                 string.IsNullOrEmpty(InietTime.Text) ||
                 string.IsNullOrEmpty(PrecipitateTime.Text) ||
                 string.IsNullOrEmpty(EmptyTime.Text) ||
-                string.IsNullOrEmpty(WarmUpTime.Text))
+                string.IsNullOrEmpty(WarmUpTime.Text) ||
+                string.IsNullOrEmpty(WashTimes.Text) ||
+                string.IsNullOrEmpty(SampleScale.Text))
             {
                 MessageBox.Show(" 流程配置有参数未设置,请设置后再启动.", "提示", MessageBoxButton.OK);
             }
 
 
-            configData.SampDil = Convert.ToInt32(sampleSpac.Text);
-            configData.SampVol = Convert.ToInt32(StandVol.Text);
+            configData.SampDil = Convert.ToInt32(SampDil.Text);
+            configData.SampVol = Convert.ToInt32(SampVol.Text);
             configData.StandDil = Convert.ToInt32(StandDil.Text);
-            configData.StandVol = Convert.ToInt32(SampVol.Text);
-            configData.EmptyTime = Convert.ToInt32(SampDil.Text);
+            configData.StandVol = Convert.ToInt32(StandVol.Text);
+            configData.EmptyTime = Convert.ToInt32(EmptyTime.Text);
             configData.InietTime = Convert.ToInt32(InietTime.Text);
             configData.PrecipitateTime = Convert.ToInt32(PrecipitateTime.Text);
-            configData.SpaceHour = Convert.ToInt32(EmptyTime.Text);
+            configData.SpaceHour = Convert.ToInt32(sampleSpac.Text);
             configData.WarmUpTime = Convert.ToInt32(WarmUpTime.Text);
+            configData.WashTimes = Convert.ToInt32(WashTimes.Text);
+            configData.SampleScale = Convert.ToInt32(SampleScale.Text);
 
             bodHelper.configData = configData;
         }
@@ -1614,7 +1672,7 @@ namespace BodDetect
             string path = @"pack://application:,,,/Resources/zanting.png";
             BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
             BodRunImg.Source = image;
-
+            _loading.Visibility = Visibility.Collapsed;
             RunStatuLab.Content = "暂停运行";
         }
 
@@ -1623,39 +1681,58 @@ namespace BodDetect
             string path = @"pack://application:,,,/Resources/icon_player.png";
             BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
             BodRunImg.Source = image;
+            _loading.Visibility = Visibility.Visible;
 
             RunStatuLab.Content = "开始运行";
         }
 
-
-
-        private void restart_Click(object sender, RoutedEventArgs e)
+        private async void restart_Click(object sender, RoutedEventArgs e)
         {
             _loading.Visibility = Visibility.Visible;
+            StopCts.Cancel();
+            progressDialog = await this.ShowProgressAsync("Please wait...", "正在重置运行流程,请稍等...",true);
+
+            await Task.Run(StopBod);
+        }
+
+        public async void StopBod() 
+        {
+            Thread.Sleep(10000);
+            while (true) 
+            {
+                if (!bodHelper.IsSampling) 
+                {
+                    break;
+                }
+            }
+            
+            progressDialog.SetMessage("运行流程重置完成...");
+            Thread.Sleep(2000);
+            await  progressDialog.CloseAsync();
         }
 
         private void DrainEmpty_Click(object sender, RoutedEventArgs e)
         {
-            byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
+            //byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
 
-            List<byte[]> data = new List<byte[]>();
-            byte[] tem = { PLCConfig.SampleValveBit };
-            byte[] tem1 = { PLCConfig.AirValveBit };
-            data.Add(tem);
-            data.Add(tem1);
+            //List<byte[]> data = new List<byte[]>();
+            //byte[] tem = { PLCConfig.SampleValveBit };
+            //byte[] tem1 = { PLCConfig.AirValveBit };
+            //data.Add(tem);
+            //data.Add(tem1);
 
-            List<ushort> Address = new List<ushort>();
-            Address.Add(PLCConfig.Valve2Address);
-            Address.Add(PLCConfig.Valve2Address);
+            //List<ushort> Address = new List<ushort>();
+            //Address.Add(PLCConfig.Valve2Address);
+            //Address.Add(PLCConfig.Valve2Address);
 
-            foreach (var item in Valves)
-            {
-                data[0][0] = item;
-                for (int i = 0; i < 10; i++)
-                {
-                    PumpProcess(data, Address, PunpCapType.fiveml);
-                }
-            }
+            //foreach (var item in Valves)
+            //{
+            //    data[0][0] = item;
+            //    for (int i = 0; i < 10; i++)
+            //    {
+            //        PumpProcess(data, Address, PunpCapType.fiveml);
+            //    }
+            //}
 
             byte[] data1 = { PLCConfig.CisternValveBit };
             bodHelper.ValveControl(PLCConfig.Valve1Address, data1);
@@ -1757,26 +1834,6 @@ namespace BodDetect
 
         }
 
-
-        public void RefreshStatus(SysStatus sysStatus)
-        {
-            switch (sysStatus)
-            {
-                case SysStatus.Sampling:
-                    start.IsChecked = true;
-                    break;
-                case SysStatus.Pause:
-                    start.IsChecked = false;
-                    break;
-                case SysStatus.Complete:
-                    start.IsChecked = false;
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:指定 IFormatProvider", Justification = "<挂起>")]
         private void GetBodData_Click(object sender, RoutedEventArgs e)
         {
@@ -1845,6 +1902,7 @@ namespace BodDetect
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:指定 IFormatProvider", Justification = "<挂起>")]
         private void UpdataData_Click(object sender, RoutedEventArgs e)
         {
+
             byte[] Temp = { PLCConfig.SensorPower };
             bool success = bodHelper.ValveControl(100, Temp);
             if (!success)
@@ -1858,43 +1916,64 @@ namespace BodDetect
             float[] PHData = bodHelper.GetPHData();
             ushort[] CODData = bodHelper.GetCodData();
 
+            mainWindow_Model.TemperatureData = DoDota[0];
+            mainWindow_Model.DoData = DoDota[1];
+            mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
+            mainWindow_Model.PHData = PHData[1];
+            mainWindow_Model.CodData = (float)CODData[0] / 100;
+            mainWindow_Model.Uv254Data = bodData.Uv254Data;
 
-
-            bodData.TemperatureData = DoDota[0]; 
-            bodData.DoData = DoDota[1];
-            bodData.TurbidityData = (float)TurbidityData[0] / 1000;
-            bodData.PHData = PHData[1];
-            bodData.CodData = (float)CODData[0] / 100;
-
-
-            DOTem.Content = bodData.Uv254Data.ToString("F2");
-
-            DO.Content = bodData.DoData.ToString("F1");
-            PH.Content = bodData.PHData.ToString();
-            COD.Content = bodData.CodData.ToString();
-            PHTem.Content = bodData.TemperatureData.ToString();
-            Turbidity.Content = bodData.TurbidityData.ToString();
-
-            BOD.Content = bodData.Bod.ToString();
         }
+
+        private async void FetchWater_Click(object sender, RoutedEventArgs e)
+        {
+             //LoginDialogSettings loginDialogSettings = new LoginDialogSettings();
+             //await this.ShowLoginAsync();
+             
+            bodHelper.WashCistern(configData.WashTimes);
+
+            byte[] data = { PLCConfig.CisternPumpBit };
+            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+            if (!success)
+            {
+
+                await this.ShowMessageAsync("This is the title", "PLC 通讯失败。");
+            }
+        }
+
+
+        private async void MeasureBod_Click(object sender, RoutedEventArgs e) 
+        {
+            await Task.Factory.StartNew(()=> bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
+        }
+
+        #region 程序关闭处理
 
         private void MetroWindow_Closed(object sender, EventArgs e)
         {
-            timer.Stop();
-            BodTimer.Stop();
-            WaterSampleTimer.Stop();
-            RunTimer.Stop();
-            _loading.animationTimer.Stop();
-            if (BodDetectRun != null) 
+            try
             {
-                BodDetectRun.Abort();
+                bodHelper.refreshProcess -= new BodHelper.RefreshUI(RefeshProcess);
+                bodHelper.refreshStaus -= new BodHelper.RefreshStaus(RefreshStatus);
+
+                bodHelper.refreshData -= new BodHelper.RefreshData(RefreshData);
+                bodHelper.refreshProcessStatus -= new BodHelper.RefreshProcessStatus(RefreshProcessStatus);
+
+                timer.Stop();
+                BodTimer.Stop();
+                WaterSampleTimer.Stop();
+                RunTimer.Stop();
+                _loading.animationTimer.Stop();
+
+                this.Dispose();
+                System.Environment.Exit(0);
+
+            }
+            catch (Exception)
+            {
 
             }
 
-            //DispatcherTimer timer = new DispatcherTimer();
-            //DispatcherTimer BodTimer = new DispatcherTimer();
-            //DispatcherTimer WaterSampleTimer = new DispatcherTimer();
-            //DispatcherTimer RunTimer = new DispatcherTimer();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -1926,5 +2005,7 @@ namespace BodDetect
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion
     }
 }
