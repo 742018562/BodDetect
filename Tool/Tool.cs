@@ -164,7 +164,7 @@ namespace BodDetect
                 floats[1] = data[i * 4 + 1];
                 floats[2] = data[i * 4 + 2];
                 floats[3] = data[i * 4 + 3];
-
+                Array.Reverse(floats);   //反转数组转成大端。
                 r[i] = BitConverter.ToSingle(floats, 0);
                 //r[i] = data[i * 2 + 1]; 
                 //r[i] = (ushort)(r[i] | data[i * 2] << 8);
@@ -184,8 +184,6 @@ namespace BodDetect
                 floats[0] = data[i * 4 + 3];
 
                 r[i] = BitConverter.ToSingle(floats, 0);
-                //r[i] = data[i * 2 + 1]; 
-                //r[i] = (ushort)(r[i] | data[i * 2] << 8);
             }
             return r;
         }
