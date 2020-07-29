@@ -27,12 +27,15 @@ namespace BodDetect
             }
         }
 
+        private List<HisDatabase> AllHisData;
+
         public override void init()
         {
             CurrentPage = 1;
             PageSize = 10;
+            AllHisData = GetHisDatabases();
+            _source = AllHisData.ToList<object>();
 
-            _source = GetHisDatabases().ToList<object>();
             _fakeSoruce = new ObservableCollection<HisDatabase>();
 
             int index = _source.Count % PageSize;
@@ -72,7 +75,9 @@ namespace BodDetect
 
         public void AddData(HisDatabase hisDatabase) 
         {
+            hisDatabase.Id = AllHisData.Count;
             _source.Add(hisDatabase);
+            AllHisData.Add(hisDatabase);
             int LastTotalPage = TotalPage;
 
             int index = _source.Count % PageSize;
@@ -84,7 +89,6 @@ namespace BodDetect
             {
                 TotalPage = _source.Count / PageSize;
             }
-
 
             if (CurrentPage != LastTotalPage) 
             {
@@ -103,6 +107,41 @@ namespace BodDetect
                 }
 
             }
+        }
+
+        public void UpdateDataByDate(DateTime? StartDate, DateTime? EndDate) 
+        {
+            int StartIndex = 0;
+            int EndIndex = 0;
+
+            List<HisDatabase> hisDatabasesList = AllHisData.OrderBy(t=>t.Id).ToList();
+
+            EndIndex = hisDatabasesList.Count -1;
+
+            if (StartDate != null) 
+            {
+                var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)StartDate) >= 0);
+                if (temp != null) 
+                {
+                    StartIndex = temp.Id;
+                }
+
+            }
+
+            if (EndDate != null) 
+            {
+                var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)EndDate) <= 0);
+                if (temp != null)
+                {
+                    EndIndex = temp.Id;
+                }
+            }
+
+            List<object> valueList = AllHisData.GetRange(StartIndex, EndIndex - StartIndex + 1).ToList<object>();
+
+            _source = valueList;
+
+            FirstPageAction(); 
         }
 
     }

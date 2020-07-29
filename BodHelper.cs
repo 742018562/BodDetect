@@ -180,7 +180,7 @@ namespace BodDetect
 
         }
 
-        public ushort[] GetCodData()
+        public ushort[] GetUv254Data()
         {
             if (finsClient == null)
             {
@@ -202,6 +202,32 @@ namespace BodDetect
             Thread.Sleep(3000);
             bitAdress = 0X00;
             ushort[] Data = finsClient.ReadData(PLCConfig.COD_StartAddress, bitAdress, PLCConfig.COD_Count, PLCConfig.Dr);
+
+            return Data;
+        }
+
+        public ushort[] GetTempAndHumData() 
+        {
+            if (finsClient == null)
+            {
+                return null;
+            }
+            byte bitAdress = 0X00;
+
+            ushort[] value = { 13, 3, 4, 0, 2 };
+            finsClient.WriteData(32300, bitAdress, value, PLCConfig.Dr);
+
+            bitAdress = 0X08;
+            byte[] wValue = { 0X01 };
+            bool success = finsClient.WriteBitData(0, bitAdress, wValue, PLCConfig.Wr);
+
+            if (!success)
+            {
+                return null;
+            }
+            Thread.Sleep(3000);
+            bitAdress = 0X00;
+            ushort[] Data = finsClient.ReadData(PLCConfig.Data_TempAndHun, bitAdress, PLCConfig.TempAndHun_Count, PLCConfig.Dr);
 
             return Data;
         }
@@ -339,6 +365,9 @@ namespace BodDetect
             bool success = ValveControl(pLCParams[0].address, pLCParams[0].data.ToArray());
             if (!success)
                 return false;
+
+            Thread.Sleep(1000);
+
             success = PunpAbsorb(punpCapType);
 
             byte id = pLCParams[0].data[0];
@@ -351,7 +380,7 @@ namespace BodDetect
             refreshProcess(param);
             //IAsyncResult asyncResult = refreshProcess.BeginInvoke(param, null, null);
 
-            Thread.Sleep(5000);
+            Thread.Sleep(8000);
             if (!success)
                 return false;
 
@@ -365,13 +394,15 @@ namespace BodDetect
             success = ValveControl(pLCParams[1].address, pLCParams[1].data.ToArray());
             if (!success)
                 return false;
+            Thread.Sleep(1000);
+
             success = PumpDrain();
 
             id = pLCParams[1].data[0];
             param = new DelegateParam(id, 0, ProcessState.AutoAdd, UiType.ProcessBar);
             refreshProcess(param);
 
-            Thread.Sleep(4000);
+            Thread.Sleep(6000);
 
             id = Convert.ToByte(uid);
             param = new DelegateParam(id, 0, ProcessState.ShowData, UiType.ProcessBar);
@@ -620,6 +651,8 @@ namespace BodDetect
                 {
                     return;
                 }
+
+                //[ 2.采集传感器参数]
                 await Task.Delay(configData.WarmUpTime * 1000);
                 for (int i = 0; i < configData.SampleScale - 1; i++)
                 {
@@ -814,6 +847,17 @@ namespace BodDetect
             pLCParams[0].data[0] = PLCConfig.bufferValveBit;
             success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
+            //预备排空一次管内残留液
+            pLCParams[0].data[0] = PLCConfig.NormalValveBit;
+            pLCParams[1].data[0] = PLCConfig.AirValveBit;
+            int TempTimes = 2;
+            while (TempTimes > 0)
+            {
+                success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                TempTimes--;
+            }
+
+
             int waterVol = configData.SampVol - (configData.SampVol / configData.SampDil);
             int Times1 = configData.SampVol / configData.SampDil / 5;
             int Times2 = configData.SampVol / configData.SampDil % 5;
@@ -896,30 +940,30 @@ namespace BodDetect
             };
             pLCParam2.data.Add(PLCConfig.NormalValveBit);
             pLCParams.Add(pLCParam2);
+            int Times1 = 0;
+            int Times2 = 0;
 
-            int Times1 = configData.StandVol / configData.StandDil / 5;
-            int Times2 = configData.StandVol / configData.StandDil % 5;
-
-            for (int i = 0; i < Times1; i++)
+            //预备排空一次管内残留液
+            pLCParams[0].data[0] = PLCConfig.NormalValveBit;
+            pLCParams[1].data[0] = PLCConfig.AirValveBit;
+            int TempTimes = 2;
+            while (TempTimes > 0) 
             {
                 success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
-                if (!success)
-                {
-                    return false;
-                }
+                TempTimes--;
             }
 
-            for (int i = 0; i < Times2; i++)
-            {
-                success = PumpOnceProcess(pLCParams, PunpCapType.oneml);
-                if (!success)
-                {
-                    return false;
-                }
-            }
-
-            pLCParams[0].data[0] = PLCConfig.AirValveBit;
+            //固定5ml缓冲溶液
+            pLCParams[0].data[0] = PLCConfig.NormalValveBit;
+            pLCParams[1].data[0] = PLCConfig.AirValveBit;
             success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+            if (!success)
+            {
+                return false;
+            }
+
+            //pLCParams[0].data[0] = PLCConfig.AirValveBit;
+            //success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
             //[ 固定0.2的标定液]
             pLCParams[0].data[0] = PLCConfig.StandardValveBit;
@@ -930,12 +974,14 @@ namespace BodDetect
                 return false;
             }
 
-            int waterVol = configData.StandVol - (configData.StandVol / configData.StandDil);
+            //int waterVol = configData.StandVol - (configData.StandVol / configData.StandDil);
 
-            Times1 = waterVol / 5;
-            Times2 = waterVol % 5;
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+            //Times1 = waterVol / 5;
+            //Times2 = waterVol % 5;
+            //pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            //pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+
+            Times1 = 9;
 
             for (int i = 0; i < Times1; i++)
             {
@@ -955,6 +1001,7 @@ namespace BodDetect
                 }
             }
 
+            
             pLCParams[0].data[0] = PLCConfig.AirValveBit;
             success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
             if (!success)
@@ -962,9 +1009,9 @@ namespace BodDetect
                 return false;
             }
 
-            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+            //pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            //pLCParams[1].data[0] = PLCConfig.AirValveBit;
+            //success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
 
             return success;
         }
@@ -1032,20 +1079,23 @@ namespace BodDetect
             float[] DoDota = GetDoData();
             uint[] TurbidityData = GetTurbidityData();
             float[] PHData = GetPHData();
-            ushort[] CODData = GetCodData();
+            ushort[] Uv254Data = GetUv254Data();
+            ushort[] TempAndHumData = GetTempAndHumData();
 
             bodData.TemperatureData = DoDota[0];
             bodData.DoData = DoDota[1];
             bodData.TurbidityData = (float)TurbidityData[0] / 1000;
             bodData.PHData = PHData[1];
-            bodData.CodData = (float)CODData[0] / 100;
+            bodData.Uv254Data = (float)Uv254Data[0] / 100;
+            bodData.HumidityData = TempAndHumData[0] / 10;
+            bodData.AirTemperatureData = TempAndHumData[1] / 10;
 
             StreamWriter streamWriter = File.CreateText("D:\\test.txt");
             streamWriter.WriteLine(bodData.TemperatureData.ToString());
             streamWriter.WriteLine(bodData.DoData.ToString());
             streamWriter.WriteLine(bodData.TurbidityData.ToString());
             streamWriter.WriteLine(bodData.PHData.ToString());
-            streamWriter.WriteLine(bodData.CodData.ToString());
+            streamWriter.WriteLine(bodData.Uv254Data.ToString());
             streamWriter.Close();
 
             mainWindow.Dispatcher.Invoke(refreshData, bodData);
@@ -1069,7 +1119,7 @@ namespace BodDetect
             Task<bool> CompletetResult = await Task.Factory.StartNew(() => IsCODComplete());
 
             float value = 0;
-            if (CompletetResult.Result) 
+            if (CompletetResult.Result)
             {
                 byte bitAdress = 0X00;
                 float[] Data = finsClient.ReadBigFloatData(432, bitAdress, 2, PLCConfig.Dr);
@@ -1080,11 +1130,11 @@ namespace BodDetect
 
         }
 
-        public async Task<bool> IsCODComplete() 
+        public async Task<bool> IsCODComplete()
         {
             try
             {
-                while (true) 
+                while (true)
                 {
                     await Task.Delay(5 * 60 * 1000);
 
@@ -1102,7 +1152,6 @@ namespace BodDetect
                 return false;
             }
         }
-
 
         public void CheckCisternIsFull(object time)
         {

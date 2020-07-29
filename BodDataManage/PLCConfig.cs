@@ -58,6 +58,9 @@ namespace BodDetect.BodDataManage
 
         public const ushort Data_Status = 640;
 
+        public const ushort Data_TempAndHun = 606;
+        public const ushort TempAndHun_Count = 2;
+
         public const ushort PumpAbsorbAddress_02ml = 234;
         public const ushort PumpAbsorbAddress_1ml = 233;
         public const ushort PumpAbsorb5mlAddress_5ml = 231;

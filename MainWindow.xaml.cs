@@ -163,8 +163,6 @@ namespace BodDetect
 
             float[] PHData = bodHelper.GetPHData();
             Thread.Sleep(3000);
-            ushort[] CODData = bodHelper.GetCodData();
-
             bodData.TemperatureData = DoDota[0];
             bodData.DoData = DoDota[1];
             bodData.TurbidityData = (float)TurbidityData[0] / 1000;
@@ -233,6 +231,8 @@ namespace BodDetect
             mainWindow_Model.TemperatureData = data.TemperatureData;
             mainWindow_Model.TurbidityData = data.TurbidityData;
             mainWindow_Model.Uv254Data = data.Uv254Data;
+            mainWindow_Model.HumidityDataData = data.HumidityData;
+            mainWindow_Model.AirTemperatureData = data.AirTemperatureData;
 
 
             HisDatabase hisDatabase = new HisDatabase();
@@ -890,6 +890,8 @@ namespace BodDetect
 
             success = bodHelper.ValveControl(address[0], data[0]);
 
+            Thread.Sleep(1000);
+
             if (!success)
             {
                 MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
@@ -902,9 +904,12 @@ namespace BodDetect
                 MessageBox.Show(" 注射泵抽水失败.", "提示", MessageBoxButton.OK);
             }
 
-            Thread.Sleep(5000);
+            Thread.Sleep(7000);
 
             success = bodHelper.ValveControl(address[1], data[1]);
+
+            Thread.Sleep(1000);
+
             if (!success)
             {
                 MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
@@ -916,58 +921,61 @@ namespace BodDetect
                 MessageBox.Show(" 注射泵放水失败.", "提示", MessageBoxButton.OK);
             }
 
-            Thread.Sleep(5000);
+            Thread.Sleep(7000);
         }
 
-        private void PumpCache_ButtonClick(object sender, EventArgs e)
+        private async void PumpCache_ButtonClick(object sender, EventArgs e)
         {
-            try
+
+            await this.Dispatcher.InvokeAsync(() =>
             {
-                string cap = PumpCache.Text;
-                if (string.IsNullOrEmpty(cap))
+                try
                 {
-                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                    string cap = PumpCache.Text;
+                    if (string.IsNullOrEmpty(cap))
+                    {
+                        MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+                    }
+
+                    int capData = Convert.ToInt32(cap);
+
+                    int times = capData / 5;
+
+                    int extraTimes = capData % 5;
+
+                    byte[] StandValve = { PLCConfig.WaterValveBit };
+
+                    byte[] StandBodValve = { PLCConfig.NormalValveBit };
+
+                    List<byte[]> data = new List<byte[]>();
+                    List<ushort> address = new List<ushort>();
+                    data.Add(StandValve);
+                    data.Add(StandBodValve);
+
+                    address.Add(PLCConfig.Valve2Address);
+                    address.Add(PLCConfig.Valve2Address);
+
+
+                    for (int i = 0; i < times; i++)
+                    {
+                        PumpProcess(data, address, PunpCapType.fiveml);
+                    }
+
+                    for (int i = 0; i < extraTimes; i++)
+                    {
+                        PumpProcess(data, address, PunpCapType.oneml);
+
+                    }
+
+                    byte[] data1 = { 0 };
+                    bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
                 }
-
-                int capData = Convert.ToInt32(cap);
-
-                int times = capData / 5;
-
-                int extraTimes = capData % 5;
-
-                byte[] StandValve = { PLCConfig.bufferValveBit };
-
-                byte[] StandBodValve = { PLCConfig.NormalValveBit };
-
-                List<byte[]> data = new List<byte[]>();
-                List<ushort> address = new List<ushort>();
-                data.Add(StandValve);
-                data.Add(StandBodValve);
-
-                address.Add(PLCConfig.Valve2Address);
-                address.Add(PLCConfig.Valve2Address);
-
-
-                while (times > 0)
+                catch (Exception)
                 {
-                    PumpProcess(data, address, PunpCapType.fiveml);
-                    times--;
+
+
                 }
-
-                while (extraTimes > 0)
-                {
-                    PumpProcess(data, address, PunpCapType.oneml);
-                    extraTimes--;
-                }
-
-                byte[] data1 = { 0 };
-                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
-            }
-            catch (Exception)
-            {
-
-
-            }
+            });      
         }
 
         private void DrainCahce_ButtonClick(object sender, EventArgs e)
@@ -1482,32 +1490,45 @@ namespace BodDetect
             bodHelper.PreInit();
         }
 
-        private void PreButton2ml_Click(object sender, RoutedEventArgs e)
+        private async void PreButton2ml_ClickAsync(object sender, RoutedEventArgs e)
         {
-            if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null)
+            await Task.Factory.StartNew(() => 
             {
-                MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
-            }
+                if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null)
+                {
+                    MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
+                }
 
-            byte[] StandBodValve = { PLCConfig.NormalValveBit };
+                byte[] StandBodValve = { PLCConfig.NormalValveBit };
 
-            byte[] waterValve = { PLCConfig.WaterValveBit };
+                byte[] waterValve = { PLCConfig.StandardValveBit };
 
-            byte[] AirValve = { PLCConfig.AirValveBit };
+                byte[] AirValve = { PLCConfig.AirValveBit };
 
-            List<byte[]> data = new List<byte[]>();
-            List<ushort> address = new List<ushort>();
-            data.Add(waterValve);
-            data.Add(StandBodValve);
+                List<byte[]> data = new List<byte[]>();
+                List<ushort> address = new List<ushort>();
+                data.Add(waterValve);
+                data.Add(StandBodValve);
 
-            address.Add(PLCConfig.Valve2Address);
-            address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
+                address.Add(PLCConfig.Valve2Address);
 
-            PumpProcess(data, address, PunpCapType.Point2ml);
+                bool  success = bodHelper.ValveControl(address[0], data[0]);
 
-            data[0] = AirValve;
+                Thread.Sleep(300);
 
-            PumpProcess(data, address, PunpCapType.fiveml);
+                if (!success)
+                {
+                    MessageBox.Show(" 阀门打开失败.", "提示", MessageBoxButton.OK);
+                }
+
+                success = bodHelper.PunpAbsorb(PunpCapType.Point2ml);
+
+                //PumpProcess(data, address, PunpCapType.Point2ml);
+            });
+            //data[0] = AirValve;
+
+            //PumpProcess(data, address, PunpCapType.fiveml);
 
         }
 
@@ -1968,14 +1989,20 @@ namespace BodDetect
             await Task.Delay(3 * 1000);
 
             float[] PHData = bodHelper.GetPHData();
-            //ushort[] CODData = bodHelper.GetCodData();
+            await Task.Delay(3 * 1000);
+            ushort[] Uv254Data = bodHelper.GetUv254Data();
+            await Task.Delay(3 * 1000);
+            ushort[] TempAndHumDada = bodHelper.GetTempAndHumData();
+            await Task.Delay(3 * 1000);
 
             mainWindow_Model.TemperatureData = DoDota[0];
             mainWindow_Model.DoData = DoDota[1];
             mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
             mainWindow_Model.PHData = PHData[1];
-            //mainWindow_Model.CodData = (float)CODData[0] / 100;
-            mainWindow_Model.Uv254Data = bodData.Uv254Data;
+            mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
+            mainWindow_Model.CodData = bodData.CodData;
+            mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
+            mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
 
             HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
@@ -2102,5 +2129,17 @@ namespace BodDetect
 
         #endregion
 
+        private async void HisDataTimeSelect(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+               await this.Dispatcher.InvokeAsync(() =>mainWindow_Model.HisParamData.UpdateDataByDate(HisDataStartPicker.SelectedDate,HisDataEndPicker.SelectedDate));
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

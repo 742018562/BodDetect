@@ -20,9 +20,10 @@ namespace BodDetect
         public List<HisDatabase> GenerateFakeSource()
         {
             List<HisDatabase> source = new List<HisDatabase>();
-
-            for (int i = 0; i < 5; i++)
+            DateTime dateTime = DateTime.Now;
+            for (int i = 0; i < 3; i++)
             {
+                dateTime = dateTime.AddSeconds(5);
                 HisDatabase item = new HisDatabase()
                 {
                     Id = i,
@@ -32,6 +33,8 @@ namespace BodDetect
                     TurbidityData = i,
                     PHData = i,
                     TemperatureData = i,
+                    CreateDate = dateTime.ToLongDateString(),
+                    CreateTime = dateTime.ToLongTimeString()
                 };
 
                 source.Add(item);

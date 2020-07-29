@@ -28,7 +28,7 @@ namespace BodDetect.UIConvert
                     text = data.ToString("F2") + "(mg/L)";
                     break;
                 case 4:
-                    text = data.ToString("F2") + "(C)";
+                    text = data.ToString("F2") + "(℃)";
                     break;
                 case 5:
                     text = data.ToString("F1");

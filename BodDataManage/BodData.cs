@@ -11,6 +11,8 @@ namespace BodDetect
         private float codData;
         private float uv254Data;
         private float bod;
+        private float airTemperatureData;
+        private float humidityData;
 
         public BodData() { }
         private int deviceStatus;
@@ -108,6 +110,9 @@ namespace BodDetect
 
             }
         }
+
+        public float AirTemperatureData { get => airTemperatureData; set => airTemperatureData = value; }
+        public float HumidityData { get => humidityData; set => humidityData = value; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

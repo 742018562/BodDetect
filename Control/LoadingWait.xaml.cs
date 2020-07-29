@@ -30,7 +30,7 @@ namespace BodDetect
 
             animationTimer = new DispatcherTimer(
                 DispatcherPriority.ContextIdle, Dispatcher);
-            animationTimer.Interval = new TimeSpan(0, 0, 0, 0, 90);
+            animationTimer.Interval = new TimeSpan(0, 0, 0, 0, 120);
         }
         #endregion
 
@@ -71,11 +71,11 @@ namespace BodDetect
         private void SetPosition(Ellipse ellipse, double offset,
             double posOffSet, double step)
         {
-            ellipse.SetValue(Canvas.LeftProperty, 100.0
-                + Math.Sin(offset + posOffSet * step) * 100.0);
+            ellipse.SetValue(Canvas.LeftProperty, 30.0
+                + Math.Sin(offset + posOffSet * step) * 30.0);
 
-            ellipse.SetValue(Canvas.TopProperty, 100.0
-                + Math.Cos(offset + posOffSet * step) * 100.0);
+            ellipse.SetValue(Canvas.TopProperty, 30.0
+                + Math.Cos(offset + posOffSet * step) * 30.0);
         }
 
         private void HandleUnloaded(object sender, RoutedEventArgs e)

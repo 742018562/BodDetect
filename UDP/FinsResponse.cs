@@ -20,6 +20,8 @@ namespace BodDetect.UDP
 
         public byte Sid { get; private set; }
         public ushort[] Data { get; private set; }
+
+
         public ManualResetEvent WaitEvent { get; private set; }
 
         public float[] FloatData { get; private set; }
@@ -90,7 +92,6 @@ namespace BodDetect.UDP
                 default:
                     break;
             }
-
 
             WaitEvent.Set();
         }

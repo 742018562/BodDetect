@@ -17,8 +17,6 @@ namespace BodDetect
 
         public SysStatusMsg sysStatusMsg;
 
-        
-
         private float _bodData;
         public float BodData 
         {
@@ -104,25 +102,6 @@ namespace BodDetect
             }
         }
 
-
-        //private int _pageSize;
-
-        //public int PageSize
-        //{
-        //    get
-        //    {
-        //        return _pageSize;
-        //    }
-        //    set
-        //    {
-        //        if (_pageSize != value)
-        //        {
-        //            _pageSize = value;
-        //            OnPropertyChanged("PageSize");
-        //        }
-        //    }
-        //}
-
         private float _uv254Data;
         public float Uv254Data
         {
@@ -154,43 +133,39 @@ namespace BodDetect
             }
         }
 
-        //private int _currentPage;
+        private float _airTemperatureData;
+        public float AirTemperatureData
+        {
+            get
+            {
+                return _airTemperatureData;
+            }
+            set
+            {
+                if (_airTemperatureData != value)
+                {
+                    _airTemperatureData = value;
+                    OnPropertyChanged("AirTemperatureData");
+                }
+            }
+        }
 
-        //public int CurrentPage
-        //{
-        //    get
-        //    {
-        //        return _currentPage;
-        //    }
-
-        //    set
-        //    {
-        //        if (_currentPage != value)
-        //        {
-        //            _currentPage = value;
-        //            OnPropertyChanged("CurrentPage");
-        //        }
-        //    }
-        //}
-
-        //private int _totalPage;
-
-        //public int TotalPage
-        //{
-        //    get
-        //    {
-        //        return _totalPage;
-        //    }
-
-        //    set
-        //    {
-        //        if (_totalPage != value)
-        //        {
-        //            _totalPage = value;
-        //            OnPropertyChanged("TotalPage");
-        //        }
-        //    }
-        //}
+        private float _humidityData;
+        public float HumidityDataData
+        {
+            get
+            {
+                return _humidityData;
+            }
+            set
+            {
+                if (_humidityData != value)
+                {
+                    _humidityData = value;
+                    OnPropertyChanged("HumidityDataData");
+                }
+            }
+        }
 
 
         public Visibility _debugMode;
@@ -210,9 +185,6 @@ namespace BodDetect
                 }
             }
         }
-
-
-
 
         private HisParamPagerModel _hisParamData;
         public HisParamPagerModel HisParamData 
@@ -245,8 +217,6 @@ namespace BodDetect
             HisParamData = new HisParamPagerModel();
             HisParamData.init();
         }
-
-
 
         private int _Hour;
         public int Hour

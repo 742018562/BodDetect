@@ -124,7 +124,7 @@ namespace BodDetect
             }
         }
 
-        private void FirstPageAction()
+        public void FirstPageAction()
         {
             CurrentPage = 1;
 
