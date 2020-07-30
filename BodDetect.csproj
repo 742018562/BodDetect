@@ -33,7 +33,6 @@
     <None Remove="Resources\air.png" />
     <None Remove="Resources\arrowBottom.png" />
     <None Remove="Resources\arrowTop.png" />
-    <None Remove="Resources\beijing.png" />
     <None Remove="Resources\biaoding.png" />
     <None Remove="Resources\biaoti.png" />
     <None Remove="Resources\Bod.png" />
@@ -51,7 +50,6 @@
     <None Remove="Resources\green.png" />
     <None Remove="Resources\huanchong.png" />
     <None Remove="Resources\icon.png" />
-    <None Remove="Resources\iconfont.ttf" />
     <None Remove="Resources\iconMove.png" />
     <None Remove="Resources\icon\Automator.png" />
     <None Remove="Resources\icon\BioHazard.png" />
@@ -80,9 +78,11 @@
     <None Remove="Resources\stard.png" />
     <None Remove="Resources\store.png" />
     <None Remove="Resources\tabIcon.png" />
+    <None Remove="Resources\tempu.png" />
     <None Remove="Resources\tingzhi.png" />
     <None Remove="Resources\titleMuenIcon.png" />
     <None Remove="Resources\today.png" />
+    <None Remove="Resources\Turbidity.png" />
     <None Remove="Resources\up.png" />
     <None Remove="Resources\water.png" />
     <None Remove="Resources\yellow.png" />
@@ -90,9 +90,7 @@
     <None Remove="Resources\zhongzhi.png" />
     <None Remove="Resources\zhushe.png" />
     <None Remove="Resources\zhushe_up.png" />
-    <None Remove="Resources\悬浮物.png" />
     <None Remove="Resources\水温.png" />
-    <None Remove="Resources\水温1.png" />
     <None Remove="Resources\浊度.png" />
     <None Remove="Resources\溶解氧.png" />
     <None Remove="tabIcon.png" />
@@ -100,13 +98,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\arrowBottom.png" />
-    <Resource Include="Resources\arrowTop.png" />
-    <Resource Include="Resources\Bod_Model.png" />
-    <Resource Include="Resources\crop_din.png" />
-    <Resource Include="Resources\first_page.png" />
-    <Resource Include="Resources\green.png" />
-    <Resource Include="Resources\iconfont.ttf" />
+    <Content Include="Resources\biaoti.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\air.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\arrowBottom.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\arrowTop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\biaoding.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Bod.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Bod_Model.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\crop_din.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\first_page.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\green.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\icon\Automator.png" />
   </ItemGroup>
 
@@ -123,59 +147,136 @@
     <Resource Include="Resources\2D\悬浮物.png" />
     <Resource Include="Resources\2D\水温1.png" />
     <Resource Include="Resources\2D\浊度.png" />
-    <Resource Include="Resources\air.png" />
-    <Resource Include="Resources\beijing.png" />
-    <Resource Include="Resources\biaoding.png" />
-    <Resource Include="Resources\biaoti.png" />
-    <Resource Include="Resources\Bod.png" />
-    <Resource Include="Resources\COD.png" />
-    <Resource Include="Resources\down.png" />
-    <Resource Include="Resources\editIcon.png" />
-    <Resource Include="Resources\fa.png" />
-    <Resource Include="Resources\huanchong.png" />
-    <Resource Include="Resources\icon.png" />
-    <Resource Include="Resources\iconMove.png" />
+    <Content Include="Resources\COD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\down.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\editIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\fa.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\huanchong.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\iconMove.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\icon\BioHazard.png" />
     <Resource Include="Resources\icon\Briefcase PixelPress Media Design.png" />
     <Resource Include="Resources\icon\dashcode.png" />
     <Resource Include="Resources\icon\home.png" />
     <Resource Include="Resources\icon\toolbarSites.png" />
     <Resource Include="Resources\icon\xray.png" />
-    <Resource Include="Resources\icon_player.png" />
-    <Resource Include="Resources\keyboard_arrow_down.png" />
-    <Resource Include="Resources\keyboard_arrow_left.png" />
-    <Resource Include="Resources\keyboard_arrow_up.png" />
-    <Resource Include="Resources\last_page.png" />
-    <Resource Include="Resources\navigate_next.png" />
-    <Resource Include="Resources\nomale.png" />
-    <Resource Include="Resources\paikou.png" />
-    <Resource Include="Resources\PH.png" />
-    <Resource Include="Resources\pic.jpg" />
-    <Resource Include="Resources\PLC.jpg" />
-    <Resource Include="Resources\qingxi.png" />
-    <Resource Include="Resources\red.png" />
-    <Resource Include="Resources\sample.png" />
-    <Resource Include="Resources\sensor.png" />
-    <Resource Include="Resources\shuiyangpng.png" />
+    <Content Include="Resources\icon_player.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\keyboard_arrow_down.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\keyboard_arrow_left.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\keyboard_arrow_up.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\last_page.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\navigate_next.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\nomale.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\paikou.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\PH.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\pic.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\PLC.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\qingxi.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\red.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sample.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sensor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\shuiyangpng.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\signal_cellular_4_bar.png" />
-    <Resource Include="Resources\stard.png" />
-    <Resource Include="Resources\store.png" />
-    <Resource Include="Resources\tabIcon.png" />
-    <Resource Include="Resources\tingzhi.png" />
-    <Resource Include="Resources\titleMuenIcon.png" />
-    <Resource Include="Resources\today.png" />
-    <Resource Include="Resources\up.png" />
-    <Resource Include="Resources\water.png" />
-    <Resource Include="Resources\yellow.png" />
-    <Resource Include="Resources\zanting.png" />
-    <Resource Include="Resources\zhongzhi.png" />
-    <Resource Include="Resources\zhushe.png" />
-    <Resource Include="Resources\zhushe_up.png" />
-    <Resource Include="Resources\悬浮物.png" />
-    <Resource Include="Resources\水温.png" />
-    <Resource Include="Resources\水温1.png" />
-    <Resource Include="Resources\浊度.png" />
-    <Resource Include="Resources\溶解氧.png" />
+    <Content Include="Resources\stard.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\store.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\tabIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\tingzhi.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\titleMuenIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\today.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\up.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\water.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\yellow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\zanting.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\zhongzhi.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\zhushe.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\zhushe_up.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Turbidity.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\水温.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\tempu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\浊度.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\溶解氧.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

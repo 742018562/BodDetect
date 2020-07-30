@@ -59,15 +59,5 @@ namespace BodDetect.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] iconfont {
-            get {
-                object obj = ResourceManager.GetObject("iconfont", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
