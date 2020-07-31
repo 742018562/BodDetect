@@ -954,8 +954,8 @@ namespace BodDetect
             }
 
             //固定5ml缓冲溶液
-            pLCParams[0].data[0] = PLCConfig.NormalValveBit;
-            pLCParams[1].data[0] = PLCConfig.AirValveBit;
+            pLCParams[0].data[0] = PLCConfig.bufferValveBit;
+            pLCParams[1].data[0] = PLCConfig.NormalValveBit;
             success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
             if (!success)
             {
@@ -968,7 +968,16 @@ namespace BodDetect
             //[ 固定0.2的标定液]
             pLCParams[0].data[0] = PLCConfig.StandardValveBit;
             pLCParams[1].data[0] = PLCConfig.NormalValveBit;
-            success = PumpOnceProcess(pLCParams, PunpCapType.Point2ml);
+            //success = PumpOnceProcess(pLCParams, PunpCapType.Point2ml);
+            success = ValveControl(pLCParams[0].address, pLCParams[0].data.ToArray());
+            if (!success)
+                return false;
+
+            Thread.Sleep(1000);
+
+            success = PunpAbsorb(PunpCapType.Point2ml);
+            Thread.Sleep(2000);
+
             if (!success)
             {
                 return false;
@@ -978,8 +987,8 @@ namespace BodDetect
 
             //Times1 = waterVol / 5;
             //Times2 = waterVol % 5;
-            //pLCParams[0].data[0] = PLCConfig.WaterValveBit;
-            //pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            pLCParams[1].data[0] = PLCConfig.NormalValveBit;
 
             Times1 = 9;
 
@@ -1293,7 +1302,7 @@ namespace BodDetect
         {
             try
             {
-                //timer.Dispose();
+
             }
             catch (Exception)
             {
@@ -1306,8 +1315,8 @@ namespace BodDetect
         {
             try
             {
-                manualevent.Dispose();
-                resetEvent.Dispose();
+
+
             }
             catch (Exception)
             {
@@ -1335,7 +1344,19 @@ namespace BodDetect
                         serialPortHelp.Dispose();
                     }
 
-                    CloseEvent();
+                    manualevent.Dispose();
+                    resetEvent.Dispose();
+
+                    try
+                    {
+                        if (timer != null) 
+                        {
+                            timer.Dispose();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
 
                 }
 

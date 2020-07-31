@@ -25,6 +25,9 @@ namespace BodDetect
         private float bod;
         private string bodDataUnit;
 
+        private float airTemperatureData;
+        private float humidityData;
+
 
         public float PHData { get => pHData; set => pHData = value; }
         public float DoData { get => doData; set => doData = value; }
@@ -39,5 +42,7 @@ namespace BodDetect
         public string CodDataUnit { get => codDataUnit; set => codDataUnit = value; }
         public string Uv254DataUnit { get => uv254DataUnit; set => uv254DataUnit = value; }
         public string BodDataUnit { get => bodDataUnit; set => bodDataUnit = value; }
+        public float AirTemperatureData { get => airTemperatureData; set => airTemperatureData = value; }
+        public float HumidityData { get => humidityData; set => humidityData = value; }
     }
 }

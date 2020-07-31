@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,8 @@ namespace BodDetect
 
         public static readonly DependencyProperty CurrentPageProperty;
         public static readonly DependencyProperty TotalPageProperty;
+
+        public Process kbpr;
 
         public string CurrentPage
         {
@@ -123,12 +126,12 @@ namespace BodDetect
 
         private void rCurrent_LostFocus(object sender, RoutedEventArgs e)
         {
-            Tool.HideInputPanel();
+            Tool.HideInputPanel(kbpr);
         }
 
         private void rCurrent_GotFocus(object sender, RoutedEventArgs e)
         {
-            Tool.ShowInputPanel();
+            kbpr = Tool.ShowInputPanel(kbpr);
         }
     }
 }

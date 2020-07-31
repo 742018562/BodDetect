@@ -2,3 +2,9 @@
 
 # Default severity for all analyzer diagnostics
 dotnet_analyzer_diagnostic.severity = none
+
+# Default severity for analyzer diagnostics with category 'Security'
+dotnet_analyzer_diagnostic.category-Security.severity = none
+
+# CA2100: 检查 SQL 查询是否存在安全漏洞
+dotnet_diagnostic.CA2100.severity = none

@@ -167,7 +167,6 @@ namespace BodDetect
             }
         }
 
-
         public Visibility _debugMode;
 
         public Visibility DebugMode 

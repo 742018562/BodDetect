@@ -12,3 +12,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1063:正确实现 IDisposable", Justification = "<挂起>", Scope = "type", Target = "~T:BodDetect.SerialPortHelp")]
 [assembly: SuppressMessage("Design", "CA1063:正确实现 IDisposable", Justification = "<挂起>", Scope = "type", Target = "~T:BodDetect.UDP.FinsClient")]
 [assembly: SuppressMessage("Design", "CA1060:将 pinvoke 移到本机方法类", Justification = "<挂起>", Scope = "type", Target = "~T:BodDetect.Tool")]
+[assembly: SuppressMessage("Security", "CA2100:检查 SQL 查询是否存在安全漏洞", Justification = "<挂起>", Scope = "member", Target = "~M:BodDetect.DataBaseInteractive.Sqlite.SQLiteHelper.CreateCommand(System.Data.SQLite.SQLiteConnection,System.String,System.Data.SQLite.SQLiteParameter[])~System.Data.SQLite.SQLiteCommand")]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BodDetect.DataBaseInteractive.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -41,6 +42,25 @@ namespace BodDetect
             }
 
             return source;
+        }
+
+        public void CopyToHisDataBaseModel(HisDataBaseModel model) 
+        {
+            model.AirTemperature = AirTemperatureData;
+            model.Bod = Bod;
+            model.Cod = CodData;
+            model.CreateDate = CreateDate;
+            model.CreateTime = CreateTime;
+            model.DO = DoData;
+            model.Humidity = HumidityData;
+            model.id = Id;
+            model.PH = PHData;
+            model.RunNum = 0;
+            model.Temperature = TemperatureData;
+            model.Turbidity = TurbidityData;
+            model.Uv254 = Uv254Data;
+            model.BodElePot = BodElePot;
+            model.BodElePotDrop = BodElePotDrop;
         }
 
         public HisDatabase()

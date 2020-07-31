@@ -77,56 +77,68 @@ namespace BodDetect
 
         #region 虚拟键盘控制
 
-        public static int ShowInputPanel()
+        public static Process ShowInputPanel(Process kbpr)
         {
+
             try
             {
+                if (kbpr==null || kbpr.HasExited)
+                {
+                    kbpr = System.Diagnostics.Process.Start("osk.exe");
+                }
+
+                return kbpr; // 打开系统键盘
+
+
                 //C:\\Windows\\System32\\osk.exe  C:\\Program Files\\Common Files\\microsoft shared\\ink\\TabTip.exe
-                string file = "C:\\Program Files\\Common Files\\microsoft shared\\ink\\TabTip.exe";
+                //string file = "C:\\Windows\\System32\\osk.exe";
 
-                if (System.IO.File.Exists(file))
-                {
-                    return -1;
-                }
-                //Process.Start(@"C:\Windows\System32\osk.exe");
+                //if (System.IO.File.Exists(file))
+                //{
+                //    return -1;
+                //}
+                ////Process.Start(@"C:\Windows\System32\osk.exe");
 
-                ProcessStartInfo procStartInfo = new ProcessStartInfo()
-                {
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    Verb = "runas",
-                    FileName = file,
-                    Arguments = "/user:Administrator cmd /K "
-                };
 
-                using (Process proc = new Process())
-                {
-                    proc.StartInfo = procStartInfo;
-                    proc.Start();
-                    string output = proc.StandardOutput.ReadToEnd();
-                    if (string.IsNullOrEmpty(output))
-                        output = proc.StandardError.ReadToEnd();
+                //ProcessStartInfo procStartInfo = new ProcessStartInfo()
+                //{
+                //    RedirectStandardError = true,
+                //    RedirectStandardOutput = true,
+                //    UseShellExecute = false,
+                //    CreateNoWindow = true,
+                //    Verb = "runas",
+                //    FileName = file,
+                //    Arguments = "/user:Administrator cmd /K "
+                //};
 
-                }
-                //    Process.Start(file);
-                //return SetUnDock(); //不知SetUnDock()是什么，所以直接注释返回1
-                return 1;
+                //using (Process proc = new Process())
+                //{
+                //    proc.StartInfo = procStartInfo;
+                //    proc.Start();
+                //    string output = proc.StandardOutput.ReadToEnd();
+                //    if (string.IsNullOrEmpty(output))
+                //        output = proc.StandardError.ReadToEnd();
+
+                //}
+                ////    Process.Start(file);
+                ////return SetUnDock(); //不知SetUnDock()是什么，所以直接注释返回1
+                //return 1;
             }
             catch (Exception)
             {
-                return 255;
+                return null;
             }
         }
 
-        public static void HideInputPanel()
+        public static void HideInputPanel(Process kbpr)
         {
-            IntPtr TouchhWnd = new IntPtr(0);
-            TouchhWnd = FindWindow("IPTip_Main_Window", null);
-            if (TouchhWnd == IntPtr.Zero)
-                return;
-            PostMessage(TouchhWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+
+            if (kbpr !=null && !kbpr.HasExited)
+            {
+                kbpr.CloseMainWindow();
+
+                kbpr.Kill();
+            }
         }
 
         #endregion

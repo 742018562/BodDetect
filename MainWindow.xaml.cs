@@ -21,6 +21,7 @@ using System.Windows.Threading;
 using Arthas.Controls;
 using Arthas.Utility.Media;
 using BodDetect.BodDataManage;
+using BodDetect.DataBaseInteractive.Sqlite;
 using BodDetect.Event;
 using BodDetect.UDP;
 using MahApps.Metro.Controls.Dialogs;
@@ -44,7 +45,7 @@ namespace BodDetect
         DispatcherTimer CodTimer = new DispatcherTimer();
 
 
-
+        public Process kbpr;
         private BodHelper bodHelper;
         public BodData bodData = new BodData();
 
@@ -1319,8 +1320,12 @@ namespace BodDetect
             SysStatusList.Items.Add(new SysStatusMsg(a + 1, "2", value, value));
         }
 
-        private void StandDilution_Click(object sender, RoutedEventArgs e)
+        private async void StandDilution_Click(object sender, RoutedEventArgs e)
         {
+
+            await Task.Factory.StartNew(() => bodHelper.DiluteStandWater());
+            return;
+
             try
             {
                 string cap = StandAll.Text;
@@ -1472,12 +1477,12 @@ namespace BodDetect
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Tool.ShowInputPanel();
+            kbpr = Tool.ShowInputPanel(kbpr);
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            Tool.HideInputPanel();
+           // Tool.HideInputPanel(kbpr);
         }
 
         private void PreButton_Click(object sender, RoutedEventArgs e)
@@ -2017,6 +2022,27 @@ namespace BodDetect
             hisDatabase.CreateTime = dateTime.ToLongTimeString();
 
             mainWindow_Model.HisParamData.AddData(hisDatabase);
+
+            HisDataBaseModel model = new HisDataBaseModel();
+
+            hisDatabase.CopyToHisDataBaseModel(model);
+            //model.AirTemperature = hisDatabase.AirTemperatureData;
+            //model.Bod = hisDatabase.Bod;
+            //model.Cod = hisDatabase.CodData;
+            //model.CreateDate = hisDatabase.CreateDate;
+            //model.CreateTime = hisDatabase.CreateTime;
+            //model.DO = hisDatabase.DoData;
+            //model.Humidity = hisDatabase.HumidityData;
+            //model.id = hisDatabase.Id;
+            //model.PH = hisDatabase.PHData;
+            //model.RunNum = 0;
+            //model.Temperature = hisDatabase.TemperatureData;
+            //model.Turbidity = hisDatabase.TurbidityData;
+            //model.Uv254 = hisDatabase.Uv254Data;
+
+            //BodSqliteHelp bodSqliteHelp = new BodSqliteHelp();
+
+            BodSqliteHelp.InsertHisBodData(model);
 
         }
 

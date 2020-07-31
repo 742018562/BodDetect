@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BodDetect.DataBaseInteractive.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace BodDetect
             }
         }
 
-        private List<HisDatabase> AllHisData;
+        public List<HisDatabase> AllHisData;
 
         public override void init()
         {
@@ -58,8 +59,16 @@ namespace BodDetect
 
         public List<HisDatabase> GetHisDatabases()
         {
-            HisDatabase fake = new HisDatabase();
-            return fake.GenerateFakeSource();
+            List< HisDatabase> fake = new List<HisDatabase>();
+            List<HisDataBaseModel> hisDataBaseModels = BodSqliteHelp.SelectHisData();
+            foreach (var item in hisDataBaseModels)
+            {
+                HisDatabase hisDatabase = new HisDatabase();
+                item.CopyToHisDatabase(hisDatabase);
+                fake.Add(hisDatabase);
+            }
+            return fake;
+
         }
 
         public override void UpdataSource(List<object> list)
@@ -75,7 +84,7 @@ namespace BodDetect
 
         public void AddData(HisDatabase hisDatabase) 
         {
-            hisDatabase.Id = AllHisData.Count;
+            hisDatabase.Id = AllHisData.Count + 1;
             _source.Add(hisDatabase);
             AllHisData.Add(hisDatabase);
             int LastTotalPage = TotalPage;
@@ -123,17 +132,17 @@ namespace BodDetect
                 var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)StartDate) >= 0);
                 if (temp != null) 
                 {
-                    StartIndex = temp.Id;
+                    StartIndex = temp.Id - 1;
                 }
 
             }
 
             if (EndDate != null) 
             {
-                var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)EndDate) <= 0);
+                var temp = hisDatabasesList.LastOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)EndDate) <= 0);
                 if (temp != null)
                 {
-                    EndIndex = temp.Id;
+                    EndIndex = temp.Id - 1;
                 }
             }
 
