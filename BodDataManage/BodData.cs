@@ -14,6 +14,11 @@ namespace BodDetect
         private float airTemperatureData;
         private float humidityData;
 
+        public float BodElePot { get; set; }
+        public float BodElePotDrop { get; set; }
+
+
+
         public BodData() { }
         private int deviceStatus;
 

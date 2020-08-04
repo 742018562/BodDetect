@@ -130,9 +130,13 @@ namespace BodDetect
             if (StartDate != null) 
             {
                 var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)StartDate) >= 0);
-                if (temp != null) 
+                if (temp != null)
                 {
                     StartIndex = temp.Id - 1;
+                }
+                else 
+                {
+                    StartIndex = -1;
                 }
 
             }
@@ -144,12 +148,21 @@ namespace BodDetect
                 {
                     EndIndex = temp.Id - 1;
                 }
+                else 
+                {
+                    EndIndex = -1;
+                }
+
             }
 
-            List<object> valueList = AllHisData.GetRange(StartIndex, EndIndex - StartIndex + 1).ToList<object>();
+            List<object> valueList = new List<object>();
+
+            if (StartIndex != -1 && EndIndex != -1)
+            {
+                valueList = AllHisData.GetRange(StartIndex, EndIndex - StartIndex + 1).ToList<object>();
+            }
 
             _source = valueList;
-
             FirstPageAction(); 
         }
 

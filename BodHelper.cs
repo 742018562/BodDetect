@@ -40,6 +40,8 @@ namespace BodDetect
 
         private bool isSampling;
 
+        private static AsyncSemaphore s_asyncSemaphore = new AsyncSemaphore();
+
         IPAddress PLCAddress { get; set; }
 
         IPEndPoint PLCEndPoint { get; set; }
@@ -56,8 +58,9 @@ namespace BodDetect
 
         public ManualResetEvent manualevent = new ManualResetEvent(true);
 
-
         private AutoResetEvent resetEvent = new AutoResetEvent(true);
+
+        object m_lock = new object();
 
         bool ConnectSeri = false;
         bool IsConnectPlc = false;
@@ -380,7 +383,7 @@ namespace BodDetect
             refreshProcess(param);
             //IAsyncResult asyncResult = refreshProcess.BeginInvoke(param, null, null);
 
-            Thread.Sleep(8000);
+            Thread.Sleep(10000);
             if (!success)
                 return false;
 
@@ -402,7 +405,7 @@ namespace BodDetect
             param = new DelegateParam(id, 0, ProcessState.AutoAdd, UiType.ProcessBar);
             refreshProcess(param);
 
-            Thread.Sleep(6000);
+            Thread.Sleep(10000);
 
             id = Convert.ToByte(uid);
             param = new DelegateParam(id, 0, ProcessState.ShowData, UiType.ProcessBar);
@@ -609,183 +612,188 @@ namespace BodDetect
             //[ 7. 调用BOD使用样液池的样液]
             //[ 8. 通过BOD获取最终计算值]
             //[ 9. 通过判断BOD的值排空标液,样液和沉淀池里的水样]
-            try
+
+            using (await s_asyncSemaphore.WaitAsync())
             {
-
-                if (finsClient == null)
+                try
                 {
-                    return;
-                }
 
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
+                    if (finsClient == null)
+                    {
+                        return;
+                    }
 
-                mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.init);
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
 
-                //if (!ConnectSeri)
-                //{
-                //    MessageBox.Show(" 串口打开失败,请检查串口设置..", "提示", MessageBoxButton.OK);
-                //    return;
-                //}
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.init);
 
-                IsSampling = true;
+                    //if (!ConnectSeri)
+                    //{
+                    //    MessageBox.Show(" 串口打开失败,请检查串口设置..", "提示", MessageBoxButton.OK);
+                    //    return;
+                    //}
 
-                bool success = false;
+                    IsSampling = true;
 
-                //[1. 通过泵抽取水样到储水池  ]
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                success = await FetchWater();
-                if (!success)
-                {
-                    return;
-                }
+                    bool success = false;
 
-                byte[] SensorPower = { PLCConfig.SensorPower };
-                success = ValveControl(100, SensorPower);
-                if (!success)
-                {
-                    return;
-                }
+                    //[1. 通过泵抽取水样到储水池  ]
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
 
-                //[ 2.采集传感器参数]
-                await Task.Delay(configData.WarmUpTime * 1000);
-                for (int i = 0; i < configData.SampleScale - 1; i++)
-                {
-                    byte[] data1 = { PLCConfig.CisternPumpBit };
-                    success = ValveControl(PLCConfig.Valve1Address, data1);
+                    success = await FetchWater();
                     if (!success)
                     {
                         return;
                     }
 
-                    await Task.Delay(2 * 60 * 1000);
+                    byte[] SensorPower = { PLCConfig.SensorPower };
+                    success = ValveControl(100, SensorPower);
+                    if (!success)
+                    {
+                        return;
+                    }
+
+                    //[ 2.采集传感器参数]
+                    await Task.Delay(configData.WarmUpTime * 1000);
+                    for (int i = 0; i < configData.SampleScale - 1; i++)
+                    {
+                        byte[] data1 = { PLCConfig.CisternPumpBit };
+                        success = ValveControl(PLCConfig.Valve1Address, data1);
+                        if (!success)
+                        {
+                            return;
+                        }
+
+                        await Task.Delay(2 * 60 * 1000);
+                        ReadSensorData();
+                        await mainWindow.Dispatcher.BeginInvoke(refreshData, bodData);
+
+
+                        byte[] Temdata = { PLCConfig.CisternValveBit };
+                        ValveControl(PLCConfig.Valve1Address, Temdata);
+                        await Task.Delay(1 * 60 * 1000);
+                    }
+
+                    //[ 启动COD开始采样]
+                    StartCod();
+                    Task<float> CodDataResult = await Task.Factory.StartNew(() => ReadCodData());
+
+                    //[ 3. 抽取标定液然后进行稀释放入到标液池,抽取清水清洗注射泵]
+                    //success = DiluteStandWater();
+                    //if (!success)
+                    //{
+                    //    return;
+                    //}
+
+                    //[ 4. 获取COD的值判断是否需要稀释]
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    manualevent.WaitOne();
+
+                    success = ValveControl(100, SensorPower);
+                    if (!success)
+                    {
+                        return;
+                    }
+                    await Task.Delay(configData.WarmUpTime * 1000);
                     ReadSensorData();
 
-                    byte[] Temdata = { PLCConfig.CisternValveBit };
-                    ValveControl(PLCConfig.Valve1Address, Temdata);
-                    await Task.Delay(1 * 60 * 1000);
-                }
+                    bodData.CodData = CodDataResult.Result;
 
-                //[ 启动COD开始采样]
-                StartCod();
-                Task<float> CodDataResult = await Task.Factory.StartNew(() => ReadCodData());
+                    int SampleDil = GetSampleDilByCod(bodData.CodData);
+                    configData.SampDil = SampleDil;
+                    //[ 5. 抽取样液进行稀释后放入样液池]
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    success = DiluteWater();
+                    if (!success)
+                    {
+                        return;
+                    }
 
-                //[ 3. 抽取标定液然后进行稀释放入到标液池,抽取清水清洗注射泵]
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                success = DiluteStandWater();
-                if (!success)
-                {
-                    return;
-                }
+                    //[ 6. 调用BOD使用标液池的标液]
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.BodStand);
+                    List<byte> TempData = new List<byte>();
+                    TempData.Add(PLCConfig.WashValveBit);
+                    ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
 
+                    //[ 7. 调用BOD使用样液池的样液]
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.BodSample);
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    TempData.Add(PLCConfig.SelectValveBit);
+                    ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
 
-                //[ 4. 获取COD的值判断是否需要稀释]
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                manualevent.WaitOne();
+                    if (ConnectSeri)
+                    {
+                        serialPortHelp.SetSampleDil((ushort)configData.SampDil);
+                        serialPortHelp.StartSampleMes();
+                        Thread.Sleep(10 * 60 * 1000);
+                    }
+                    //[ 8. 通过BOD获取最终计算值]
 
-                success = ValveControl(100, SensorPower);
-                if (!success)
-                {
-                    return;
-                }
-                await Task.Delay(configData.WarmUpTime * 1000);
-                ReadSensorData();
+                    if (ConnectSeri)
+                    {
+                        float[] recvData = serialPortHelp.BodCurrentData();
+                        if (recvData != null && recvData.Length > 1)
+                        {
+                            bodData.Bod = recvData[0];
+                            bodData.BodElePotDrop = recvData[1];
+                            StreamWriter streamWriter = File.CreateText("D:\\test.txt");
+                            streamWriter.WriteLine(bodData.Bod.ToString());
+                            streamWriter.Close();
+                        }
+                    }
 
-                bodData.CodData = CodDataResult.Result;
-                //[ 5. 抽取样液进行稀释后放入样液池]
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                success = DiluteWater();
-                if (!success)
-                {
-                    return;
-                }
+                    await mainWindow.Dispatcher.BeginInvoke(refreshData, bodData);
 
-                //[ 6. 调用BOD使用标液池的标液]
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.BodStand);
-                List<byte> TempData = new List<byte>();
-                TempData.Add(PLCConfig.WashValveBit);
-                ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
+                    await mainWindow.Dispatcher.BeginInvoke(refreshProcessStatus, ProcessType.DrainEmpty);
 
-                if (ConnectSeri)
-                {
-                    serialPortHelp.SetStandDeep(20);
-                    serialPortHelp.StartStandMeas();
-                    Thread.Sleep(10 * 60 * 1000);
-                }
+                    if (ConnectSeri)
+                    {
+                        serialPortHelp.StartWash();
+                    }
 
-                //[ 7. 调用BOD使用样液池的样液]
-                mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.BodSample);
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                TempData.Add(PLCConfig.SelectValveBit);
-                ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
+                    await Task.Delay(28 * 60 * 1000);
+                    //[ BOD的清洗液进行循环]
 
-                if (ConnectSeri)
-                {
-                    serialPortHelp.SetSampleDil((ushort)configData.SampDil);
-                    serialPortHelp.StartSampleMes();
-                    Thread.Sleep(10 * 60 * 1000);
                 }
-                //[ 8. 通过BOD获取最终计算值]
-
-                if (ConnectSeri)
+                catch (Exception ex)
                 {
-                    bodData.Bod = serialPortHelp.BodCurrentData();
                     StreamWriter streamWriter = File.CreateText("D:\\test.txt");
-                    streamWriter.WriteLine(bodData.Bod.ToString());
+                    string message = ex.Message;
+                    streamWriter.WriteLine(message);
+                    streamWriter.WriteLine(ex.StackTrace);
                     streamWriter.Close();
-                    mainWindow.Dispatcher.Invoke(refreshData, bodData);
                 }
-
-                mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.DrainEmpty);
-
-                if (ConnectSeri)
+                finally
                 {
-                    serialPortHelp.StartWash();
+                    //[ 9. 通过判断BOD的值排空标液,样液和沉淀池里的水样]
+                    byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
+                    DrianEmpty(Valves);
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.Waitding);
+
+                    IsSampling = false;
+                    mainWindow.Dispatcher.Invoke(refreshStaus, SysStatus.Complete);
                 }
-
-                await Task.Delay(28 * 60 * 1000);
-                //[ BOD的清洗液进行循环]
-
             }
-            catch (Exception ex)
-            {
-                StreamWriter streamWriter = File.CreateText("D:\\test.txt");
-                string message = ex.Message;
-                streamWriter.WriteLine(message);
-                streamWriter.WriteLine(ex.StackTrace);
-                streamWriter.Close();
-            }
-            finally
-            {
-                //[ 9. 通过判断BOD的值排空标液,样液和沉淀池里的水样]
-                byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
-                DrianEmpty(Valves);
-                mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.Waitding);
-
-                IsSampling = false;
-                mainWindow.Dispatcher.Invoke(refreshStaus, SysStatus.Complete);
-            }
+            
         }
 
         /// <summary>
@@ -813,6 +821,39 @@ namespace BodDetect
 
             return true;
         }
+
+        /// <summary>
+        /// 标定流程
+        /// </summary>
+        /// <returns></returns>
+        public async Task StartBodStandWater() 
+        {
+            using (await s_asyncSemaphore.WaitAsync())
+            {
+                try
+                {
+                    bool Success = DiluteStandWater();
+                    if (!Success)
+                    {
+                        return;
+                    }
+
+                    if (ConnectSeri)
+                    {
+                        serialPortHelp.SetStandDeep(20);
+                        serialPortHelp.StartStandMeas();
+                        await Task.Delay(10 * 60 * 1000);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+
+                return;
+            }
+        }
+
+
 
         /// <summary>
         /// 稀释水样流程
@@ -857,6 +898,10 @@ namespace BodDetect
                 TempTimes--;
             }
 
+            if (configData.SampDil < 1) 
+            {
+                configData.SampDil = 1;
+            }
 
             int waterVol = configData.SampVol - (configData.SampVol / configData.SampDil);
             int Times1 = configData.SampVol / configData.SampDil / 5;
@@ -976,7 +1021,13 @@ namespace BodDetect
             Thread.Sleep(1000);
 
             success = PunpAbsorb(PunpCapType.Point2ml);
-            Thread.Sleep(2000);
+            Thread.Sleep(5000);
+
+            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            pLCParams[1].data[0] = PLCConfig.NormalValveBit;
+
+            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
 
             if (!success)
             {
@@ -990,7 +1041,7 @@ namespace BodDetect
             pLCParams[0].data[0] = PLCConfig.WaterValveBit;
             pLCParams[1].data[0] = PLCConfig.NormalValveBit;
 
-            Times1 = 9;
+            Times1 = 8;
 
             for (int i = 0; i < Times1; i++)
             {
@@ -1106,9 +1157,6 @@ namespace BodDetect
             streamWriter.WriteLine(bodData.PHData.ToString());
             streamWriter.WriteLine(bodData.Uv254Data.ToString());
             streamWriter.Close();
-
-            mainWindow.Dispatcher.Invoke(refreshData, bodData);
-
         }
 
         public void StartCod()
@@ -1160,6 +1208,33 @@ namespace BodDetect
 
                 return false;
             }
+        }
+
+        public int GetSampleDilByCod(float CodDdata) 
+        {
+            double CodDil = 0;
+
+            switch (configData.sampleDilType)
+            {
+                case SampleDilType.WarerIn:
+                    CodDil = 0.5;
+                    break;
+                case SampleDilType.WaterOut:
+                    CodDil = 0.3;
+                    break;
+                default:
+                    break;
+            }
+
+            if (CodDil == 0)
+            {
+                return 0;
+            }
+
+            double Dil = CodDdata * CodDil / 20;
+
+            return Convert.ToInt32(Dil);
+
         }
 
         public void CheckCisternIsFull(object time)
@@ -1346,6 +1421,7 @@ namespace BodDetect
 
                     manualevent.Dispose();
                     resetEvent.Dispose();
+                    s_asyncSemaphore.Dispose();
 
                     try
                     {

@@ -735,7 +735,7 @@
             <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
             <Setter Property="Height" Value="35"/>
         </Style>
-       
+
         <local:BoolConverter x:Key="debugModeCon"/>
 
         <Style TargetType="Metro:MetroTextBox">
@@ -1326,64 +1326,7 @@
                             </DockPanel>
                         </Viewbox>
                     </TabItem>
-                    <TabItem Header="流程调试" Style="{StaticResource MahApps.Styles.TabItem}">
-                        <Metro:MetroWaterfallFlow ListWidth="600">
-                            <GroupBox Style="{StaticResource MahApps.Styles.GroupBox}" Header="流程调试" >
-
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition Height="20"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-
-
-                                    <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
-                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="100" Height="100" Background="#CC0078D7" BorderThickness="5" Click="MeasureBod_Click"></Button>
-                                        <TextBlock Text="测量BOD"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
-
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1">
-                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="100" Height="100" Background="#CC0078D7" BorderThickness="5" Click="FetchWater_Click" ></Button>
-                                        <TextBlock Text="采水"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
-
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical">
-                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="100" Height="100" Background="#CC0078D7" BorderThickness="5"   Click="restart_Click"></Button>
-                                        <TextBlock Text="复位"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
-
-                                    </StackPanel>
-
-
-                                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
-
-                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="100" Height="100" Background="#CC0078D7" BorderThickness="5"  Click="MeasureCod_Click"></Button>
-                                        <TextBlock Text="开始COD测量"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
-
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical">
-
-                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="100" Height="100" Background="#CC0078D7" BorderThickness="5"  Click="UpdataData_Click" ></Button>
-                                        <TextBlock Text="获取其他传感器数据"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
-
-                                    </StackPanel>
-
-                                </Grid>
-
-                            </GroupBox>
-
-                        </Metro:MetroWaterfallFlow>
-                    </TabItem>
-                    <TabItem Name="SingleProcessTab" Header="单个流程" Style="{StaticResource MahApps.Styles.TabItem}">
+                    <TabItem Name="SingleProcessTab" Header="单个流程调试" Style="{StaticResource MahApps.Styles.TabItem}">
                         <StackPanel >
                             <!--<StackPanel>-->
                             <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="准备流程">
@@ -1429,10 +1372,8 @@
                                                         </StackPanel>
                                                     </Metro:MetroGroupBox>
                                                 </Grid>
-
                                             </StackPanel>
                                         </GroupBox>
-
                                     </Grid>
                                     <Grid>
                                         <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}"  Header="样液流程"  >
@@ -1473,62 +1414,55 @@
                                         </GroupBox>
                                     </Grid>
                                     <Grid>
-                                        <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="BOD流程" Padding="10,20,10,20"  Grid.ColumnSpan="2" Grid.RowSpan="2">
+                                        <GroupBox Style="{StaticResource MahApps.Styles.GroupBox}" Header="流程调试" >
+
                                             <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition Height="20"/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition/>
                                                     <ColumnDefinition/>
-
+                                                    <ColumnDefinition/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <Metro:MetroGroupBox Header="控制流程"  Grid.Column="0"  Width="300">
 
-                                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="MeasureBod_Click"></Button>
+                                                    <TextBlock Text="测量BOD"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
-                                                        <Metro:MetroTextBox Width="280" Name="SetSampleDli" Title="设置BOD稀释倍数:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定" ButtonClick="DrainSample_ButtonClick" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
-                                                        <Metro:MetroTextBox Width="280" Name="SetStandData" Title="设置BOD标准值:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定"  GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" Margin="0,20,0,0" />
+                                                </StackPanel>
 
-                                                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0" >
-                                                            <Metro:MetroButton Name="BodSample" Content="Bod开始测量样品" Width="130" Height="40" Click="BodSample_Click" MetroButtonState="None"/>
+                                                <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1">
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="FetchWater_Click" ></Button>
+                                                    <TextBlock Text="采水"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
-                                                            <Metro:MetroButton Name="BodStand" Content="Bod开始标准测量" Width="130" Height="40" Click="BodStand_Click" MetroButtonState="None" Margin="20,0,0,0"/>
-                                                        </StackPanel>
-                                                        <Metro:MetroButton Name="BodWash" Content="Bod开始清洗" Width="100" Height="40" Click="BodWash_Click" MetroButtonState="None" Margin="0,20,0,0" HorizontalAlignment="Left"/>
-                                                    </StackPanel>
-                                                </Metro:MetroGroupBox>
+                                                </StackPanel>
 
-                                                <Metro:MetroGroupBox Header="获取BOD状态"  Grid.Column="1" Margin="10,0,0,0" >
-                                                    <Grid>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition/>
-                                                            <RowDefinition/>
-                                                            <RowDefinition/>
+                                                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical">
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5"   Click="restart_Click"></Button>
+                                                    <TextBlock Text="复位"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+                                                </StackPanel>
 
-                                                        </Grid.RowDefinitions>
 
-                                                        <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                            <Metro:MetroButton Name="GetBodStatus" Content="获取bod状态" Width="120" Height="40"></Metro:MetroButton>
-                                                            <TextBlock x:Name="BodStatus" Text="0" Width="100" Height="20" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
 
-                                                        </StackPanel>
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5"  Click="MeasureCod_Click"></Button>
+                                                    <TextBlock Text="开始COD测量"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
-                                                        <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                                            <Metro:MetroButton Name="GetBodStandData" Content="获取bod标准值" Width="120" Height="40"></Metro:MetroButton>
-                                                            <TextBlock x:Name="BodStandData" Text="0" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></TextBlock>
-                                                            <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
-                                                        </StackPanel>
+                                                </StackPanel>
 
-                                                        <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                                            <Metro:MetroButton Name="GetBodData" Content="获取当前bod数值" Width="120" Height="40" Click="GetBodData_Click"></Metro:MetroButton>
-                                                            <TextBlock x:Name="BodData" Text="0" Margin="20,0,0,0"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="50"></TextBlock>
-                                                            <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </Metro:MetroGroupBox>
+                                                <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical">
 
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5"  Click="UpdataData_Click" ></Button>
+                                                    <TextBlock Text="获取其他传感器数据"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+
+                                                </StackPanel>
 
                                             </Grid>
-
 
                                         </GroupBox>
 
@@ -1570,6 +1504,212 @@
                                 </Metro:MetroWaterfallFlow>
                             </Grid>
                         </StackPanel>
+                    </TabItem>
+                    <TabItem Header="BOD流程调试" Style="{StaticResource MahApps.Styles.TabItem}">
+                        <Metro:MetroWaterfallFlow ListWidth="600">
+                            <Grid>
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="BOD流程控制" Padding="10,20,10,20"  Grid.RowSpan="2" >
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <Metro:MetroGroupBox Header="标液测量控制"  Grid.Row="0">
+                                                        <StackPanel Orientation="Vertical">
+                                                            <Metro:MetroTextBox Width="280" Name="SetStandData" Title="设置BOD标准浓度:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定"   Margin="0,10,0,0" ButtonClick="SetBodStand_click" />
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Metro:MetroButton Name="BodStand" Content="Bod开始标准测量" Width="130" Height="40" Click="StartBodStand_click" MetroButtonState="None" Margin="0,20,0,0"/>
+                                                                <Metro:MetroButton  Content="取消标准做样" Width="130" Height="40" Click="StopBodAndWash" MetroButtonState="None" Margin="30,20,0,0" />
+                                                            </StackPanel>
+
+                                                        </StackPanel>
+                                                    </Metro:MetroGroupBox>
+
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                                    <Metro:MetroGroupBox Header="样液测量控制"  Grid.Row="1" >
+                                                        <StackPanel Orientation="Vertical">
+                                                            <Metro:MetroTextBox Width="280" Name="SetSampleDli" Title="设置BOD稀释倍数:" TitleForeground="Red" FontSize="14"  ButtonTitle="确定" ButtonClick="SetBodSampleDil_click" Margin="0,10,0,0"  />
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Metro:MetroButton Name="BodSample" Content="Bod开始测量样品" Width="130" Height="40" Click="StartBodSample_click" MetroButtonState="None" Margin="0,20,0,0" HorizontalAlignment="Left"/>
+                                                                <Metro:MetroButton  Content="取消做样" Width="100" Height="40" Click="StopBodAndWash" MetroButtonState="None" Margin="30,20,0,0" HorizontalAlignment="Right"/>
+
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Metro:MetroGroupBox>
+
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                                            <Metro:MetroGroupBox Header="其他状态控制" Grid.Row="2">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                        <ColumnDefinition/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Orientation="Vertical"  Grid.Column="0">
+                                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="StopBodAndWash"></Button>
+                                                        <TextBlock Text="取消做样,进行清洗"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Row="0"  Grid.Column="1">
+                                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="ClearAlram_click" ></Button>
+                                                        <TextBlock Text="清除警告"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                                        <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5"   Click="ResetBod_click"></Button>
+                                                        <TextBlock Text="系统复位"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                </Grid>
+
+                                            </Metro:MetroGroupBox>
+                                        </StackPanel>
+
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                            <Grid>
+                                <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="获取BOD状态" Padding="10,20,10,20"  Grid.RowSpan="2">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0"  Orientation="Horizontal">
+                                            <Metro:MetroTextBox Width="280"  Title="当前BOD状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取"/>
+                                            <Metro:MetroTextBox Width="280"  Title="当前采样状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1"  Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Metro:MetroTextBox Width="280"  Title="电极电位值:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取"/>
+                                            <Metro:MetroTextBox Width="280"  Title="设备告警状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2"  Margin="0,10,0,0">
+                                            <Metro:MetroGroupBox >
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition/>
+                                                                <RowDefinition/>
+                                                            </Grid.RowDefinitions>
+                                                            <StackPanel Grid.Row="0" Orientation="Vertical">
+                                                                <Grid >
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="50"/>
+                                                                        <RowDefinition Height="50"/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                        <ColumnDefinition Width="50"/>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                        <Label Content="BOD标准值：" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <Label x:Name="BodStandData" Content="0"   Width="50" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                        <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                        <Label Content="电位降：" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <Label  Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                        <Label Content="单位：uA" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                                                <Metro:MetroButton Name="GetBodStandData" Content="获取数据" Width="60" Height="40" MetroButtonState="Red"></Metro:MetroButton>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition/>
+                                                                <RowDefinition/>
+                                                            </Grid.RowDefinitions>
+                                                            <StackPanel Grid.Row="0" Orientation="Vertical">
+                                                                <Grid >
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="50"/>
+                                                                        <RowDefinition Height="50"/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                        <ColumnDefinition Width="50"/>
+                                                                        <ColumnDefinition Width="100"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                        <Label Content="当前BOD值：" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <Label  Content="0"   Width="50" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                        <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                        <Label Content="电位降：" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <Label  Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                                        <Label Content="单位：uA" VerticalContentAlignment="Center"></Label>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                                                <Metro:MetroButton Content="获取数据" Width="60" Height="40" MetroButtonState="Red"></Metro:MetroButton>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Metro:MetroGroupBox>
+                                        </StackPanel>
+
+
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                        </Metro:MetroWaterfallFlow>
                     </TabItem>
 
                 </TabControl>
@@ -1719,7 +1859,7 @@
 
                     <StackPanel Grid.Row="1" Margin="5,0,0,0" Background="White">
                         <Metro:MetroTabControl x:Name="DataAlarm"  Foreground="#FF2F48B8" FontSize="14" >
-                            <Metro:MetroTabItem Header="当天报警信息" Icon="/Resources/tabIcon.png">
+                            <Metro:MetroTabItem Header="未处理报警信息" Icon="/Resources/tabIcon.png">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -1849,19 +1989,31 @@
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition/>
                                                             <RowDefinition/>
+                                                            <RowDefinition/>
                                                         </Grid.RowDefinitions>
                                                         <StackPanel Grid.Row="0" Orientation="Horizontal">
 
                                                             <Metro:MetroTextBox Name="StandVol" Title="标液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50">
                                                             </Metro:MetroTextBox>
                                                             <Label Content="(单位:ml)"></Label>
-                                                            <Metro:MetroTextBox Name="StandDil" Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10"/>
+                                                            <Metro:MetroTextBox Name="StandDil" Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="250" IsEnabled="False" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
                                                             <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50"/>
                                                             <Label Content="(单位:ml)"></Label>
-                                                            <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10"/>
+                                                            <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10" Visibility="Collapsed"/>
+
                                                         </StackPanel>
+                                                        <StackPanel Grid.Row="2" Margin="0,20,0,0">
+                                                            <Metro:MetroGroupBox Header="样液稀释模式">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <RadioButton Style="{StaticResource BoxRadioButton}" Margin="10,1,1,1" Content="进水口模式"  Background="{DynamicResource MahApps.Brushes.Accent}" FontSize="20" Width="150" Height="40" Checked="WaterInModel_Checked"></RadioButton>
+                                                                    <RadioButton Style="{StaticResource BoxRadioButton}" Margin="40,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="150" Height="40" Content="出水口模式" Checked="WaterOutModel_Checked"></RadioButton>
+                                                                </StackPanel>
+                                                               
+                                                            </Metro:MetroGroupBox>
+                                                        </StackPanel>
+                                                        
                                                     </Grid>
                                                 </GroupBox>
                                                 <GroupBox Header="流程参数配置" Style="{StaticResource MahApps.Styles.GroupBox}" Margin="0,20,0,0">
@@ -1967,7 +2119,7 @@
                                                         <Grid>
                                                             <Grid.RowDefinitions>
                                                                 <RowDefinition/>
-                                                                <RowDefinition Height="10"/>
+                                                                <RowDefinition Height="20"/>
                                                                 <RowDefinition/>
                                                             </Grid.RowDefinitions>
 
@@ -1977,15 +2129,15 @@
 
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Grid.Row="2">
-                                                                <Metro:MetroTextBox  Text="1" Title="刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
-                                                                <Label Content="(单位：秒)" VerticalContentAlignment="Center"></Label>
+                                                                <Metro:MetroTextBox  Text="20" Title="状态刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                                <Label Content="(单位：分钟)" VerticalContentAlignment="Center"></Label>
                                                             </StackPanel>
                                                         </Grid>
 
                                                     </StackPanel>
 
-                                                    <StackPanel Grid.Column="1">
-                                                        <local:TimeEditer Hour="{Binding Hour,Mode=TwoWay}" Minute="{Binding Minute,Mode=TwoWay}" Second="{Binding Seccond,Mode=TwoWay}" Width="250" Height="100" HorizontalAlignment="Left" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                        <!--<local:TimeEditer Hour="{Binding Hour,Mode=TwoWay}" Minute="{Binding Minute,Mode=TwoWay}" Second="{Binding Seccond,Mode=TwoWay}" Width="250" Height="100" HorizontalAlignment="Left" />
                                                         <TextBlock Margin="0 10 0 0" FontSize="18">
                                                             <Run Text="当前时间：" />
                                                             <Run Text="{Binding Hour}"/>
@@ -1994,7 +2146,9 @@
                                                             <Run Text="分"/>
                                                             <Run Text="{Binding Seccond}"/>
                                                             <Run Text="秒"/>
-                                                        </TextBlock>
+                                                        </TextBlock>-->
+
+
                                                     </StackPanel>
                                                 </Grid>
 

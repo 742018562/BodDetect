@@ -27,6 +27,11 @@ namespace BodDetect.BodDataManage
         public int SampDil { get; set; }
 
         /// <summary>
+        /// 样液稀释模式
+        /// </summary>
+        public SampleDilType sampleDilType { get; set; }
+
+        /// <summary>
         /// 进水超时
         /// </summary>
         public int InietTime { get; set; }

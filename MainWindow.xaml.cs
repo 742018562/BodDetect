@@ -40,7 +40,7 @@ namespace BodDetect
 
         DispatcherTimer timer = new DispatcherTimer();
         DispatcherTimer BodTimer = new DispatcherTimer();
-        DispatcherTimer WaterSampleTimer = new DispatcherTimer();
+        DispatcherTimer StandWaterTimer = new DispatcherTimer();
         DispatcherTimer RunTimer = new DispatcherTimer();
         DispatcherTimer CodTimer = new DispatcherTimer();
 
@@ -146,6 +146,9 @@ namespace BodDetect
 
                 initConfig();
 
+                StandWaterTimer.Tick += StartStandWaterAsync;
+                StandWaterTimer.Interval = new TimeSpan(3, 0, 0, 0);
+                StandWaterTimer.Start();
             }
             catch (Exception)
             {
@@ -223,7 +226,7 @@ namespace BodDetect
 
         }
 
-        private void RefreshData(BodData data)
+        private async void RefreshData(BodData data)
         {
             mainWindow_Model.BodData = data.Bod;
             mainWindow_Model.CodData = data.CodData;
@@ -234,7 +237,6 @@ namespace BodDetect
             mainWindow_Model.Uv254Data = data.Uv254Data;
             mainWindow_Model.HumidityDataData = data.HumidityData;
             mainWindow_Model.AirTemperatureData = data.AirTemperatureData;
-
 
             HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
@@ -252,6 +254,10 @@ namespace BodDetect
             hisDatabase.CreateTime = dateTime.ToLongTimeString();
 
             mainWindow_Model.HisParamData.AddData(hisDatabase);
+
+            HisDataBaseModel hisDataBaseModel = new HisDataBaseModel();
+            hisDatabase.CopyToHisDataBaseModel(hisDataBaseModel);
+            await Task.Factory.StartNew(()=> BodSqliteHelp.InsertHisBodData(hisDataBaseModel));
         }
 
         private void MetroButton_Click_2(object sender, RoutedEventArgs e)
@@ -1326,78 +1332,78 @@ namespace BodDetect
             await Task.Factory.StartNew(() => bodHelper.DiluteStandWater());
             return;
 
-            try
-            {
-                string cap = StandAll.Text;
-                string zoom = Dilution.Text;
+            //try
+            //{
+            //    string cap = StandAll.Text;
+            //    string zoom = Dilution.Text;
 
-                if (string.IsNullOrEmpty(cap))
-                {
-                    MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
-                }
+            //    if (string.IsNullOrEmpty(cap))
+            //    {
+            //        MessageBox.Show(" 请输入抽取容量.", "提示", MessageBoxButton.OK);
+            //    }
 
-                int capData = Convert.ToInt32(cap);
-                int zoomdata = Convert.ToInt32(zoom);
+            //    int capData = Convert.ToInt32(cap);
+            //    int zoomdata = Convert.ToInt32(zoom);
 
-                int waterData = capData * (zoomdata - 1);
+            //    int waterData = capData * (zoomdata - 1);
 
-                int times = capData / 5;
+            //    int times = capData / 5;
 
-                int extraTimes = capData % 5;
+            //    int extraTimes = capData % 5;
 
-                byte[] StandValve = { PLCConfig.StandardValveBit };
+            //    byte[] StandValve = { PLCConfig.StandardValveBit };
 
-                byte[] StandBodValve = { PLCConfig.NormalValveBit };
+            //    byte[] StandBodValve = { PLCConfig.NormalValveBit };
 
-                byte[] waterValve = { PLCConfig.WaterValveBit };
+            //    byte[] waterValve = { PLCConfig.WaterValveBit };
 
-                List<byte[]> data = new List<byte[]>();
-                List<ushort> address = new List<ushort>();
-                data.Add(StandValve);
-                data.Add(StandBodValve);
+            //    List<byte[]> data = new List<byte[]>();
+            //    List<ushort> address = new List<ushort>();
+            //    data.Add(StandValve);
+            //    data.Add(StandBodValve);
 
-                address.Add(PLCConfig.Valve2Address);
-                address.Add(PLCConfig.Valve2Address);
+            //    address.Add(PLCConfig.Valve2Address);
+            //    address.Add(PLCConfig.Valve2Address);
 
-                while (times > 0)
-                {
-                    PumpProcess(data, address, PunpCapType.fiveml);
-                    times--;
-                }
+            //    while (times > 0)
+            //    {
+            //        PumpProcess(data, address, PunpCapType.fiveml);
+            //        times--;
+            //    }
 
-                while (extraTimes > 0)
-                {
-                    PumpProcess(data, address, PunpCapType.oneml);
-                    extraTimes--;
-                }
-
-
-                times = waterData / 5;
-                extraTimes = waterData % 5;
-                data[0] = waterValve;
-                data[1] = StandBodValve;
-
-                while (times > 0)
-                {
-                    PumpProcess(data, address, PunpCapType.fiveml);
-                    times--;
-                }
-
-                while (extraTimes > 0)
-                {
-                    PumpProcess(data, address, PunpCapType.oneml);
-                    extraTimes--;
-                }
+            //    while (extraTimes > 0)
+            //    {
+            //        PumpProcess(data, address, PunpCapType.oneml);
+            //        extraTimes--;
+            //    }
 
 
-                byte[] data1 = { 0 };
-                bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
-            }
-            catch (Exception)
-            {
+            //    times = waterData / 5;
+            //    extraTimes = waterData % 5;
+            //    data[0] = waterValve;
+            //    data[1] = StandBodValve;
+
+            //    while (times > 0)
+            //    {
+            //        PumpProcess(data, address, PunpCapType.fiveml);
+            //        times--;
+            //    }
+
+            //    while (extraTimes > 0)
+            //    {
+            //        PumpProcess(data, address, PunpCapType.oneml);
+            //        extraTimes--;
+            //    }
 
 
-            }
+            //    byte[] data1 = { 0 };
+            //    bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
+            //}
+            //catch (Exception)
+            //{
+
+
+            //}
         }
 
         private void SampleDilution_Click(object sender, RoutedEventArgs e)
@@ -1656,7 +1662,6 @@ namespace BodDetect
 
                 if (!bodHelper.IsSampling)
                 {
-
                     initConfig();
                     RunTimer.Tick += BodRun;
                     RunTimer.Interval = new TimeSpan(SpaceHour, 0, 0);
@@ -1679,6 +1684,12 @@ namespace BodDetect
 
         }
 
+
+        public async void StartStandWaterAsync(object sender, EventArgs e) 
+        {
+            await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+        }
+
         public void initConfig()
         {
             if (string.IsNullOrEmpty(sampleSpac.Text) ||
@@ -1692,8 +1703,7 @@ namespace BodDetect
                 MessageBox.Show(" 流程配置有参数未设置,请设置后再启动.", "提示", MessageBoxButton.OK);
             }
 
-
-            configData.SampDil = Convert.ToInt32(SampDil.Text);
+            //configData.SampDil = Convert.ToInt32(SampDil.Text);
             configData.SampVol = Convert.ToInt32(SampVol.Text);
             configData.StandDil = Convert.ToInt32(StandDil.Text);
             configData.StandVol = Convert.ToInt32(StandVol.Text);
@@ -1814,6 +1824,23 @@ namespace BodDetect
 
         }
 
+
+        private void WaterInModel_Checked(object sender, RoutedEventArgs e) 
+        {
+            if (configData != null) 
+            {
+                configData.sampleDilType = SampleDilType.WarerIn;
+            }
+        }
+
+        private void WaterOutModel_Checked(object sender, RoutedEventArgs e) 
+        {
+            if (configData != null)
+            {
+                configData.sampleDilType = SampleDilType.WaterOut;
+            }
+        }
+
         private void WashValve_Click(object sender, RoutedEventArgs e)
         {
             byte[] data = { 0 };
@@ -1877,7 +1904,6 @@ namespace BodDetect
             catch (Exception)
             {
 
-
             }
 
         }
@@ -1904,28 +1930,23 @@ namespace BodDetect
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:指定 IFormatProvider", Justification = "<挂起>")]
-        private void GetBodData_Click(object sender, RoutedEventArgs e)
+        private  void GetBodData_Click(object sender, RoutedEventArgs e)
         {
+            
             StreamWriter streamWriter = File.CreateText("D:\\test1111.txt");
             try
             {
                 byte[] data = { 0 };
-
-
-
                 bodHelper.ValveControl(PLCConfig.Valve1Address, data);
 
                 //bodHelper.serialPortHelp.OpenPort();
                 streamWriter.WriteLine("开始读数据");
 
-                bodHelper.serialPortHelp.ReadBodFun(RegStatus.CurrentBod, 3);
+                float[] BodData = bodHelper.serialPortHelp.BodCurrentData();
 
-                data = bodHelper.serialPortHelp.ReadData();
-                streamWriter.WriteLine("读取数据完成");
-
-                if (data == null)
+                if (BodData == null)
                 {
-                    streamWriter.WriteLine("data == null");
+                    streamWriter.WriteLine("BodData == null");
 
                     return;
                 }
@@ -2106,7 +2127,7 @@ namespace BodDetect
 
                 timer.Stop();
                 BodTimer.Stop();
-                WaterSampleTimer.Stop();
+                StandWaterTimer.Stop();
                 RunTimer.Stop();
                 _loading.animationTimer.Stop();
 
@@ -2130,6 +2151,12 @@ namespace BodDetect
                     // TODO: 释放托管状态(托管对象)
                     bodHelper.Dispose();
                     StopCts.Dispose();
+
+                    if (kbpr != null) 
+                    {
+                        kbpr.Kill();
+                        kbpr.Dispose();
+                    }
                 }
 
                 // TODO: 释放未托管的资源(未托管的对象)并替代终结器
@@ -2151,7 +2178,6 @@ namespace BodDetect
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
 
         #endregion
 

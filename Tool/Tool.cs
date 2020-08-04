@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace BodDetect
 {
-    public enum SysStatus 
+    public enum SysStatus
     {
         Sampling = 1,
         Pause,
@@ -46,7 +47,7 @@ namespace BodDetect
         preDrain
     }
 
-    public enum ProcessType 
+    public enum ProcessType
     {
         init,
         SampleWater,
@@ -82,7 +83,7 @@ namespace BodDetect
 
             try
             {
-                if (kbpr==null || kbpr.HasExited)
+                if (kbpr == null || kbpr.HasExited)
                 {
                     kbpr = System.Diagnostics.Process.Start("osk.exe");
                 }
@@ -133,7 +134,7 @@ namespace BodDetect
         public static void HideInputPanel(Process kbpr)
         {
 
-            if (kbpr !=null && !kbpr.HasExited)
+            if (kbpr != null && !kbpr.HasExited)
             {
                 kbpr.CloseMainWindow();
 
@@ -200,7 +201,6 @@ namespace BodDetect
             return r;
         }
 
-
         public static float[] DoFloats(byte[] data)
         {
             float[] r = new float[data.Length / 4];
@@ -256,9 +256,9 @@ namespace BodDetect
             return r;
         }
 
-        public static bool CompareBytes(byte[] LeftData,byte[] RightData) 
+        public static bool IsSameBytes(byte[] LeftData, byte[] RightData)
         {
-            if (LeftData == null || RightData == null) 
+            if (LeftData == null || RightData == null)
             {
                 return false;
             }
@@ -266,14 +266,14 @@ namespace BodDetect
             int leftCount = LeftData.Length;
             int RightCount = RightData.Length;
 
-            if (leftCount != RightCount) 
+            if (leftCount != RightCount)
             {
                 return false;
             }
 
             for (int i = 0; i < leftCount; i++)
             {
-                if (LeftData[i] != RightData[i]) 
+                if (LeftData[i] != RightData[i])
                 {
                     return false;
                 }
@@ -281,6 +281,41 @@ namespace BodDetect
 
             return true;
         }
+
+        public static bool CheckCRC16(byte[] data)
+        {
+            int len = data.Length;
+
+            if (len - 2 <= 0)
+            {
+                return false;
+            }
+
+            byte[] CRCData = { 0, 0 };
+
+
+            ushort crc = 0xFFFF;
+
+            for (int i = 0; i < len - 2; i++)
+            {
+                crc = (ushort)(crc ^ (data[i]));
+                for (int j = 0; j < 8; j++)
+                {
+                    crc = (crc & 1) != 0 ? (ushort)((crc >> 1) ^ 0xA001) : (ushort)(crc >> 1);
+                }
+            }
+            CRCData[0] = (byte)((crc & 0xFF00) >> 8);  //高位置
+            CRCData[1] = (byte)(crc & 0x00FF);         //低位置
+
+            if (CRCData[0] != data[len - 2] || CRCData[1] != data[len - 1]) 
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
         #endregion
 
 

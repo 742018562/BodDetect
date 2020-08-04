@@ -11,7 +11,7 @@ using System.Windows.Threading;
 
 namespace BodDetect
 {
-    public  class SerialPortHelp : IDisposable
+    public class SerialPortHelp : IDisposable
     {
         /// <summary>
         /// SerialPort对象
@@ -30,9 +30,8 @@ namespace BodDetect
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            throw new NotImplementedException();
+            byte[] data = ReadData();
         }
-
 
         public bool OpenPort()
         {
@@ -44,6 +43,7 @@ namespace BodDetect
                 serialPort.Open();
                 serialPort.DiscardInBuffer();
                 serialPort.DiscardOutBuffer();
+                //serialPort.DataReceived += SerialPort_DataReceived;
                 flag = true;
             }
             catch (Exception)
@@ -71,6 +71,16 @@ namespace BodDetect
             return flag;
         }
 
+        public bool IsAlive() 
+        {
+            if (serialPort == null) 
+            {
+                return false;
+            }
+
+            return serialPort.IsOpen;
+        }
+
         private void ConfigurePort()
         {
             serialPort.PortName = "COM1";
@@ -80,7 +90,7 @@ namespace BodDetect
             serialPort.StopBits = StopBits.One;
         }
 
-        public void ReadBodFun(RegStatus regStatus, Int32 iRegCount) 
+        private void ReadBodFun(RegStatus regStatus, Int32 iRegCount)
         {
             List<byte> Message = new List<byte>();
 
@@ -89,7 +99,7 @@ namespace BodDetect
             ushort temp = (ushort)regStatus;
             byte RegHighAddress = (byte)(temp >> 8);
             byte RegLowAddress = (byte)temp;
-            byte RegCountHighAddress =(byte)(iRegCount >> 8);
+            byte RegCountHighAddress = (byte)(iRegCount >> 8);
             byte RegCountLowAddress = (byte)iRegCount;
 
             Message.Add(Address);
@@ -107,18 +117,19 @@ namespace BodDetect
             SerialPortWrite(Message.ToArray());
         }
 
-        public void StartStandMeas() 
+        private byte[] BodCtrlFun(RegCtrl regCtrl, Int32 Data)
         {
             List<byte> Message = new List<byte>();
 
             byte Address = SerialPortConfig.Address;
             byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            byte RegHighAddress = (int)RegCtrl.Start_Stand >> 8;
 
-            ushort temp = (ushort)RegCtrl.Start_Stand;
+            ushort temp = (ushort)regCtrl;
+            byte RegHighAddress = (byte)(temp >> 8);
             byte RegLowAddress = (byte)temp;
-            byte DataHighAddress = 0X00;
-            byte DataLowAddress = 0x01;
+
+            byte DataHighAddress = (byte)(Data >> 8);
+            byte DataLowAddress = (byte)Data;
 
             Message.Add(Address);
             Message.Add(FunCode);
@@ -133,76 +144,149 @@ namespace BodDetect
             Message.Add(Crc16[0]);
 
             SerialPortWrite(Message.ToArray());
+
+            return Message.ToArray();
         }
 
-
-        public void StartSampleMes() 
+        public bool StartStandMeas()
         {
-            List<byte> Message = new List<byte>();
 
-            byte Address = SerialPortConfig.Address;
-            byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            byte RegHighAddress = (int)RegCtrl.Start_Sample >> 8;
-            ushort temp = (ushort)RegCtrl.Start_Sample;
-            byte RegLowAddress = (byte)temp;
-            byte DataHighAddress = 0X00;
-            byte DataLowAddress = 0x01;
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Start_Stand, 1);
 
-            Message.Add(Address);
-            Message.Add(FunCode);
-            Message.Add(RegHighAddress);
-            Message.Add(RegLowAddress);
-            Message.Add(DataHighAddress);
-            Message.Add(DataLowAddress);
+            byte[] recvMsg = ReadData();
 
-            byte[] Crc16 = CRC.CRC16(Message.ToArray());
+            return Tool.IsSameBytes(sendMsg, recvMsg);
 
-            Message.Add(Crc16[1]);
-            Message.Add(Crc16[0]);
+            //List<byte> Message = new List<byte>();
 
-            SerialPortWrite(Message.ToArray());
+            //byte Address = SerialPortConfig.Address;
+            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            //byte RegHighAddress = (int)RegCtrl.Start_Stand >> 8;
+
+            //ushort temp = (ushort)RegCtrl.Start_Stand;
+            //byte RegLowAddress = (byte)temp;
+            //byte DataHighAddress = 0X00;
+            //byte DataLowAddress = 0x01;
+
+            //Message.Add(Address);
+            //Message.Add(FunCode);
+            //Message.Add(RegHighAddress);
+            //Message.Add(RegLowAddress);
+            //Message.Add(DataHighAddress);
+            //Message.Add(DataLowAddress);
+
+            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
+
+            //Message.Add(Crc16[1]);
+            //Message.Add(Crc16[0]);
+
+            //SerialPortWrite(Message.ToArray());
         }
 
-        public bool SetSampleDil(ushort Dil) 
+        public bool StartSampleMes()
         {
-           return SetData(Dil, RegCtrl.Sample_Dil);
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Start_Sample, 1);
+            byte[] recvMsg = ReadData();
+
+            return Tool.IsSameBytes(sendMsg, recvMsg);
+
+            //List<byte> Message = new List<byte>();
+
+            //byte Address = SerialPortConfig.Address;
+            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            //byte RegHighAddress = (int)RegCtrl.Start_Sample >> 8;
+            //ushort temp = (ushort)RegCtrl.Start_Sample;
+            //byte RegLowAddress = (byte)temp;
+            //byte DataHighAddress = 0X00;
+            //byte DataLowAddress = 0x01;
+
+            //Message.Add(Address);
+            //Message.Add(FunCode);
+            //Message.Add(RegHighAddress);
+            //Message.Add(RegLowAddress);
+            //Message.Add(DataHighAddress);
+            //Message.Add(DataLowAddress);
+
+            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
+
+            //Message.Add(Crc16[1]);
+            //Message.Add(Crc16[0]);
+
+            //SerialPortWrite(Message.ToArray());
         }
 
-
-        public void SetStandDeep(ushort data) 
+        public bool SetSampleDil(ushort Dil)
         {
-            SetData(data, RegCtrl.Stand_Deep);
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Sample_Dil, Dil);
+
+            byte[] recvMsg = ReadData();
+
+            return Tool.IsSameBytes(sendMsg, recvMsg);
+            //return Tool.CompareBytes(revData, Message.ToArray());
+            //return SetData(Dil, RegCtrl.Sample_Dil);
         }
 
-        public void StartWash() 
+        public bool SetStandDeep(ushort data)
         {
-            List<byte> Message = new List<byte>();
 
-            byte Address = SerialPortConfig.Address;
-            byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            byte RegHighAddress = (int)RegCtrl.Stop_All >> 8;
-            ushort temp = (ushort)RegCtrl.Stop_All;
-            byte RegLowAddress = (byte)temp;
-            byte DataHighAddress = 0X00;
-            byte DataLowAddress = 0x01;
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Stand_Deep, data);
+            byte[] recvMsg = ReadData();
 
-            Message.Add(Address);
-            Message.Add(FunCode);
-            Message.Add(RegHighAddress);
-            Message.Add(RegLowAddress);
-            Message.Add(DataHighAddress);
-            Message.Add(DataLowAddress);
+            return Tool.IsSameBytes(sendMsg, recvMsg);
 
-            byte[] Crc16 = CRC.CRC16(Message.ToArray());
-
-            Message.Add(Crc16[1]);
-            Message.Add(Crc16[0]);
-
-            SerialPortWrite(Message.ToArray());
+            //SetData(data, RegCtrl.Stand_Deep);
         }
 
+        public bool StartWash()
+        {
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Stop_All, 1);
 
-        public bool SetData(ushort Data, RegCtrl regCtrl) 
+            byte[] recvMsg = ReadData();
+
+            return Tool.IsSameBytes(sendMsg, recvMsg);
+
+            //List<byte> Message = new List<byte>();
+
+            //byte Address = SerialPortConfig.Address;
+            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
+            //byte RegHighAddress = (int)RegCtrl.Stop_All >> 8;
+            //ushort temp = (ushort)RegCtrl.Stop_All;
+            //byte RegLowAddress = (byte)temp;
+            //byte DataHighAddress = 0X00;
+            //byte DataLowAddress = 0x01;
+
+            //Message.Add(Address);
+            //Message.Add(FunCode);
+            //Message.Add(RegHighAddress);
+            //Message.Add(RegLowAddress);
+            //Message.Add(DataHighAddress);
+            //Message.Add(DataLowAddress);
+
+            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
+
+            //Message.Add(Crc16[1]);
+            //Message.Add(Crc16[0]);
+
+            //SerialPortWrite(Message.ToArray());
+        }
+
+        public bool ClearAlram(ushort data)
+        {
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Clear, data);
+            byte[] recvMsg = ReadData();
+
+            return Tool.IsSameBytes(sendMsg, recvMsg);
+        }
+
+        public bool SysReset()
+        {
+            byte[] sendMsg = BodCtrlFun(RegCtrl.SysReset, 1);
+            byte[] recvMsg = ReadData();
+
+            return Tool.IsSameBytes(sendMsg, recvMsg);
+        }
+
+        public bool SetData(ushort Data, RegCtrl regCtrl)
         {
             try
             {
@@ -237,13 +321,13 @@ namespace BodDetect
                     return false;
                 }
 
-                return Tool.CompareBytes(revData, Message.ToArray());
+                return Tool.IsSameBytes(revData, Message.ToArray());
 
             }
             catch (Exception)
             {
                 return false;
-                
+
             }
 
 
@@ -263,7 +347,7 @@ namespace BodDetect
 
             try
             {
-               serialPort.Write(textData, 0, textData.Length);
+                serialPort.Write(textData, 0, textData.Length);
 
             }
             catch (Exception)
@@ -282,7 +366,7 @@ namespace BodDetect
             {
                 int count = serialPort.Read(tempBuffer, 0, bytesToRead);
 
-                if (count == 0) 
+                if (count == 0)
                 {
                     return null;
                 }
@@ -296,31 +380,106 @@ namespace BodDetect
 
         }
 
-
-        public float BodCurrentData()
+        public float[] BodCurrentData()
         {
             ReadBodFun(RegStatus.CurrentBod, 3);
 
             byte[] data = ReadData();
 
-            if (data == null) 
+            if (data == null)
             {
-                return 0;
+                return new float[] { -1 };
             }
 
             int iLength = data.Length;
 
-            if (iLength != 11) 
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x02 ||
+                iLength != 11)
             {
-                return 0;
+                return new float[] { -1 };
             }
 
             int iCount = Convert.ToInt32(data[2]);
 
-            byte[] BodValue = { data[3],data[4],data[5],data[6]};
-            float Value =  Tool.ToInt32(BodValue)[0] ;
+            byte[] BodValue = { data[3], data[4], data[5], data[6] };
+            float Value = Tool.ToInt32(BodValue)[0];
 
-            return Value / 1000;
+            float ElePotDrop = BitConverter.ToInt16(BodValue, 8);
+
+            return new float[] { Value / 100, ElePotDrop / 100 };
+        }
+
+        public int GetBodStatus()
+        {
+            ReadBodFun(RegStatus.Nomale, 1);
+            byte[] data = ReadData();
+
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x02)
+            {
+                return -1;
+            }
+
+            return BitConverter.ToInt16(data, 3);
+        }
+
+        public int GetSamplingStatus()
+        {
+            ReadBodFun(RegStatus.Samling, 1);
+            byte[] data = ReadData();
+
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x02)
+            {
+                return -1;
+            }
+
+            return BitConverter.ToInt16(data, 3);
+        }
+
+        public float GetElePot()
+        {
+            ReadBodFun(RegStatus.electric, 1);
+            byte[] data = ReadData();
+
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x02)
+            {
+                return -1;
+            }
+
+            float temp = BitConverter.ToInt16(data, 3);
+
+            return temp / 100;
+        }
+
+        public int GetAlarmStatus()
+        {
+            ReadBodFun(RegStatus.Dev, 1);
+            byte[] data = ReadData();
+
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x02)
+            {
+                return -1;
+            }
+
+            return BitConverter.ToInt16(data, 3);
+        }
+
+        private bool BodRecvDataBaseCheck(byte[] data, byte funCode)
+        {
+            if (data == null ||
+                data.Length > 3 ||
+                data[0] != 0x01 ||
+                data[1] != funCode ||
+                Tool.CheckCRC16(data))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void Dispose()

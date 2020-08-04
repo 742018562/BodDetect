@@ -17,11 +17,17 @@ namespace BodDetect.BodDataManage
         Pump,
     }
 
-    public enum UiType 
+    public enum UiType
     {
         ProcessBar,
         Image,
         Button
+    }
+
+    public enum SampleDilType        
+    {
+        WarerIn,
+        WaterOut
     }
 
 
