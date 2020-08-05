@@ -23,6 +23,7 @@ using Arthas.Utility.Media;
 using BodDetect.BodDataManage;
 using BodDetect.DataBaseInteractive.Sqlite;
 using BodDetect.Event;
+using BodDetect.PagerDataModels;
 using BodDetect.UDP;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -39,7 +40,7 @@ namespace BodDetect
         private Dictionary<byte, MetroSwitch> MultiValveDic = new Dictionary<byte, MetroSwitch>();
 
         DispatcherTimer timer = new DispatcherTimer();
-        DispatcherTimer BodTimer = new DispatcherTimer();
+        DispatcherTimer UpdataStatusTimer = new DispatcherTimer();
         DispatcherTimer StandWaterTimer = new DispatcherTimer();
         DispatcherTimer RunTimer = new DispatcherTimer();
         DispatcherTimer CodTimer = new DispatcherTimer();
@@ -105,10 +106,6 @@ namespace BodDetect
         {
             try
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    SysStatusList.Items.Add(new SysStatusMsg(i, "test0", "test1", "test2"));
-                }
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -122,14 +119,12 @@ namespace BodDetect
 
                 logList.Items.Add("test");
 
-
-
                 string ip = IP_textbox.Text;
 
                 string[] value = ip.Split('.');
                 if (value.Length < 4)
                 {
-                    this.ShowMessageAsync("Error", "异常ip!");
+                    this.ShowMessageAsync("Error", "异常ip!", MessageDialogStyle.Affirmative);
                 }
                 int port = Convert.ToInt32(Port_TextBox.Text, 10);
 
@@ -149,6 +144,9 @@ namespace BodDetect
                 StandWaterTimer.Tick += StartStandWaterAsync;
                 StandWaterTimer.Interval = new TimeSpan(3, 0, 0, 0);
                 StandWaterTimer.Start();
+
+               int times = Convert.ToInt32(UpdataStatus.Text);
+                UpdataStatusTimer.Interval = new TimeSpan(0, times, 0);
             }
             catch (Exception)
             {
@@ -226,6 +224,12 @@ namespace BodDetect
 
         }
 
+        private void ResetIp_Click(object sender, RoutedEventArgs e) 
+        {
+            IP_textbox.Text = "192.168.16.174";
+            Port_TextBox.Text = "9600";
+        }
+
         private async void RefreshData(BodData data)
         {
             mainWindow_Model.BodData = data.Bod;
@@ -248,6 +252,7 @@ namespace BodDetect
             hisDatabase.TurbidityUnit = "mg/L";
             hisDatabase.Bod = mainWindow_Model.BodData;
             hisDatabase.CodData = mainWindow_Model.CodData;
+            hisDatabase.Uv254Data = mainWindow_Model.Uv254Data;
 
             DateTime dateTime = DateTime.Now;
             hisDatabase.CreateDate = dateTime.ToLongDateString();
@@ -258,6 +263,8 @@ namespace BodDetect
             HisDataBaseModel hisDataBaseModel = new HisDataBaseModel();
             hisDatabase.CopyToHisDataBaseModel(hisDataBaseModel);
             await Task.Factory.StartNew(()=> BodSqliteHelp.InsertHisBodData(hisDataBaseModel));
+
+            UpdataDevStatus();
         }
 
         private void MetroButton_Click_2(object sender, RoutedEventArgs e)
@@ -484,40 +491,24 @@ namespace BodDetect
 
         }
 
-        public void RefreshProcessStatus(ProcessType processType)
+        public async void RefreshProcessStatus(ProcessType processType)
         {
-            string text = "系统运转状态：";
-            switch (processType)
-            {
-                case ProcessType.init:
-                    text += "正在初始化...";
-                    break;
-                case ProcessType.SampleWater:
-                    text += "正在取水样...";
-                    break;
-                case ProcessType.StandDil:
-                    text += "正在稀释标定液...";
-                    break;
-                case ProcessType.SampleDil:
-                    text += "正在稀释样液...";
-                    break;
-                case ProcessType.BodStand:
-                    text += "正在标定BOD...";
-                    break;
-                case ProcessType.BodSample:
-                    text += "正在测量BOD...";
-                    break;
-                case ProcessType.DrainEmpty:
-                    text += "测量完成,正在排空溶液...";
-                    break;
-                case ProcessType.Waitding:
-                    text += "系统空闲...";
-                    break;
-                default:
-                    break;
-            }
+            string status = Tool.GetProcessTypeToString(processType);
+            SysStaus.Content = status;
 
-            SysStaus.Content = text;
+            SysStatusData sysStatusData = new SysStatusData();
+            sysStatusData.Status = status;
+            sysStatusData.id = mainWindow_Model.SysStatusDataModel.AllSysStatusData.Count + 1;
+            sysStatusData.num = 0;
+            DateTime dateTime = DateTime.Now;
+            sysStatusData.CreateDate = dateTime.ToLongDateString();
+            sysStatusData.CreateTime = dateTime.ToLongTimeString();
+            mainWindow_Model.SysStatusDataModel.AddData(sysStatusData);
+
+            SysStatusInfoModel sysStatusInfoModel = new SysStatusInfoModel();
+            sysStatusData.CopyToSysStatusInfoModel(sysStatusInfoModel);
+
+            await Task.Factory.StartNew(()=>BodSqliteHelp.InsertSysStatusData(sysStatusInfoModel));
         }
 
         #endregion
@@ -1491,14 +1482,15 @@ namespace BodDetect
            // Tool.HideInputPanel(kbpr);
         }
 
-        private void PreButton_Click(object sender, RoutedEventArgs e)
+        private async void PreButton_Click(object sender, RoutedEventArgs e)
         {
             if (bodHelper == null || bodHelper.finsClient == null || bodHelper.finsClient == null)
             {
                 MessageBox.Show(" PLC未连接请连接.", "提示", MessageBoxButton.OK);
             }
 
-            bodHelper.PreInit();
+
+          await Task.Factory.StartNew(()=>  bodHelper.PreInit());
         }
 
         private async void PreButton2ml_ClickAsync(object sender, RoutedEventArgs e)
@@ -1553,47 +1545,49 @@ namespace BodDetect
             bodHelper.PumpDrain();
         }
 
-        private void PrePumpAri_Click(object sender, RoutedEventArgs e)
+        private  async void PrePumpAri_Click(object sender, RoutedEventArgs e)
         {
             //bodHelper.ChangePunpValve(PumpValveType.pre);
             //bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+            await Task.Factory.StartNew(() =>
+            {
+                byte[] data = { PLCConfig.AirValveBit };
 
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+                data[0] = 0X01;
 
-            byte[] data = { PLCConfig.AirValveBit };
+                bodHelper.ChangePunpValve(PumpValveType.pre);
+                bodHelper.finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
 
-            bodHelper.ValveControl(PLCConfig.Valve2Address, data);
-            data[0] = 0X01;
-
-            bodHelper.ChangePunpValve(PumpValveType.pre);
-            bodHelper.finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
-
-            //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
-            bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
-            Thread.Sleep(5000);
-            bodHelper.PumpDrain();
-
+                //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+                Thread.Sleep(5000);
+                bodHelper.PumpDrain();
+            });
         }
 
-        private void PrePumpwater_Click(object sender, RoutedEventArgs e)
+        private  async void PrePumpwater_Click(object sender, RoutedEventArgs e)
         {
             //bodHelper.ChangePunpValve(PumpValveType.pre);
             //bodHelper.PrePumpCtrl(PrePumpWork.preDrain);
 
-            byte[] data = { PLCConfig.WaterValveBit };
+            await Task.Factory.StartNew(() =>
+            {
+                byte[] data = { PLCConfig.WaterValveBit };
 
-            bodHelper.ValveControl(PLCConfig.Valve2Address, data);
-            data[0] = 0X01;
+                bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+                data[0] = 0X01;
 
-            bodHelper.ChangePunpValve(PumpValveType.pre);
+                bodHelper.ChangePunpValve(PumpValveType.pre);
 
-            bodHelper.finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
+                bodHelper.finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
 
-            //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
-            bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+                //bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
 
-            Thread.Sleep(5000);
-            bodHelper.PumpDrain();
-
+                Thread.Sleep(5000);
+                bodHelper.PumpDrain();
+            });
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -1714,6 +1708,7 @@ namespace BodDetect
             configData.WarmUpTime = Convert.ToInt32(WarmUpTime.Text);
             configData.WashTimes = Convert.ToInt32(WashTimes.Text);
             configData.SampleScale = Convert.ToInt32(SampleScale.Text);
+            configData.UpdateStatusInter = Convert.ToInt32(UpdataStatus.Text);
 
             bodHelper.configData = configData;
         }
@@ -1911,7 +1906,18 @@ namespace BodDetect
         private void SaveConfig_Click(object sender, RoutedEventArgs e) 
         {
             initConfig();
-            RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+
+            double hours = RunTimer.Interval.TotalHours;
+            if (hours != configData.SpaceHour) 
+            {
+                RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+            }
+
+            double min = UpdataStatusTimer.Interval.TotalMinutes;
+            if (min != configData.UpdateStatusInter) 
+            {
+                UpdataStatusTimer.Interval = new TimeSpan(0, configData.UpdateStatusInter, 0);
+            }
         }
 
         private void ReadConfig_Click(object sender, RoutedEventArgs e) 
@@ -1927,7 +1933,30 @@ namespace BodDetect
             WarmUpTime.Text = configData.WarmUpTime.ToString();
             WashTimes.Text =configData.WashTimes.ToString();
             SampleScale.Text = configData.SampleScale.ToString();
+            UpdataStatus.Text = configData.UpdateStatusInter.ToString();
         }
+
+        private void ResetConfig_Click(object sender, RoutedEventArgs e) 
+        {
+            configData.SampVol = 50;
+            configData.StandDil = 250;
+            configData.StandVol = 50;
+            configData.EmptyTime = 300;
+            configData.InietTime = 60;
+            configData.PrecipitateTime = 10;
+            configData.SpaceHour = 2;
+            configData.WarmUpTime = 60;
+            configData.WashTimes = 5;
+            configData.SampleScale = 1;
+            configData.UpdateStatusInter = 30;
+
+            ReadConfig_Click(sender, e);
+
+            DebugModel.IsChecked = true;
+
+            OutModel.IsChecked = true;
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:指定 IFormatProvider", Justification = "<挂起>")]
         private  void GetBodData_Click(object sender, RoutedEventArgs e)
@@ -2063,7 +2092,9 @@ namespace BodDetect
 
             //BodSqliteHelp bodSqliteHelp = new BodSqliteHelp();
 
-            BodSqliteHelp.InsertHisBodData(model);
+            await Task.Factory.StartNew( ()=>BodSqliteHelp.InsertHisBodData(model));
+
+            UpdataDevStatus();
 
         }
 
@@ -2111,7 +2142,81 @@ namespace BodDetect
 
             
         }
-    
+
+        private void UpdateDevStatus(object sender, EventArgs e) 
+        {
+            bool IsConnect = bodHelper.finsClient.IsConnect();
+
+
+        }
+
+        public void UpdatePLCStatus(bool Connect,bool RunStatus) 
+        {
+            string path = @"pack://application:,,,/Resources/green.png";
+            if (!Connect) 
+            {
+                path = @"pack://application:,,,/Resources/red.png";
+            }
+
+            BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
+            PLCstatusComm_Image.Source = image;
+
+            path = @"pack://application:,,,/Resources/green.png";
+            if (!RunStatus) 
+            {
+                path = @"pack://application:,,,/Resources/red.png";
+            }
+
+            BitmapImage image1 = new BitmapImage(new Uri(path, UriKind.Absolute));
+            PLCstatusRun_Image.Source = image1;
+        }
+
+        public  void UpdataDevStatus() 
+        {
+            string path1 = @"pack://application:,,,/Resources/red.png";
+            string path2 = @"pack://application:,,,/Resources/green.png";
+
+            BitmapImage GreenImage = new BitmapImage(new Uri(path1, UriKind.Absolute));
+            BitmapImage RedImage = new BitmapImage(new Uri(path2, UriKind.Absolute));
+
+            if (mainWindow_Model.Uv254Data == 0)
+            {
+                uv254_Sensor_Img.Source = RedImage;
+            }
+            else 
+            {
+                uv254_Sensor_Img.Source = GreenImage;
+            }
+
+            if (mainWindow_Model.TurbidityData == 0)
+            {
+                Tur_Sensor_Img.Source = RedImage;
+            }
+            else 
+            {
+                Tur_Sensor_Img.Source = GreenImage;
+            }
+
+            if (mainWindow_Model.PHData == 0)
+            {
+                PH_Sensor_Img.Source = RedImage;
+            }
+            else 
+            {
+                PH_Sensor_Img.Source = GreenImage;
+            }
+
+            if (mainWindow_Model.DoData == 0)
+            {
+                DO_Sensor_Img.Source = RedImage;
+            }
+            else 
+            {
+                DO_Sensor_Img.Source = GreenImage;
+            }
+
+        }
+
 
         #region 程序关闭处理
 
@@ -2126,7 +2231,7 @@ namespace BodDetect
                 bodHelper.refreshProcessStatus -= new BodHelper.RefreshProcessStatus(RefreshProcessStatus);
 
                 timer.Stop();
-                BodTimer.Stop();
+                UpdataStatusTimer.Stop();
                 StandWaterTimer.Stop();
                 RunTimer.Stop();
                 _loading.animationTimer.Stop();

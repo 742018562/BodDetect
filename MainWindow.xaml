@@ -1054,27 +1054,27 @@
                                             <StackPanel Grid.Row="0"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                                 <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Metro:MetroImage Name="COD_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                                 <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Metro:MetroImage Name="DO_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="2"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                                 <Label IsEnabled="False" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/red.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Metro:MetroImage Name="uv254_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="3"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                                 <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Metro:MetroImage Name="PH_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="4"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                                 <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Metro:MetroImage Name="Tur_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                         </Grid>
                                     </Metro:MetroGroupBox>
@@ -1083,23 +1083,104 @@
                         </Grid>
                     </TabItem>
                     <TabItem Style="{StaticResource MahApps.Styles.TabItem}"  Header="系统状态" >
-                        <StackPanel Background="White">
-                            <ListView Name="SysStatusList">
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
-                                        <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
-                                        <GridViewColumn Header="状态信息" Width="200" DisplayMemberBinding="{Binding StatusInfo}"/>
-                                        <GridViewColumn Header="当前时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
-                                    </GridView>
-                                </ListView.View>
-                            </ListView>
 
-                            <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="70"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <!--<StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <Label Content="起始时间："  VerticalContentAlignment="Center" FontSize="16" Margin="50,0,0,0"></Label>
+                                <DatePicker Name="SysStatusStartPicker" 
+                                                    CalendarStyle="{StaticResource CalendarStyle1}" 
+                                                    Width="300" 
+                                                    FontSize="20" Height="40"
+                                                    DatePicker.SelectedDateChanged="SysStatusTimeSelect" 
+                                                    Style="{StaticResource MahApps.Styles.DatePicker}" 
+                                                    mah:TextBoxHelper.WatermarkAlignment="Center" 
+                                                    mah:TextBoxHelper.ClearTextButton="True"
+                                                    mah:TextBoxHelper.ButtonWidth="40">
+                                </DatePicker>
 
-                            </local:Pager>
+                                <Label Content="结束时间：" Margin="150,0,0,0" VerticalContentAlignment="Center" FontSize="16"></Label>
+                                <DatePicker Name="SysStatusEndPicker" 
+                                                    CalendarStyle="{StaticResource CalendarStyle1}" 
+                                                    Width="300" 
+                                                    FontSize="20"
+                                                    Height="40"
+                                                    DatePicker.SelectedDateChanged="SysStatusTimeSelect" 
+                                                    Style="{StaticResource MahApps.Styles.DatePicker}" 
+                                                    mah:TextBoxHelper.WatermarkAlignment="Center" 
+                                                    mah:TextBoxHelper.ClearTextButton="True"
+                                                    mah:TextBoxHelper.ButtonWidth="40" mah:TextBoxHelper.AutoWatermark="True">
+                                </DatePicker>
+                            </StackPanel>-->
 
-                        </StackPanel>
+                            <StackPanel Grid.Row="1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                </Grid>
+                                <StackPanel Grid.Row="0">
+                                    <ListView x:Name="SysStatusList" 
+                                                      ItemsSource="{Binding SysStatusDataSource}" 
+                                                      ItemContainerStyle="{StaticResource ListViewItemStyle}"
+                                                      Style="{StaticResource MahApps.Styles.ListView}"  
+                                                      VerticalAlignment="Center" 
+                                                      DataContext="{Binding SysStatusDataModel}" 
+                                                      Height="450">
+                                        <ListView.View >
+                                            <GridView >
+                                                <GridView.ColumnHeaderContainerStyle>
+                                                    <Style TargetType="GridViewColumnHeader">
+                                                        <Setter Property="HorizontalContentAlignment"  Value="Center"/>
+                                                        <Setter Property="FontWeight" Value="Black"/>
+                                                        <Setter Property="Height" Value="40"/>
+                                                    </Style>
+                                                </GridView.ColumnHeaderContainerStyle>
+
+                                                <GridViewColumn Header="序号" Width="40" DisplayMemberBinding="{Binding id}"/>
+                                                <GridViewColumn Header="状态信息" Width="350" DisplayMemberBinding="{Binding Status}"/>
+                                                <GridViewColumn Header="采集日期" Width="120" DisplayMemberBinding="{Binding CreateDate}"/>
+                                                <GridViewColumn Header="采集时间" Width="120" DisplayMemberBinding="{Binding CreateTime}"/>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+                                </StackPanel>
+
+                                <!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
+                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>-->
+
+                                <StackPanel Grid.Row="1" Margin="0,30,0,0">
+
+                                    <local:Pager  TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" DataContext="{Binding SysStatusDataModel}" >
+
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="FirstPage">
+                                                <i:InvokeCommandAction Command="{Binding FirstPageCommand}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviousPage">
+                                                <i:InvokeCommandAction Command="{Binding PreviousPageCommand}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="NextPage">
+                                                <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="LastPage">
+                                                <i:InvokeCommandAction Command="{Binding LastPageCommand}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </local:Pager>
+                                </StackPanel>
+
+                            </StackPanel>
+
+                        </Grid>
                     </TabItem>
 
                 </TabControl>
@@ -1332,7 +1413,7 @@
                             <GroupBox  Style="{StaticResource MahApps.Styles.GroupBox}" Header="准备流程">
                                 <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="预处理" Name="PreButton" Click="PreButton_Click" Margin="20,0,0,0"></Metro:MetroButton>
-                                    <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml到标液" Name="PreButton2ml" Click="PreButton2ml_ClickAsync" Margin="20,0,0,0"></Metro:MetroButton>
+                                    <Metro:MetroButton Width="120" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml到标液" Name="PreButton2ml" Click="PreButton2ml_ClickAsync" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="吸取0.2ml" Name="Pre2ml" Click="Pre2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="100" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="排水0.2ml" Name="Pumpdrain2ml" Click="Pumpdrain2ml_Click" Margin="20,0,0,0"></Metro:MetroButton>
                                     <Metro:MetroButton Width="150" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Content="泵预备阀抽取空气" Name="PrePumpAri" Click="PrePumpAri_Click" Margin="20,0,0,0"></Metro:MetroButton>
@@ -2008,7 +2089,7 @@
                                                             <Metro:MetroGroupBox Header="样液稀释模式">
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <RadioButton Style="{StaticResource BoxRadioButton}" Margin="10,1,1,1" Content="进水口模式"  Background="{DynamicResource MahApps.Brushes.Accent}" FontSize="20" Width="150" Height="40" Checked="WaterInModel_Checked"></RadioButton>
-                                                                    <RadioButton Style="{StaticResource BoxRadioButton}" Margin="40,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="150" Height="40" Content="出水口模式" Checked="WaterOutModel_Checked"></RadioButton>
+                                                                    <RadioButton x:Name="OutModel" Style="{StaticResource BoxRadioButton}" Margin="40,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="150" Height="40" Content="出水口模式" Checked="WaterOutModel_Checked"></RadioButton>
                                                                 </StackPanel>
                                                                
                                                             </Metro:MetroGroupBox>
@@ -2077,7 +2158,7 @@
                                                         </StackPanel>
 
                                                         <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                            <Metro:MetroTextBox  Title="采样间隔:" Width="150"  x:Name="sampleSpac" Text="1"/>
+                                                            <Metro:MetroTextBox  Title="采样间隔:" Width="150"  x:Name="sampleSpac" Text="2"/>
                                                             <Label Content="(单位：时)" Foreground="Red"></Label>
                                                         </StackPanel>
 
@@ -2091,6 +2172,8 @@
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                                                     <Metro:MetroButton Content="配置" MinWidth="100" MinHeight="30" Width="100" Height="40" Click="SaveConfig_Click"/>
                                                     <Metro:MetroButton Content="读取" MinWidth="100" MinHeight="30" Width="100" Height="40" Margin="40,0,0,0" Click="ReadConfig_Click"/>
+                                                    <Metro:MetroButton Content="恢复出厂设置" MetroButtonState="Red" MinWidth="120" MinHeight="30" Width="100" Height="40" Margin="40,0,0,0" Click="ResetConfig_Click"/>
+
                                                 </StackPanel>
                                             </StackPanel>
 
@@ -2102,6 +2185,8 @@
                                                 <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.16.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
                                                 <Metro:MetroTextBox x:Name="Port_TextBox"  Text="9600" Title="Port" HorizontalAlignment="Right" Height="30" Width="Auto" InputHint="InputHint..."  VerticalAlignment="Center" Margin="0,10,0,0"  />
                                                 <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Green" Content="连接" Command="{Binding CmdSampleWithParam}" CommandParameter="Good" IsEnabled="{Binding BtnEnabled}" VerticalAlignment="Center"   Width="25" Height="30" Margin="60,0,0,-10" Padding="8,6,8,6" ScrollViewer.CanContentScroll="True" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" Click="MetroButton_Click_1"/>
+                                                <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Red" Content="重置" VerticalAlignment="Center"   Width="25" Height="30" Margin="20,0,0,-10" Padding="8,6,8,6"  FontSize="12" FontWeight="Bold"  Click="ResetIp_Click"/>
+
                                             </StackPanel>
                                         </Metro:MetroGroupBox>
                                     </Grid>
@@ -2125,11 +2210,11 @@
 
                                                             <StackPanel Orientation="Horizontal" Grid.Row="0" >
                                                                 <RadioButton Style="{StaticResource BoxRadioButton}" Margin="10,1,1,1" Content="出厂模式"  Background="{DynamicResource MahApps.Brushes.Accent}" FontSize="20" Width="120" Height="40"></RadioButton>
-                                                                <RadioButton Style="{StaticResource BoxRadioButton}" Margin="20,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="120" Height="40" Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked" Content="调试模式"></RadioButton>
+                                                                <RadioButton x:Name="DebugModel" Style="{StaticResource BoxRadioButton}" Margin="20,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="120" Height="40" Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked" Content="调试模式"></RadioButton>
 
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Grid.Row="2">
-                                                                <Metro:MetroTextBox  Text="20" Title="状态刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                                <Metro:MetroTextBox Name="UpdataStatus" Text="30" Title="状态刷新周期" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
                                                                 <Label Content="(单位：分钟)" VerticalContentAlignment="Center"></Label>
                                                             </StackPanel>
                                                         </Grid>

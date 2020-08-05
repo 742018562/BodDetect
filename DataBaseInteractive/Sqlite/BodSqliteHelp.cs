@@ -51,7 +51,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             }
         }
 
-        public static List<HisDataBaseModel> SelectHisData() 
+        public static List<HisDataBaseModel> SelectHisData()
         {
             List<HisDataBaseModel> hisDataBaseModelList = new List<HisDataBaseModel>();
             using (SQLiteConnection conn = new SQLiteConnection(connStr))
@@ -72,7 +72,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
                     HisDataBaseModel hisDataBaseModel = new HisDataBaseModel();
                     hisDataBaseModel.id = (int)item["id"];
                     hisDataBaseModel.Humidity = (double)item["Humidity"];
-                    hisDataBaseModel.PH = (double)item["PH"]; 
+                    hisDataBaseModel.PH = (double)item["PH"];
                     hisDataBaseModel.RunNum = (int)item["RunNum"];
                     hisDataBaseModel.Temperature = (double)item["Temperature"];
                     hisDataBaseModel.Turbidity = (double)item["Turbidity"];
@@ -95,7 +95,43 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             return hisDataBaseModelList;
         }
 
-        public void InsertHisBodData(List<HisDataBaseModel> hisDatabasesModel)
+
+        public static List<SysStatusInfoModel> SelectSysStatusData()
+        {
+            List<SysStatusInfoModel> sysStatusInfoModelList = new List<SysStatusInfoModel>();
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM SysStatusInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+
+
+                DataTable dt = ds.Tables[0];
+                foreach (DataRow item in dt.Rows)
+                {
+                    SysStatusInfoModel sysStatusInfoModel = new SysStatusInfoModel();
+                    sysStatusInfoModel.id = (int)item["id"];
+                    sysStatusInfoModel.num = (int)item["num"];
+                    sysStatusInfoModel.SysStatus = (string)item["sysStatus"];
+                    sysStatusInfoModel.CreateDate = (string)item["CreateDate"];
+                    sysStatusInfoModel.CreateTime = (string)item["CreateTime"];
+
+                    sysStatusInfoModelList.Add(sysStatusInfoModel);
+                }
+
+                conn.Close();
+                conn.Dispose();
+            }
+
+            return sysStatusInfoModelList;
+        }
+
+        public static void InsertHisBodData(List<HisDataBaseModel> hisDatabasesModel)
         {
             using (SQLiteConnection conn = new SQLiteConnection(connStr))
             {
@@ -120,6 +156,67 @@ namespace BodDetect.DataBaseInteractive.Sqlite
 
                     SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
                 }
+
+                conn.Close();
+                conn.Dispose();
+            }
+        }
+
+        public static void InsertSysStatusData(List<SysStatusInfoModel> sysStatusInfoModel)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM SysStatusInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+                DataTable dt = ds.Tables[0];
+
+                foreach (var item in sysStatusInfoModel)
+                {
+                    DataRow dataRow = dt.NewRow();
+                    dt.Rows.Add(dataRow);
+
+                    sql = "INSERT INTO HisDataBase(id,num,sysStatus,CreateDate,CreateTime) " +
+                        "VALUES(@id,@num,@SysStatus,@CreateDate,@CreateTime)";
+
+                    object[] paramList = item.GetObjectList();
+
+                    SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
+                }
+
+                conn.Close();
+                conn.Dispose();
+            }
+        }
+
+        public static void InsertSysStatusData(SysStatusInfoModel sysStatusInfoModel)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM SysStatusInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+                DataTable dt = ds.Tables[0];
+
+
+                DataRow dataRow = dt.NewRow();
+                dt.Rows.Add(dataRow);
+
+                sql = "INSERT INTO SysStatusInfo(id,num,sysStatus,CreateDate,CreateTime) " +
+                    "VALUES(@id,@num,@SysStatus,@CreateDate,@CreateTime)";
+
+                object[] paramList = sysStatusInfoModel.GetObjectList();
+
+                SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
+
 
                 conn.Close();
                 conn.Dispose();

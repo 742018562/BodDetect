@@ -64,6 +64,8 @@ namespace BodDetect.BodDataManage
 
         public int SpaceHour { get; set; }
 
+        public int UpdateStatusInter { get; set; }
+
         public ConfigData() { }
     }
 }

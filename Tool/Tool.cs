@@ -318,6 +318,42 @@ namespace BodDetect
 
         #endregion
 
+        public static string GetProcessTypeToString(ProcessType processType) 
+        {
+            string text = "系统运转状态：";
+            switch (processType)
+            {
+                case ProcessType.init:
+                    text += "正在初始化...";
+                    break;
+                case ProcessType.SampleWater:
+                    text += "正在取水样...";
+                    break;
+                case ProcessType.StandDil:
+                    text += "正在稀释标定液...";
+                    break;
+                case ProcessType.SampleDil:
+                    text += "正在稀释样液...";
+                    break;
+                case ProcessType.BodStand:
+                    text += "正在标定BOD...";
+                    break;
+                case ProcessType.BodSample:
+                    text += "正在测量BOD...";
+                    break;
+                case ProcessType.DrainEmpty:
+                    text += "测量完成,正在排空溶液...";
+                    break;
+                case ProcessType.Waitding:
+                    text += "系统空闲...";
+                    break;
+                default:
+                    break;
+            }
+
+            return text;
+        }
+
 
         #region 本地网络数据
         /// <summary>

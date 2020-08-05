@@ -207,7 +207,12 @@ namespace BodDetect
             //_fakeSoruce.Clear();
 
             //_fakeSoruce.AddRange(result);
-        } 
+        }
+
+        public PagerDataModel() 
+        {
+            
+        }
 
 
     }

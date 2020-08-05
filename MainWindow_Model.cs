@@ -1,4 +1,5 @@
 ﻿using BodDetect.BodDataManage;
+using BodDetect.PagerDataModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -201,6 +202,23 @@ namespace BodDetect
             }
         }
 
+        private SysStatusPagerModel _sysStatusDataModel;
+
+        public SysStatusPagerModel SysStatusDataModel 
+        {
+            get 
+            {
+                return _sysStatusDataModel;
+            }
+            set 
+            {
+                if (_sysStatusDataModel != value) 
+                {
+                    _sysStatusDataModel = value;
+                }
+            }
+        }
+
         public MainWindow_Model()
         {
 
@@ -215,6 +233,9 @@ namespace BodDetect
         {
             HisParamData = new HisParamPagerModel();
             HisParamData.init();
+
+            SysStatusDataModel = new SysStatusPagerModel();
+            SysStatusDataModel.init();
         }
 
         private int _Hour;

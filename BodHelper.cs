@@ -485,13 +485,13 @@ namespace BodDetect
 
         public bool PreInit()
         {
-            //【1.用清水填满储液环】
-            //【2.排出储液环5ml清水】
+            //【1.用空气排空储液环】
+            //【2.用备用阀吸取储液环10ml清水】
             //【3.将清水,样液,标液，缓冲液管道填满相应溶液】
             try
             {
                 //【1.用清水填满储液环】
-                int counts = 3;
+                int counts = 4;
                 byte[] data = { PLCConfig.AirValveBit };
 
                 ValveControl(PLCConfig.Valve2Address, data);
@@ -500,16 +500,17 @@ namespace BodDetect
                 bool sucess = false;
 
 
-                //【1.用清水填满储液环】
+                //【1.用空气排空储液环】
                 for (int i = 0; i < counts; i++)
                 {
                     ChangePunpValve(PumpValveType.pre);
                     //ValveControl(PLCConfig.Valve1Address,PLCConfig.PrePumpValveAir, data);
-                    sucess = finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
-                    Thread.Sleep(1000);
+                    sucess = finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
+                    Thread.Sleep(2000);
                     sucess = PrePumpCtrl(PrePumpWork.preAbsorb);
-                    Thread.Sleep(6000);
+                    Thread.Sleep(10000);
                     sucess = PumpDrain();
+                    Thread.Sleep(10000);
 
                     //byte[] data = { PLCConfig.WaterValveBit };
 
@@ -527,70 +528,63 @@ namespace BodDetect
                     //bodHelper.PumpDrain();
 
                 }
-                Thread.Sleep(6000);
 
+                data[0] = PLCConfig.AirValveBit ;
+
+                ValveControl(PLCConfig.Valve2Address, data);
                 //【2.排出储液环5ml清水，在用预备阀吸取5ml清水】
-                data[0] = 0X01;
-                sucess = ChangePunpValve(PumpValveType.pre);
-                if (!sucess)
+                for (int i = 0; i < 2; i++)
                 {
-                    return false;
-                }
-                Thread.Sleep(1000);
-
-                finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
-                Thread.Sleep(1000);
-
-                // ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
-                PrePumpCtrl(PrePumpWork.preAbsorb);
-                Thread.Sleep(6000);
-
-                PumpDrain();
-                Thread.Sleep(6000);
-
-                ChangePunpValve(PumpValveType.pre);
-                Thread.Sleep(1000);
-
-                sucess = finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
-                Thread.Sleep(1000);
-                sucess = PrePumpCtrl(PrePumpWork.preAbsorb);
-                Thread.Sleep(6000);
-                PumpDrain();
-
-
-                Thread.Sleep(10000);
-
-                //【3.将清水,样液,标液，缓冲液管道填满相应溶液】
-                data[0] = 0X01;
-                //   byte[] valve = { PLCConfig.WaterValveBit, PLCConfig.StandardValveBit, PLCConfig.DepositValveBit, PLCConfig.bufferValveBit };
-                List<byte> Valve = new List<byte>();
-                Valve.Add(PLCConfig.WaterValveBit);
-                Valve.Add(PLCConfig.StandardValveBit);
-                Valve.Add(PLCConfig.DepositValveBit);
-                Valve.Add(PLCConfig.bufferValveBit);
-
-                byte[] tempdata = { PLCConfig.AirValveBit };
-                foreach (byte item in Valve)
-                {
-                    data[0] = item;
-                    for (int i = 0; i < 2; i++)
+                    data[0] = 0X01;
+                    sucess = ChangePunpValve(PumpValveType.pre);
+                    if (!sucess)
                     {
-                        ValveControl(PLCConfig.Valve2Address, data);
-                        PunpAbsorb(PunpCapType.fiveml);
-                        Thread.Sleep(6000);
-                        tempdata[0] = PLCConfig.AirValveBit;
-                        ValveControl(PLCConfig.Valve2Address, tempdata);
-                        PumpDrain();
+                        return false;
                     }
+                    Thread.Sleep(2000);
 
-                    tempdata[0] = PLCConfig.WaterValveBit;
-                    ValveControl(PLCConfig.Valve2Address, tempdata);
-                    PunpAbsorb(PunpCapType.fiveml);
-                    Thread.Sleep(6000);
-                    tempdata[0] = PLCConfig.AirValveBit;
-                    ValveControl(PLCConfig.Valve2Address, tempdata);
+                    finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
+                    Thread.Sleep(2000);
+
+                    // ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                    PrePumpCtrl(PrePumpWork.preAbsorb);
+                    Thread.Sleep(10000);
+
                     PumpDrain();
+                    Thread.Sleep(10000);
                 }
+
+                ////【3.将清水,样液,标液，缓冲液管道填满相应溶液】
+                //data[0] = 0X01;
+                ////   byte[] valve = { PLCConfig.WaterValveBit, PLCConfig.StandardValveBit, PLCConfig.DepositValveBit, PLCConfig.bufferValveBit };
+                //List<byte> Valve = new List<byte>();
+                //Valve.Add(PLCConfig.WaterValveBit);
+                //Valve.Add(PLCConfig.StandardValveBit);
+                //Valve.Add(PLCConfig.DepositValveBit);
+                //Valve.Add(PLCConfig.bufferValveBit);
+
+                //byte[] tempdata = { PLCConfig.AirValveBit };
+                //foreach (byte item in Valve)
+                //{
+                //    data[0] = item;
+                //    for (int i = 0; i < 2; i++)
+                //    {
+                //        ValveControl(PLCConfig.Valve2Address, data);
+                //        PunpAbsorb(PunpCapType.fiveml);
+                //        Thread.Sleep(6000);
+                //        tempdata[0] = PLCConfig.AirValveBit;
+                //        ValveControl(PLCConfig.Valve2Address, tempdata);
+                //        PumpDrain();
+                //    }
+
+                //    tempdata[0] = PLCConfig.WaterValveBit;
+                //    ValveControl(PLCConfig.Valve2Address, tempdata);
+                //    PunpAbsorb(PunpCapType.fiveml);
+                //    Thread.Sleep(6000);
+                //    tempdata[0] = PLCConfig.AirValveBit;
+                //    ValveControl(PLCConfig.Valve2Address, tempdata);
+                //    PumpDrain();
+                //}
 
             }
             catch (Exception)
@@ -852,7 +846,6 @@ namespace BodDetect
                 return;
             }
         }
-
 
 
         /// <summary>
@@ -1384,19 +1377,6 @@ namespace BodDetect
 
             }
 
-        }
-
-        public void CloseEvent()
-        {
-            try
-            {
-
-
-            }
-            catch (Exception)
-            {
-
-            }
         }
 
         protected virtual void Dispose(bool disposing)

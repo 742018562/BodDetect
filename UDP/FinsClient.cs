@@ -30,7 +30,6 @@ namespace BodDetect.UDP
         {
             _udpClient = new UdpClient();
             _udpClient.Connect(remoteIpEndPoint);
-            
             remoteIp = RemoteIp;
 
             string[] value = remoteIp.Split('.');
@@ -73,6 +72,11 @@ namespace BodDetect.UDP
         {
             _cancellationTokenSource.Cancel();
             _readerThread.Join();
+        }
+
+        public bool IsConnect() 
+        {
+            return _udpClient.Client.Connected;
         }
 
         /// <summary>
