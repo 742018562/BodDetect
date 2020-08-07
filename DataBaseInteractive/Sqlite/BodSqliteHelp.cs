@@ -180,7 +180,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
                     DataRow dataRow = dt.NewRow();
                     dt.Rows.Add(dataRow);
 
-                    sql = "INSERT INTO HisDataBase(id,num,sysStatus,CreateDate,CreateTime) " +
+                    sql = "INSERT INTO SysStatusInfo(id,num,sysStatus,CreateDate,CreateTime) " +
                         "VALUES(@id,@num,@SysStatus,@CreateDate,@CreateTime)";
 
                     object[] paramList = item.GetObjectList();
@@ -222,6 +222,106 @@ namespace BodDetect.DataBaseInteractive.Sqlite
                 conn.Dispose();
             }
         }
+
+
+        public static void InsertAlramInfo(AlramInfoModel alramInfoModel)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM AlramInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+                DataTable dt = ds.Tables[0];
+
+                DataRow dataRow = dt.NewRow();
+                dt.Rows.Add(dataRow);
+
+                sql = "INSERT INTO AlramInfo(id,DeviceInfo,ErrorCode,ErrorDes,HasHandle,CreateDate,CreateTime) " +
+                    "VALUES(@id,@DeviceInfo,@ErrorCode,@ErrorDes,@HasHandle,@CreateDate,@CreateTime)";
+
+                object[] paramList = alramInfoModel.GetObjectList();
+
+                SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
+
+                conn.Close();
+                conn.Dispose();
+            }
+        }
+
+        public static void InsertAlramInfo(List<AlramInfoModel> alramInfoModelList)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM AlramInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+                DataTable dt = ds.Tables[0];
+
+                foreach (var item in alramInfoModelList)
+                {
+                    DataRow dataRow = dt.NewRow();
+                    dt.Rows.Add(dataRow);
+
+                    sql = "INSERT INTO AlramInfo(id,DeviceInfo,ErrorCode,ErrorDes,HasHandle,CreateDate,CreateTime) " +
+                        "VALUES(@id,@DeviceInfo,@ErrorCode,@ErrorDes,@HasHandle,@CreateDate,@CreateTime)";
+
+                    object[] paramList = item.GetObjectList();
+
+                    SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
+                }
+
+                conn.Close();
+                conn.Dispose();
+            }
+        }
+
+        public static List<AlramInfoModel> SelectAlramInfo()
+        {
+            List<AlramInfoModel> alramInfoModelList = new List<AlramInfoModel>();
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM AlramInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+
+
+                DataTable dt = ds.Tables[0];
+                foreach (DataRow item in dt.Rows)
+                {
+                    AlramInfoModel alramInfoModel = new AlramInfoModel();
+                    alramInfoModel.id = (int)item["id"];
+                    alramInfoModel.DeviceInfo = (int)item["DeviceInfo"];
+                    alramInfoModel.ErrorCode = (int)item["ErrorCode"];
+                    alramInfoModel.ErrorDes = (string)item["ErrorDes"];
+                    alramInfoModel.HasHandle = (Boolean)item["HasHandle"];
+                    alramInfoModel.CreateDate = (string)item["CreateDate"];
+                    alramInfoModel.CreateTime = (string)item["CreateTime"];
+
+                    alramInfoModelList.Add(alramInfoModel);
+                }
+
+                conn.Close();
+                conn.Dispose();
+            }
+
+            return alramInfoModelList;
+        }
+
 
     }
 }

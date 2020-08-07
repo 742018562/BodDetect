@@ -22,6 +22,7 @@
 
         <UIConvert:BodDataToString x:Key="BodDataToString"/>
         <UIConvert:HisParamDataToString x:Key="HisParamDataToString"/>
+        <UIConvert:StringToImageSourceConverter x:Key="MyImageConverter"/>
 
         <!--日历主体样式表   Metro:MetroWindow-->
         <Style x:Key="CalendarItemStyle1"
@@ -942,37 +943,34 @@
                                         <Metro:MetroImage Grid.Row="1"  x:Name="BOD_Model_Image" Source="/Resources/Bod_Model.png" Width="300"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                        <Grid>
+                                        <Grid DataContext="{Binding DevStatusModel}" >
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="100"/>
                                                 <RowDefinition Height="100"/>
                                                 <RowDefinition Height="100"/>
                                                 <RowDefinition Height="100"/>
-                                                <RowDefinition Height="100"/>
+
                                             </Grid.RowDefinitions>
 
                                             <StackPanel Grid.Row="0" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusComm_Image" Source="/Resources/red.png" Height="80" Width="80" Margin="40,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding BOD_Connect_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"  />
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusComm_Image" Source="{Binding Path=BOD_Connect_ImgSource,Converter={StaticResource MyImageConverter}}" Height="80" Width="80" Margin="40,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" >
                                                 <Label IsEnabled="False" Content="运行状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusRun_redImage" Source="/Resources/red.png" Height="80" Width="80" Margin="40,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding BOD_Run_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="BodstatusRun_redImage" Source="{Binding Path =BOD_Run_ImgSource,Converter={StaticResource MyImageConverter}}" Height="80" Width="80" Margin="40,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,0" >
                                                 <Label IsEnabled="False" Content="告警状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Name="Bod_Alarm_status" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Grid.Row="1"  x:Name="Bod_Alarm_status_Image" Source="/Resources/red.png" Height="80" Width="80" Margin="40,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding BOD_Alram_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Grid.Row="1"  x:Name="Bod_Alarm_status_Image" Source="{Binding Path=BOD_Alram_ImgSource,Converter={StaticResource MyImageConverter}}" Height="80" Width="80" Margin="40,0,0,0" />
                                             </StackPanel>
+
                                             <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                <Label IsEnabled="False" Content="工作状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Name="Bod_Work_status" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,20,0,0" >
                                                 <Label IsEnabled="False" Content="做样状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Name="Bod_Sampling_status" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Label IsEnabled="False" Content="{Binding BOD_Sample_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
                                             </StackPanel>
 
                                         </Grid>
@@ -980,7 +978,7 @@
                                 </Grid>
                             </Metro:MetroGroupBox >
                             <StackPanel Grid.Column="1" Margin="20,10,0,0" >
-                                <Grid Height="700">
+                                <Grid Height="700" DataContext="{Binding DevStatusModel}">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="220"/>
                                         <RowDefinition/>
@@ -1006,19 +1004,19 @@
 
                                                     <StackPanel Grid.Row="0" Orientation="Horizontal" >
                                                         <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                        <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusComm_Image" Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                        <Label IsEnabled="False" Content="{Binding PLC_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusComm_Image" Source="{Binding Path=PLC_Status_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                                     </StackPanel>
                                                     <StackPanel Grid.Row="1" Orientation="Horizontal" >
                                                         <Label IsEnabled="False" Content="运行状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                        <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusRun_Image" Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                        <Label IsEnabled="False" Content="{Binding PLC_Run_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                        <Metro:MetroImage Grid.Row="1"  x:Name="PLCstatusRun_Image" Source="{Binding Path=PLC__Run_Status_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                                     </StackPanel>
                                                 </Grid>
                                             </StackPanel>
                                         </Grid>
                                     </Metro:MetroGroupBox>
-                                    <Metro:MetroGroupBox Grid.Row="1" Header="传感器状态" FontWeight="Bold" >
+                                    <Metro:MetroGroupBox Grid.Row="1" Header="传感器状态" >
                                         <Grid >
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition/>
@@ -1053,28 +1051,28 @@
 
                                             <StackPanel Grid.Row="0"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Name="COD_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding Cod_Sensor_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Name="COD_Sensor_Img" Grid.Row="1"  Source="{Binding Path=Cod_Sensor_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Name="DO_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding DO_Sensor_Status, Mode=TwoWay}"  FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Name="DO_Sensor_Img" Grid.Row="1"  Source="{Binding Path=Do_Sensor_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="2"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="断开" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Name="uv254_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding UV254_Sensor_Status, Mode=TwoWay}"  FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Name="uv254_Sensor_Img" Grid.Row="1"  Source="{Binding Path=UV254_Sensor_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="3"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Name="PH_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding PH_Sensor_Status, Mode=TwoWay}"  FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Name="PH_Sensor_Img" Grid.Row="1"  Source="{Binding Path=PH_Sensor_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                             <StackPanel Grid.Row="4"  Grid.Column="2" Orientation="Horizontal" >
                                                 <Label IsEnabled="False" Content="通讯状态:" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Label IsEnabled="False" Content="正常" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
-                                                <Metro:MetroImage Name="Tur_Sensor_Img" Grid.Row="1"  Source="/Resources/green.png" Height="60" Width="60" Margin="20,0,0,0" />
+                                                <Label IsEnabled="False" Content="{Binding Tur_Sensor_Status, Mode=TwoWay}" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center"/>
+                                                <Metro:MetroImage Name="Tur_Sensor_Img" Grid.Row="1"  Source="{Binding Path=Tur_Sensor_ImgSource,Converter={StaticResource MyImageConverter}}" Height="60" Width="60" Margin="20,0,0,0" />
                                             </StackPanel>
                                         </Grid>
                                     </Metro:MetroGroupBox>
@@ -1516,12 +1514,13 @@
                                                     <TextBlock Text="测量BOD"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
                                                 </StackPanel>
+                                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
 
-                                                <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1">
-                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="FetchWater_Click" ></Button>
-                                                    <TextBlock Text="采水"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="StartBodStandWater_Click"  ></Button>
+                                                    <TextBlock Text="标定BOD"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
                                                 </StackPanel>
+
 
                                                 <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical">
                                                     <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5"   Click="restart_Click"></Button>
@@ -1535,6 +1534,12 @@
                                                     <TextBlock Text="开始COD测量"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
                                                 </StackPanel>
+                                                <StackPanel Grid.Row="2" Orientation="Vertical" Grid.Column="1">
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"   Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="FetchWater_Click" ></Button>
+                                                    <TextBlock Text="采水"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
+
+                                                </StackPanel>
+
 
                                                 <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical">
 
@@ -1678,12 +1683,12 @@
                                         </Grid.RowDefinitions>
 
                                         <StackPanel Grid.Row="0"  Orientation="Horizontal">
-                                            <Metro:MetroTextBox Width="280"  Title="当前BOD状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取"/>
-                                            <Metro:MetroTextBox Width="280"  Title="当前采样状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" />
+                                            <Metro:MetroTextBox Name="BodStatus_text" Width="280"  Title="当前BOD状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" ButtonClick="GetBodStatus_click"/>
+                                            <Metro:MetroTextBox Name="SampleStatus_box" Width="280"  Title="当前采样状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" ButtonClick="GetBodSampleStatus_click" />
                                         </StackPanel>
                                         <StackPanel Grid.Row="1"  Orientation="Horizontal" Margin="0,10,0,0">
-                                            <Metro:MetroTextBox Width="280"  Title="电极电位值:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取"/>
-                                            <Metro:MetroTextBox Width="280"  Title="设备告警状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" />
+                                            <Metro:MetroTextBox Name="ElePot_textbox" Width="280"  Title="电极电位值:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" ButtonClick="GetElepot_click"/>
+                                            <Metro:MetroTextBox Name="AlramInfo_textbox" Width="280"  Title="设备告警状态:" TitleForeground="Red" FontSize="14"  ButtonTitle="获取" HorizontalAlignment="Right" Margin="40,0,0,0" ButtonClick="GetAlramInfo_click" />
                                         </StackPanel>
                                         <StackPanel Grid.Row="2"  Margin="0,10,0,0">
                                             <Metro:MetroGroupBox >
@@ -1724,7 +1729,7 @@
                                                                         <Label Content="电位降：" VerticalContentAlignment="Center"></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                        <Label  Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
+                                                                        <Label  Name="StandElePotDrop_lab" Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                                         <Label Content="单位：uA" VerticalContentAlignment="Center"></Label>
@@ -1733,7 +1738,7 @@
                                                             </StackPanel>
 
                                                             <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                                                <Metro:MetroButton Name="GetBodStandData" Content="获取数据" Width="60" Height="40" MetroButtonState="Red"></Metro:MetroButton>
+                                                                <Metro:MetroButton  Content="获取数据" Width="60" Height="40" MetroButtonState="Red" Click="GetBodStandData_click"></Metro:MetroButton>
                                                             </StackPanel>
                                                         </Grid>
                                                     </StackPanel>
@@ -1760,7 +1765,7 @@
                                                                         <Label Content="当前BOD值：" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                        <Label  Content="0"   Width="50" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+                                                                        <Label  Name="CurrentData_lab" Content="0"   Width="50" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                                         <Label Content="单位：mg/l" VerticalContentAlignment="Center"></Label>
@@ -1769,7 +1774,7 @@
                                                                         <Label Content="电位降：" VerticalContentAlignment="Center"></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                        <Label  Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
+                                                                        <Label Name="CurrentElePotDrop_lab" Content="0"  HorizontalAlignment="Center" VerticalAlignment="Center"  Width="50"></Label>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                                         <Label Content="单位：uA" VerticalContentAlignment="Center"></Label>
@@ -1778,7 +1783,7 @@
                                                             </StackPanel>
 
                                                             <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                                                <Metro:MetroButton Content="获取数据" Width="60" Height="40" MetroButtonState="Red"></Metro:MetroButton>
+                                                                <Metro:MetroButton Content="获取数据" Width="60" Height="40" MetroButtonState="Red" Click="GetBodCurrentData_click"></Metro:MetroButton>
                                                             </StackPanel>
                                                         </Grid>
                                                     </StackPanel>
@@ -1884,13 +1889,6 @@
                                             </ListView>
                                         </StackPanel>
 
-                                        <!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
-                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
-                                            </DataGrid.Columns>
-                                        </DataGrid>-->
-
                                         <StackPanel Grid.Row="1" Margin="0,30,0,0">
 
                                             <local:Pager  TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" DataContext="{Binding HisParamData}" >
@@ -1947,28 +1945,45 @@
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
 
-                                    <ListView Name="AlarmList" Grid.Row="0" Margin="0,10,0,0" Height="450">
-                                        <ListView.View>
-                                            <GridView>
-                                                <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
-                                                <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
-                                                <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
-                                                <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
-                                                <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
-                                                <GridViewColumn Header="是否处理" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
-                                            </GridView>
-                                        </ListView.View>
-                                    </ListView>
+                                    <!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
+                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>-->
+
+                                    <DataGrid Name="AlarmList" Grid.Row="0" Margin="0,10,0,0" Height="450">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="序号" Width="50" Binding="{Binding id}"/>
+                                            <DataGridTextColumn Header="设备信息" Width="150" Binding="{Binding DeviceInfo}"/>
+                                            <DataGridTextColumn Header="报警码" Width="200" Binding="{Binding AlramNum}"/>
+                                            <DataGridTextColumn Header="报警信息" Width="200" Binding="{Binding AlramInfo}"/>
+                                            <DataGridTextColumn Header="报警时间" Width="150" Binding="{Binding dateTime}"/>
+                                            <DataGridTextColumn Header="是否处理" Width="150" Binding="{Binding HasHandle}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
 
                                     <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
-
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="FirstPage">
+                                                <i:InvokeCommandAction Command="{Binding FirstPageCommand}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="PreviousPage">
+                                                <i:InvokeCommandAction Command="{Binding PreviousPageCommand}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="NextPage">
+                                                <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="LastPage">
+                                                <i:InvokeCommandAction Command="{Binding LastPageCommand}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
                                     </local:Pager>
                                 </Grid>
 
                             </Metro:MetroTabItem>
                             <Metro:MetroTabItem Header="历史报警数据" Icon="/Resources/tabIcon.png">
                                 <Grid>
-
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="80"/>
                                         <RowDefinition/>
@@ -2012,7 +2027,7 @@
                                             <ListView.View>
                                                 <GridView>
                                                     <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
-                                                    <GridViewColumn Header="设备信息" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
+                                                    <GridViewColumn Header="设备类型" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
                                                     <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
                                                     <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
                                                     <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
@@ -2022,10 +2037,22 @@
                                         </ListView>
 
                                         <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" Margin="0,10,0,0">
-
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="FirstPage">
+                                                    <i:InvokeCommandAction Command="{Binding FirstPageCommand}"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="PreviousPage">
+                                                    <i:InvokeCommandAction Command="{Binding PreviousPageCommand}"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="NextPage">
+                                                    <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="LastPage">
+                                                    <i:InvokeCommandAction Command="{Binding LastPageCommand}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
                                         </local:Pager>
                                     </StackPanel>
-
                                 </Grid>
                             </Metro:MetroTabItem>
                         </Metro:MetroTabControl>
@@ -2091,10 +2118,10 @@
                                                                     <RadioButton Style="{StaticResource BoxRadioButton}" Margin="10,1,1,1" Content="进水口模式"  Background="{DynamicResource MahApps.Brushes.Accent}" FontSize="20" Width="150" Height="40" Checked="WaterInModel_Checked"></RadioButton>
                                                                     <RadioButton x:Name="OutModel" Style="{StaticResource BoxRadioButton}" Margin="40,1,1,1" FontWeight="Bold" FontSize="20" Background="{DynamicResource MahApps.Brushes.Accent}" IsChecked="True" Width="150" Height="40" Content="出水口模式" Checked="WaterOutModel_Checked"></RadioButton>
                                                                 </StackPanel>
-                                                               
+
                                                             </Metro:MetroGroupBox>
                                                         </StackPanel>
-                                                        
+
                                                     </Grid>
                                                 </GroupBox>
                                                 <GroupBox Header="流程参数配置" Style="{StaticResource MahApps.Styles.GroupBox}" Margin="0,20,0,0">

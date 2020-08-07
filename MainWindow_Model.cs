@@ -219,10 +219,30 @@ namespace BodDetect
             }
         }
 
+        private DevStatusModels _devStatusModels;
+
+        public DevStatusModels DevStatusModel 
+        {
+            get 
+            {
+                return _devStatusModels;
+            }
+            set 
+            {
+                if (_devStatusModels != value) 
+                {
+                    _devStatusModels = value;
+                }
+            }
+        }
+
         public MainWindow_Model()
         {
 
             PagerInit();
+
+            DevStatusModel = new DevStatusModels();
+            DevStatusModel.init();
 
             Hour = 1;
             Minute = 2;
@@ -258,6 +278,82 @@ namespace BodDetect
             get { return _Seccond; }
             set { _Seccond = value; OnPropertyChanged("Seccond"); }
         }
+
+        public void UpdateSensorStatus() 
+        {
+            string Redpath = @"pack://application:,,,/Resources/red.png";
+            string Greenpath = @"pack://application:,,,/Resources/green.png";
+
+            if (Uv254Data == 0)
+            {
+                DevStatusModel.UV254_Sensor_ImgSource = Redpath;
+                DevStatusModel.UV254_Sensor_Status = "异常";
+            }
+            else
+            {
+                DevStatusModel.UV254_Sensor_ImgSource = Greenpath;
+                DevStatusModel.UV254_Sensor_Status = "正常";
+            }
+
+            if (TurbidityData == 0)
+            {
+                DevStatusModel.Tur_Sensor_ImgSource= Redpath;
+                DevStatusModel.Tur_Sensor_Status = "异常";
+            }
+            else
+            {
+                DevStatusModel.Tur_Sensor_ImgSource = Greenpath;
+                DevStatusModel.Tur_Sensor_Status = "正常";
+            }
+
+            if (PHData == 0)
+            {
+                DevStatusModel.PH_Sensor_ImgSource = Redpath;
+                DevStatusModel.PH_Sensor_Status = "异常";
+            }
+            else
+            {
+                DevStatusModel.PH_Sensor_ImgSource = Greenpath;
+                DevStatusModel.PH_Sensor_Status = "正常";
+            }
+
+            if (DoData == 0)
+            {
+                DevStatusModel.Do_Sensor_ImgSource = Redpath;
+                DevStatusModel.DO_Sensor_Status = "异常";
+            }
+            else
+            {
+                DevStatusModel.Do_Sensor_ImgSource = Greenpath;
+                DevStatusModel.DO_Sensor_Status = "正常";
+            }
+        }
+
+        public void UpdatePlcStatus(bool Connect, bool RunStatus) 
+        {
+            if (Connect)
+            {
+                DevStatusModel.PLC_Status = "正常";
+                DevStatusModel.PLC_Status_ImgSource = DevStatusModels.Greenpath;
+            }
+            else 
+            {
+                DevStatusModel.PLC_Status = "异常";
+                DevStatusModel.PLC_Status_ImgSource = DevStatusModels.Redpath;
+            }
+
+            if (RunStatus)
+            {
+                DevStatusModel.PLC_Run_Status = "正常";
+                DevStatusModel.PLC__Run_Status_ImgSource = DevStatusModels.Greenpath;
+            }
+            else 
+            {
+                DevStatusModel.PLC_Run_Status = "异常";
+                DevStatusModel.PLC__Run_Status_ImgSource = DevStatusModels.Redpath;
+            }
+        }
+
 
         //private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         //{

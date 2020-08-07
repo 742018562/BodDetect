@@ -107,10 +107,10 @@ namespace BodDetect
             try
             {
 
-                for (int i = 0; i < 10; i++)
-                {
-                    AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
-                }
+                //for (int i = 0; i < 10; i++)
+                //{
+                //    AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
+                //}
 
                 //for (int i = 0; i < 10; i++)
                 //{
@@ -145,6 +145,7 @@ namespace BodDetect
                 StandWaterTimer.Interval = new TimeSpan(3, 0, 0, 0);
                 StandWaterTimer.Start();
 
+                UpdataStatusTimer.Tick += UpdateDevStatus;
                int times = Convert.ToInt32(UpdataStatus.Text);
                 UpdataStatusTimer.Interval = new TimeSpan(0, times, 0);
             }
@@ -242,6 +243,7 @@ namespace BodDetect
             mainWindow_Model.HumidityDataData = data.HumidityData;
             mainWindow_Model.AirTemperatureData = data.AirTemperatureData;
 
+
             HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
             hisDatabase.DoDataUnit = "mg/L";
@@ -253,6 +255,8 @@ namespace BodDetect
             hisDatabase.Bod = mainWindow_Model.BodData;
             hisDatabase.CodData = mainWindow_Model.CodData;
             hisDatabase.Uv254Data = mainWindow_Model.Uv254Data;
+            hisDatabase.BodElePot = data.BodElePot;
+            hisDatabase.BodElePotDrop = data.BodElePotDrop;
 
             DateTime dateTime = DateTime.Now;
             hisDatabase.CreateDate = dateTime.ToLongDateString();
@@ -264,7 +268,7 @@ namespace BodDetect
             hisDatabase.CopyToHisDataBaseModel(hisDataBaseModel);
             await Task.Factory.StartNew(()=> BodSqliteHelp.InsertHisBodData(hisDataBaseModel));
 
-            UpdataDevStatus();
+            mainWindow_Model.UpdateSensorStatus();
         }
 
         private void MetroButton_Click_2(object sender, RoutedEventArgs e)
@@ -1819,7 +1823,6 @@ namespace BodDetect
 
         }
 
-
         private void WaterInModel_Checked(object sender, RoutedEventArgs e) 
         {
             if (configData != null) 
@@ -2059,7 +2062,7 @@ namespace BodDetect
             mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
             mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
 
-            HisDatabase hisDatabase = new HisDatabase();
+           HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
             hisDatabase.DoDataUnit = "mg/L";
             hisDatabase.PHData = mainWindow_Model.PHData;
@@ -2070,6 +2073,7 @@ namespace BodDetect
             DateTime dateTime = DateTime.Now;
             hisDatabase.CreateDate = dateTime.ToLongDateString();
             hisDatabase.CreateTime = dateTime.ToLongTimeString();
+            hisDatabase.Bod = mainWindow_Model.BodData;
 
             mainWindow_Model.HisParamData.AddData(hisDatabase);
 
@@ -2094,7 +2098,8 @@ namespace BodDetect
 
             await Task.Factory.StartNew( ()=>BodSqliteHelp.InsertHisBodData(model));
 
-            UpdataDevStatus();
+            mainWindow_Model.UpdateSensorStatus();
+            UpdataBodStatus();
 
         }
 
@@ -2146,75 +2151,45 @@ namespace BodDetect
         private void UpdateDevStatus(object sender, EventArgs e) 
         {
             bool IsConnect = bodHelper.finsClient.IsConnect();
-
-
+            mainWindow_Model.UpdatePlcStatus(IsConnect, true);
+            UpdataBodStatus();
         }
 
-        public void UpdatePLCStatus(bool Connect,bool RunStatus) 
+
+        public  void UpdataBodStatus() 
         {
-            string path = @"pack://application:,,,/Resources/green.png";
-            if (!Connect) 
+            string text = GetBodStatus();
+            string AlramInfo = GetAlramInfo();
+            string SampleText = GetBodSampleStatus();
+
+            if (string.IsNullOrEmpty(text))
             {
-                path = @"pack://application:,,,/Resources/red.png";
-            }
+                mainWindow_Model.DevStatusModel.BOD_Connect_Status = "异常";
+                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Greenpath;
 
-            BitmapImage image = new BitmapImage(new Uri(path, UriKind.Absolute));
-            PLCstatusComm_Image.Source = image;
-
-            path = @"pack://application:,,,/Resources/green.png";
-            if (!RunStatus) 
-            {
-                path = @"pack://application:,,,/Resources/red.png";
-            }
-
-            BitmapImage image1 = new BitmapImage(new Uri(path, UriKind.Absolute));
-            PLCstatusRun_Image.Source = image1;
-        }
-
-        public  void UpdataDevStatus() 
-        {
-            string path1 = @"pack://application:,,,/Resources/red.png";
-            string path2 = @"pack://application:,,,/Resources/green.png";
-
-            BitmapImage GreenImage = new BitmapImage(new Uri(path1, UriKind.Absolute));
-            BitmapImage RedImage = new BitmapImage(new Uri(path2, UriKind.Absolute));
-
-            if (mainWindow_Model.Uv254Data == 0)
-            {
-                uv254_Sensor_Img.Source = RedImage;
+                mainWindow_Model.DevStatusModel.BOD_Run_Status = "异常";
+                mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Redpath;
             }
             else 
             {
-                uv254_Sensor_Img.Source = GreenImage;
-            }
+                mainWindow_Model.DevStatusModel.BOD_Connect_Status = "正常";
+                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Greenpath;
 
-            if (mainWindow_Model.TurbidityData == 0)
-            {
-                Tur_Sensor_Img.Source = RedImage;
-            }
-            else 
-            {
-                Tur_Sensor_Img.Source = GreenImage;
-            }
+                mainWindow_Model.DevStatusModel.BOD_Run_Status = text;
+                mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Greenpath;
 
-            if (mainWindow_Model.PHData == 0)
-            {
-                PH_Sensor_Img.Source = RedImage;
-            }
-            else 
-            {
-                PH_Sensor_Img.Source = GreenImage;
-            }
+                mainWindow_Model.DevStatusModel.BOD_Alram_Status = AlramInfo;
+                if (AlramInfo != "无告警")
+                {
+                    mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Redpath;
+                }
+                else 
+                {
+                    mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Greenpath;
+                }
 
-            if (mainWindow_Model.DoData == 0)
-            {
-                DO_Sensor_Img.Source = RedImage;
+                mainWindow_Model.DevStatusModel.BOD_Sample_Status = SampleText;
             }
-            else 
-            {
-                DO_Sensor_Img.Source = GreenImage;
-            }
-
         }
 
 

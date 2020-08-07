@@ -87,7 +87,7 @@ namespace BodDetect.BodDataManage
         public const byte WashValveBit = 0X01;
 
         /// <summary>
-        /// BOD到排口阀（三通）,0表示接排水口，1变送接清洗液循环
+        /// BOD到排口阀（三通）,1表示接排水口，0变送接清洗液循环
         /// </summary>
         public const byte BodDrainValveBit = 0X02;
 

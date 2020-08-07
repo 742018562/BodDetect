@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BodDetect.DataBaseInteractive.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,23 +8,33 @@ namespace BodDetect.BodDataManage
     public class AlarmData
     {
 
-        public AlarmData(int id, string DeviceInfo, int AlramNum, string AlramInfo, string dateTime, bool HasHandle)
+        public AlarmData(int id, int DeviceInfo, int AlramNum, string AlramInfo,bool HasHandle)
         {
             this.id = id;
             this.DeviceInfo = DeviceInfo;
-            this.AlramNum = AlramNum;
-            this.AlramInfo = AlramInfo;
-            this.dateTime = dateTime;
+            this.ErrorCode = AlramNum;
+            this.ErrorDes = AlramInfo;
             this.HasHandle = HasHandle;
         }
 
         public int id { get; set; }
-        public string DeviceInfo { get; set; }
+        public int DeviceInfo { get; set; }
+        public int ErrorCode { get; set; }
+        public string ErrorDes { set; get; }
+        public Boolean HasHandle { get; set; }
 
-        public int AlramNum { get; set; }
-        public string AlramInfo { set; get; }
+        public string CreateDate { get; set; }
+        public string CreateTime { get; set; }
 
-        public string dateTime { get; set; }
-        public bool HasHandle { get; set; }
+        public void CopyToAlramInfoModel(AlramInfoModel alramInfoModel) 
+        {
+            alramInfoModel.id = id;
+            alramInfoModel.DeviceInfo = DeviceInfo;
+            alramInfoModel.ErrorCode = ErrorCode;
+            alramInfoModel.ErrorDes = ErrorDes;
+            alramInfoModel.HasHandle = HasHandle;
+            alramInfoModel.CreateTime = CreateTime;
+            alramInfoModel.CreateDate = CreateDate;
+        }
     }
 }

@@ -71,9 +71,9 @@ namespace BodDetect
             return flag;
         }
 
-        public bool IsAlive() 
+        public bool IsAlive()
         {
-            if (serialPort == null) 
+            if (serialPort == null)
             {
                 return false;
             }
@@ -83,7 +83,7 @@ namespace BodDetect
 
         private void ConfigurePort()
         {
-            serialPort.PortName = "COM1";
+            serialPort.PortName = "COM2";
             serialPort.BaudRate = 9600;
             serialPort.Parity = Parity.None;
             serialPort.DataBits = 8;
@@ -360,6 +360,7 @@ namespace BodDetect
 
         public byte[] ReadData()
         {
+            Thread.Sleep(500);
             int bytesToRead = serialPort.BytesToRead;
             byte[] tempBuffer = new byte[bytesToRead];
             try
@@ -394,7 +395,7 @@ namespace BodDetect
             int iLength = data.Length;
 
             if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
-                data[2] != 0x02 ||
+                data[2] != 0x06 ||
                 iLength != 11)
             {
                 return new float[] { -1 };
@@ -402,10 +403,42 @@ namespace BodDetect
 
             int iCount = Convert.ToInt32(data[2]);
 
-            byte[] BodValue = { data[3], data[4], data[5], data[6] };
-            float Value = Tool.ToInt32(BodValue)[0];
+            byte[] BodValue = { data[6], data[5], data[4], data[3] };
+            float Value = BitConverter.ToInt32(BodValue,0);
 
-            float ElePotDrop = BitConverter.ToInt16(BodValue, 8);
+            byte[] tempbe = { data[8], data[7] };
+            float ElePotDrop = BitConverter.ToInt16(tempbe,0);
+
+            return new float[] { Value / 100, ElePotDrop / 100 };
+        }
+
+        public float[] GetBodStandData()
+        {
+            ReadBodFun(RegStatus.BodStand, 3);
+
+            byte[] data = ReadData();
+
+            if (data == null)
+            {
+                return new float[] { -1 };
+            }
+
+            int iLength = data.Length;
+
+            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                data[2] != 0x06 ||
+                iLength != 11)
+            {
+                return new float[] { -1 };
+            }
+
+            int iCount = Convert.ToInt32(data[2]);
+
+            byte[] BodValue = { data[6], data[5], data[4], data[3] };
+            float Value = BitConverter.ToInt32(BodValue,0);
+
+            byte[] tempbe = { data[8], data[7] };
+            float ElePotDrop = BitConverter.ToInt16(tempbe,0);
 
             return new float[] { Value / 100, ElePotDrop / 100 };
         }
@@ -421,7 +454,9 @@ namespace BodDetect
                 return -1;
             }
 
-            return BitConverter.ToInt16(data, 3);
+            byte[] tempbe = { data[4], data[3] };
+
+            return BitConverter.ToInt16(tempbe,0);
         }
 
         public int GetSamplingStatus()
@@ -435,7 +470,9 @@ namespace BodDetect
                 return -1;
             }
 
-            return BitConverter.ToInt16(data, 3);
+            byte[] tempbe = { data[4], data[3] };
+
+            return BitConverter.ToInt16(tempbe,0);
         }
 
         public float GetElePot()
@@ -449,7 +486,9 @@ namespace BodDetect
                 return -1;
             }
 
-            float temp = BitConverter.ToInt16(data, 3);
+            byte[] tempbe = { data[4], data[3] };
+
+            float temp = BitConverter.ToInt16(tempbe,0);
 
             return temp / 100;
         }
@@ -465,25 +504,28 @@ namespace BodDetect
                 return -1;
             }
 
-            return BitConverter.ToInt16(data, 3);
+            byte[] tempbe = { data[4], data[3] };
+
+            return BitConverter.ToInt16(tempbe, 0);
         }
 
         private bool BodRecvDataBaseCheck(byte[] data, byte funCode)
         {
             if (data == null ||
-                data.Length > 3 ||
+                data.Length < 3 ||
                 data[0] != 0x01 ||
-                data[1] != funCode ||
-                Tool.CheckCRC16(data))
+                data[1] != funCode)
+                //Tool.CheckCRC16(data))
             {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public void Dispose()
         {
+            ClosePort();
             serialPort.Dispose();
         }
 

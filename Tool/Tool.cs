@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml.Schema;
 
 namespace BodDetect
 {
@@ -346,6 +347,32 @@ namespace BodDetect
                     break;
                 case ProcessType.Waitding:
                     text += "系统空闲...";
+                    break;
+                default:
+                    break;
+            }
+
+            return text;
+        }
+
+
+        public static string GetBodStatusToString(int status) 
+        {
+            string text = "";
+
+            switch (status)
+            {
+                case 0:
+                    text = "空闲";
+                    break;
+                case 1:
+                    text = "清洗未完成";
+                    break;
+                case 2:
+                    text = "正在做标准";
+                    break;
+                case 3:
+                    text = "正在做样品";
                     break;
                 default:
                     break;
