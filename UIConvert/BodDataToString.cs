@@ -19,7 +19,7 @@ namespace BodDetect.UIConvert
                     text = data.ToString("F2");
                     break;
                 case 1:
-                    text = data.ToString("F2");
+                    text = data.ToString();
                     break;
                 case 2:
                     text = data.ToString("F2");

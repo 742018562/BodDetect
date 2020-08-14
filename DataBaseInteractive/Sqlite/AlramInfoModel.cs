@@ -29,7 +29,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             return paramList;
         }
 
-        public void CopyToSysStatusData(AlarmData alarmData)
+        public void CopyToAlarmData(AlarmData alarmData)
         {
             alarmData.id = id;
             alarmData.ErrorCode = ErrorCode;

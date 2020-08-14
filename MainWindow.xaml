@@ -12,17 +12,24 @@
         x:Class="BodDetect.MainWindow"
         Loaded="Window_Loaded" 
         mc:Ignorable="d"
-        Width="1366"
-        Height="768"
+        Width="1366" MaxWidth="1366" MinWidth="1366"
+        Height="768" MaxHeight="768" MinHeight="768"
     
-        Closed="MetroWindow_Closed" Background="#FF954619">
-    <!--ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" WindowState="Maximized" IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
+        Closed="MetroWindow_Closed" Background="#FF954619"
+
+        WindowState="Maximized"
+        ResizeMode="NoResize" KeepBorderOnMaximize="False" 
+        
+        >
+    <!--ResizeMode="NoResize" ShowInTaskbar="False"  IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
 
     <Window.Resources>
 
         <UIConvert:BodDataToString x:Key="BodDataToString"/>
         <UIConvert:HisParamDataToString x:Key="HisParamDataToString"/>
         <UIConvert:StringToImageSourceConverter x:Key="MyImageConverter"/>
+        <UIConvert:AlarmDataToString x:Key="AlarmDataConverter"/>
+
 
         <!--日历主体样式表   Metro:MetroWindow-->
         <Style x:Key="CalendarItemStyle1"
@@ -940,7 +947,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0">
-                                        <Metro:MetroImage Grid.Row="1"  x:Name="BOD_Model_Image" Source="/Resources/Bod_Model.png" Width="300"/>
+                                        <!--<Metro:MetroImage Grid.Row="1"  x:Name="BOD_Model_Image" Source="/Resources/Bod_Model.png" Width="300"/>-->
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                         <Grid DataContext="{Binding DevStatusModel}" >
@@ -988,12 +995,12 @@
 
                                         <Grid  Margin="0,10,0,0" >
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition />
+                                                <ColumnDefinition  Width="auto"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
 
                                             <StackPanel Grid.Column="0">
-                                                <Metro:MetroImage Grid.Row="1"  x:Name="PLCImage" Source="/Resources/PLC.jpg" Height="140"/>
+                                                <!--<Metro:MetroImage Grid.Row="1"  x:Name="PLCImage" Source="/Resources/PLC.jpg" Height="140"/>-->
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Margin="20,0,0,0">
                                                 <Grid >
@@ -1510,7 +1517,7 @@
 
 
                                                 <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
-                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="MeasureBod_Click"></Button>
+                                                    <Button Style="{StaticResource MahApps.Styles.Button.Circle}"  Width="70" Height="70" Background="#CC0078D7" BorderThickness="5" Click="StartBodSampleWater_Click"></Button>
                                                     <TextBlock Text="测量BOD"  FontSize="22" Foreground="Red" HorizontalAlignment="Center"/>
 
                                                 </StackPanel>
@@ -1845,6 +1852,8 @@
                                                     mah:TextBoxHelper.ClearTextButton="True"
                                                     mah:TextBoxHelper.ButtonWidth="40" mah:TextBoxHelper.AutoWatermark="True">
                                         </DatePicker>
+
+                                        <Metro:MetroButton Content="导出数据" MetroButtonState="Green" Click="HisDataExport_click" Width="150" Height="40" Margin="50,0,0,0" VerticalAlignment="Center"></Metro:MetroButton>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1">
@@ -1938,19 +1947,19 @@
 
                     <StackPanel Grid.Row="1" Margin="5,0,0,0" Background="White">
                         <Metro:MetroTabControl x:Name="DataAlarm"  Foreground="#FF2F48B8" FontSize="14" >
-                            <Metro:MetroTabItem Header="未处理报警信息" Icon="/Resources/tabIcon.png">
+                            <!--<Metro:MetroTabItem Header="未处理报警信息" Icon="/Resources/tabIcon.png">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
 
-                                    <!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
+                                    --><!--<DataGrid Grid.Row="0" ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False" CanUserAddRows="False">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
                                                 <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
                                             </DataGrid.Columns>
-                                        </DataGrid>-->
+                                        </DataGrid>--><!--
 
                                     <DataGrid Name="AlarmList" Grid.Row="0" Margin="0,10,0,0" Height="450">
                                         <DataGrid.Columns>
@@ -1981,7 +1990,7 @@
                                     </local:Pager>
                                 </Grid>
 
-                            </Metro:MetroTabItem>
+                            </Metro:MetroTabItem>-->
                             <Metro:MetroTabItem Header="历史报警数据" Icon="/Resources/tabIcon.png">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -1991,10 +2000,11 @@
                                     <StackPanel Grid.Row="0" Orientation="Horizontal">
                                         <Label Content="起始时间："  VerticalContentAlignment="Center" FontSize="16" Margin="50,0,0,0"></Label>
                                         <DatePicker 
+                                                    Name="AlarmDataStartPicker"
                                                     CalendarStyle="{StaticResource CalendarStyle1}" 
                                                     Width="300" 
                                                     FontSize="20" Height="40"
-                                                    DatePicker.SelectedDateChanged="HisDataTimeSelect" 
+                                                    SelectedDateChanged="AlramDataTimeSelect" 
                                                     Style="{StaticResource MahApps.Styles.DatePicker}" 
                                                     mah:TextBoxHelper.WatermarkAlignment="Center" 
                                                     mah:TextBoxHelper.ClearTextButton="True"
@@ -2003,11 +2013,12 @@
 
                                         <Label Content="结束时间：" Margin="150,0,0,0" VerticalContentAlignment="Center" FontSize="16"></Label>
                                         <DatePicker 
+                                                    Name="AlarmDataEndPicker"
                                                     CalendarStyle="{StaticResource CalendarStyle1}" 
                                                     Width="300" 
                                                     FontSize="20"
                                                     Height="40"
-                                                    DatePicker.SelectedDateChanged="HisDataTimeSelect" 
+                                                    SelectedDateChanged="AlramDataTimeSelect" 
                                                     Style="{StaticResource MahApps.Styles.DatePicker}" 
                                                     mah:TextBoxHelper.WatermarkAlignment="Center" 
                                                     mah:TextBoxHelper.ClearTextButton="True"
@@ -2023,20 +2034,34 @@
                                             </Grid.RowDefinitions>
                                         </Grid>
 
-                                        <ListView Name="HisAlarmList" Grid.Row="0" Height="450">
-                                            <ListView.View>
+                                        <ListView Name="HisAlarmList" Grid.Row="0" 
+                                                      ItemsSource="{Binding AlarmDataSource}" 
+                                                      ItemContainerStyle="{StaticResource ListViewItemStyle}"
+                                                      Style="{StaticResource MahApps.Styles.ListView}"  
+                                                      VerticalAlignment="Center" 
+                                                      DataContext="{Binding AlramPagerModels}" 
+                                                      Height="450">
+                                            <ListView.View >
                                                 <GridView>
+                                                    <GridView.ColumnHeaderContainerStyle>
+                                                        <Style TargetType="GridViewColumnHeader">
+                                                            <Setter Property="HorizontalContentAlignment"  Value="Center"/>
+                                                            <Setter Property="FontWeight" Value="Black"/>
+                                                            <Setter Property="Height" Value="40"/>
+                                                        </Style>
+                                                    </GridView.ColumnHeaderContainerStyle>
+
                                                     <GridViewColumn Header="序号" Width="50" DisplayMemberBinding="{Binding id}"/>
-                                                    <GridViewColumn Header="设备类型" Width="150" DisplayMemberBinding="{Binding DeviceInfo}"/>
-                                                    <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding AlramNum}"/>
-                                                    <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding AlramInfo}"/>
-                                                    <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding dateTime}"/>
-                                                    <GridViewColumn Header="是否处理" Width="150" DisplayMemberBinding="{Binding HasHandle}"/>
+                                                    <GridViewColumn Header="设备类型" Width="150" DisplayMemberBinding="{Binding DeviceInfo, Converter={StaticResource AlarmDataConverter}}"/>
+                                                    <GridViewColumn Header="报警码" Width="200" DisplayMemberBinding="{Binding ErrorCode}"/>
+                                                    <GridViewColumn Header="报警信息" Width="200" DisplayMemberBinding="{Binding ErrorDes}"/>
+                                                    <GridViewColumn Header="报警日期" Width="150" DisplayMemberBinding="{Binding CreateDate}"/>
+                                                    <GridViewColumn Header="报警时间" Width="150" DisplayMemberBinding="{Binding CreateTime}"/>
                                                 </GridView>
                                             </ListView.View>
                                         </ListView>
 
-                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" Margin="0,10,0,0">
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" Margin="0,10,0,0" DataContext="{Binding AlramPagerModels}">
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="FirstPage">
                                                     <i:InvokeCommandAction Command="{Binding FirstPageCommand}"/>
@@ -2175,17 +2200,17 @@
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                            <Metro:MetroTextBox  Title="清洗频率:" Width="150"  Text="5"/>
+                                                            <Metro:MetroTextBox  Title="清洗频率:" Width="150"  Text="1"/>
                                                             <Label Content="(次)"></Label>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                            <Metro:MetroTextBox Name="WashTimes"  Title="润洗次数:" Width="150"  Text="5" />
+                                                            <Metro:MetroTextBox Name="WashTimes"  Title="润洗次数:" Width="150"  Text="1" />
                                                             <Label Content="(次)" ></Label>
                                                         </StackPanel>
 
                                                         <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" >
-                                                            <Metro:MetroTextBox  Title="采样间隔:" Width="150"  x:Name="sampleSpac" Text="2"/>
+                                                            <Metro:MetroTextBox  Title="采样间隔:" Width="150"  x:Name="sampleSpac" Text="4"/>
                                                             <Label Content="(单位：时)" Foreground="Red"></Label>
                                                         </StackPanel>
 

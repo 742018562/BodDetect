@@ -8,13 +8,13 @@ namespace BodDetect.BodDataManage
     public class AlarmData
     {
 
-        public AlarmData(int id, int DeviceInfo, int AlramNum, string AlramInfo,bool HasHandle)
+        public AlarmData()
         {
-            this.id = id;
-            this.DeviceInfo = DeviceInfo;
-            this.ErrorCode = AlramNum;
-            this.ErrorDes = AlramInfo;
-            this.HasHandle = HasHandle;
+            //this.id = id;
+            //this.DeviceInfo = DeviceInfo;
+            //this.ErrorCode = AlramNum;
+            //this.ErrorDes = AlramInfo;
+            //this.HasHandle = HasHandle;
         }
 
         public int id { get; set; }

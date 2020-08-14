@@ -376,5 +376,11 @@ namespace BodDetect
             await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
         }
 
+        public async void StartBodSampleWater_Click(object sender, RoutedEventArgs e) 
+        {
+            await Task.Factory.StartNew(() => bodHelper.StartBodSample());
+
+        }
+
     }
 }

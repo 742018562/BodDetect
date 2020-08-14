@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml.Schema;
+
 
 namespace BodDetect
 {
@@ -308,7 +312,7 @@ namespace BodDetect
             CRCData[0] = (byte)((crc & 0xFF00) >> 8);  //高位置
             CRCData[1] = (byte)(crc & 0x00FF);         //低位置
 
-            if (CRCData[0] != data[len - 2] || CRCData[1] != data[len - 1]) 
+            if (CRCData[0] != data[len - 2] || CRCData[1] != data[len - 1])
             {
                 return false;
             }
@@ -319,7 +323,7 @@ namespace BodDetect
 
         #endregion
 
-        public static string GetProcessTypeToString(ProcessType processType) 
+        public static string GetProcessTypeToString(ProcessType processType)
         {
             string text = "系统运转状态：";
             switch (processType)
@@ -343,7 +347,7 @@ namespace BodDetect
                     text += "正在测量BOD...";
                     break;
                 case ProcessType.DrainEmpty:
-                    text += "测量完成,正在排空溶液...";
+                    text += "正在排空溶液...";
                     break;
                 case ProcessType.Waitding:
                     text += "系统空闲...";
@@ -356,7 +360,7 @@ namespace BodDetect
         }
 
 
-        public static string GetBodStatusToString(int status) 
+        public static string GetBodStatusToString(int status)
         {
             string text = "";
 
@@ -413,6 +417,233 @@ namespace BodDetect
                 return ex.Message;
             }
         }
+        #endregion
+
+        #region 数据库导出成excel
+        public class Export
+        {
+            public string Encoding = "UTF-8";
+
+            public void EcportExcel(DataTable dt, string fileName)
+            {
+
+                if (dt != null)
+                {
+                    StringWriter sw = new StringWriter();
+                    CreateStringWriter(dt, ref sw);
+                    sw.Close();
+                }
+
+            }
+
+            private void CreateStringWriter(DataTable dt, ref StringWriter sw)
+            {
+                string sheetName = "sheetName";
+
+                sw.WriteLine("<html xmlns:x=\"urn:schemas-microsoft-com:office:excel\">");
+                sw.WriteLine("<head>");
+                sw.WriteLine("<!--[if gte mso 9]>");
+                sw.WriteLine("<xml>");
+                sw.WriteLine(" <x:ExcelWorkbook>");
+                sw.WriteLine(" <x:ExcelWorksheets>");
+                sw.WriteLine(" <x:ExcelWorksheet>");
+                sw.WriteLine(" <x:Name>" + sheetName + "</x:Name>");
+                sw.WriteLine(" <x:WorksheetOptions>");
+                sw.WriteLine(" <x:Print>");
+                sw.WriteLine(" <x:ValidPrinterInfo />");
+                sw.WriteLine(" </x:Print>");
+                sw.WriteLine(" </x:WorksheetOptions>");
+                sw.WriteLine(" </x:ExcelWorksheet>");
+                sw.WriteLine(" </x:ExcelWorksheets>");
+                sw.WriteLine("</x:ExcelWorkbook>");
+                sw.WriteLine("</xml>");
+                sw.WriteLine("<![endif]-->");
+                sw.WriteLine("</head>");
+                sw.WriteLine("<body>");
+                sw.WriteLine("<table>");
+                sw.WriteLine(" <tr>");
+                string[] columnArr = new string[dt.Columns.Count];
+                int i = 0;
+                foreach (DataColumn columns in dt.Columns)
+                {
+
+                    sw.WriteLine(" <td>" + columns.ColumnName + "</td>");
+                    columnArr[i] = columns.ColumnName;
+                    i++;
+                }
+                sw.WriteLine(" </tr>");
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    sw.WriteLine(" <tr>");
+                    foreach (string columnName in columnArr)
+                    {
+                        sw.WriteLine(" <td style='vnd.ms-excel.numberformat:@'>" + dr[columnName] + "</td>");
+                    }
+                    sw.WriteLine(" </tr>");
+                }
+                sw.WriteLine("</table>");
+                sw.WriteLine("</body>");
+                sw.WriteLine("</html>");
+            }
+        }
+
+        /// <summary>
+        /// 把datagridView保存为excel
+        /// </summary>
+        /// <param name="m_DataTable">DataGridView绑定的DataTable为参数</param>
+        public static bool DataToExcel(DataTable m_DataTable, string FileName)
+        {
+            try
+            {
+
+
+
+                //SaveFileDialog kk = new SaveFileDialog();
+                //kk.Title = "保存EXECL文件";
+                //kk.Filter = "EXECL文件(*.xls) |*.xls |所有文件(*.*) |*.*";
+                //kk.FilterIndex = 1;
+                //if (kk.ShowDialog() == DialogResult.OK)
+                //{
+                DateTime time = DateTime.Now;
+                FileName = "D:\\" + FileName + "_";
+                FileName += time.ToLongDateString() + ".csv";
+                if (File.Exists(FileName))
+                    File.Delete(FileName);
+                //object missing = System.Reflection.Missing.Value;
+                //Microsoft.Office.Interop.Excel.Application app = new Microsoft.Office.Interop.Excel.ApplicationClass();
+                //app.Application.Workbooks.Add(true);
+                //Microsoft.Office.Interop.Excel.Workbook book = (Microsoft.Office.Interop.Excel.Workbook)app.ActiveWorkbook;
+                //Microsoft.Office.Interop.Excel.Worksheet sheet = (Microsoft.Office.Interop.Excel.Worksheet)book.ActiveSheet;
+                //sheet.Cells[1, 1] = "源数据站点名称记录";
+                //sheet.Cells[1, 2] = "匹配总数";
+                //for (int i = 0; i < m_DataTable.Columns.Count; i++)
+                //{
+                //    sheet.Cells[1, i + 1] = m_DataTable.Columns[i].Caption.ToString() + Convert.ToChar(9);
+                //}
+
+                ////将DataTable赋值给excel
+                //for (int k = 0; k < m_DataTable.Rows.Count; k++)
+                //{
+                //    sheet.Cells[k + 2, 1] = m_DataTable.Rows[k][0];
+                //    sheet.Cells[k + 2, 2] = m_DataTable.Rows[k][1];
+                //}
+                ////保存excel文件
+                //book.SaveCopyAs(FileName);
+                ////关闭文件
+                //book.Close(false, missing, missing);
+                ////退出excel
+                //app.Quit();
+
+                FileStream objFileStream;
+                StreamWriter objStreamWriter;
+                string strLine = "";
+                objFileStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write);
+                objStreamWriter = new StreamWriter(objFileStream, System.Text.Encoding.Unicode);
+                for (int i = 0; i < m_DataTable.Columns.Count; i++)
+                {
+                    strLine = strLine + m_DataTable.Columns[i].Caption.ToString() + Convert.ToChar(9);
+                }
+                objStreamWriter.WriteLine(strLine);
+                strLine = "";
+
+                for (int i = 0; i < m_DataTable.Rows.Count; i++)
+                {
+                    for (int j = 0; j < m_DataTable.Columns.Count; j++)
+                    {
+                        if (m_DataTable.Rows[i].ItemArray[j] == null)
+                            strLine = strLine + " " + Convert.ToChar(9);
+                        else
+                        {
+                            string rowstr = "";
+                            rowstr = m_DataTable.Rows[i].ItemArray[j].ToString();
+                            if (rowstr.IndexOf("\r\n") > 0)
+                                rowstr = rowstr.Replace("\r\n", " ");
+                            if (rowstr.IndexOf("\t") > 0)
+                                rowstr = rowstr.Replace("\t", " ");
+                            strLine = strLine + rowstr + Convert.ToChar(9);
+                        }
+                    }
+                    objStreamWriter.WriteLine(strLine);
+                    strLine = "";
+                }
+                objStreamWriter.Close();
+                objFileStream.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+            //}
+        }
+        /// <summary>
+        /// 把datagridView保存为excel
+        /// </summary>
+        /// <param name="m_DataView">DataGridView显示的内容</param>
+        public void DataToExcel2(DataGridView m_DataView)
+        {
+            SaveFileDialog kk = new SaveFileDialog();
+            kk.Title = "保存EXECL文件";
+            kk.Filter = "EXECL文件(*.xls) |*.xls |所有文件(*.*) |*.*";
+            kk.FilterIndex = 1;
+            if (kk.ShowDialog() == DialogResult.OK)
+            {
+                string FileName = kk.FileName;
+                if (File.Exists(FileName))
+                    File.Delete(FileName);
+                FileStream objFileStream;
+                StreamWriter objStreamWriter;
+                string strLine = "";
+                objFileStream = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write);
+                objStreamWriter = new StreamWriter(objFileStream, System.Text.Encoding.Unicode);
+                for (int i = 0; i < m_DataView.Columns.Count; i++)
+                {
+                    if (m_DataView.Columns[i].Visible == true)
+                    {
+                        strLine = strLine + m_DataView.Columns[i].HeaderText.ToString() + Convert.ToChar(9);
+                    }
+                }
+                objStreamWriter.WriteLine(strLine);
+                strLine = "";
+
+                for (int i = 0; i < m_DataView.Rows.Count; i++)
+                {
+                    if (m_DataView.Columns[0].Visible == true)
+                    {
+                        if (m_DataView.Rows[i].Cells[0].Value == null)
+                            strLine = strLine + " " + Convert.ToChar(9);
+                        else
+                            strLine = strLine + m_DataView.Rows[i].Cells[0].Value.ToString() + Convert.ToChar(9);
+                    }
+                    for (int j = 1; j < m_DataView.Columns.Count; j++)
+                    {
+                        if (m_DataView.Columns[j].Visible == true)
+                        {
+                            if (m_DataView.Rows[i].Cells[j].Value == null)
+                                strLine = strLine + " " + Convert.ToChar(9);
+                            else
+                            {
+                                string rowstr = "";
+                                rowstr = m_DataView.Rows[i].Cells[j].Value.ToString();
+                                if (rowstr.IndexOf("\r\n") > 0)
+                                    rowstr = rowstr.Replace("\r\n", " ");
+                                if (rowstr.IndexOf("\t") > 0)
+                                    rowstr = rowstr.Replace("\t", " ");
+                                strLine = strLine + rowstr + Convert.ToChar(9);
+                            }
+                        }
+                    }
+                    objStreamWriter.WriteLine(strLine);
+                    strLine = "";
+                }
+                objStreamWriter.Close();
+                objFileStream.Close();
+                MessageBox.Show("保存EXCEL成功");
+            }
+        }
+
         #endregion
 
     }

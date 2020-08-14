@@ -6,51 +6,39 @@ using System.Windows.Data;
 
 namespace BodDetect.UIConvert
 {
-    class HisParamDataToString : IValueConverter
+    class AlarmDataToString : IValueConverter
     {
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            float data = (float)value;
-            int type = System.Convert.ToInt32(parameter);
+            int type = (int)value;
             string text = string.Empty;
             switch (type)
             {
                 case 0:
-                    text = data.ToString("F2") + "(mg/L)";
+                    text = "主机";
                     break;
                 case 1:
-                    text = data.ToString() + "(AU/m)";
+                    text = "BOD";
                     break;
                 case 2:
-                    text = data.ToString("F2") + "(mg/L)";
+                    text =  "PLC";
                     break;
                 case 3:
-                    text = data.ToString("F2") + "(mg/L)";
+                    text = "uv254传感器";
                     break;
                 case 4:
-                    text = data.ToString("F2") + "(℃)";
+                    text = "浊度传感器";
                     break;
                 case 5:
-                    text = data.ToString("F1");
+                    text = "PH传感器";
                     break;
                 case 6:
-                    text = data.ToString("F2") + "(mg/L)";
-                    break;
-                case 7:
-                    text = data.ToString("F2") + "(uA)";
-                    break;
-                case 8:
-                    text = data.ToString("F2") + "(uA)";
+                    text = "DO传感器";
                     break;
                 default:
                     break;
             }
-
-            if (data == 0)
-            {
-                text = "--";
-            }
-
 
             return text;
         }
@@ -61,4 +49,6 @@ namespace BodDetect.UIConvert
             throw new NotImplementedException();
         }
     }
+
+
 }

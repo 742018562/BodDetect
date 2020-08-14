@@ -163,6 +163,16 @@ namespace BodDetect
             }
 
             _source = valueList;
+            int index = _source.Count % PageSize;
+            if (index > 0)
+            {
+                TotalPage = _source.Count / PageSize + 1;
+            }
+            else
+            {
+                TotalPage = _source.Count / PageSize;
+            }
+
             FirstPageAction(); 
         }
 

@@ -1,5 +1,7 @@
 ﻿using BodDetect.BodDataManage;
+using BodDetect.DataBaseInteractive.Sqlite;
 using BodDetect.PagerDataModels;
+using BodDetect.UIModels.PagerDataModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -219,6 +221,23 @@ namespace BodDetect
             }
         }
 
+        private AlramPagerModel _alramPagerModel;
+
+        public AlramPagerModel AlramPagerModels
+        {
+            get
+            {
+                return _alramPagerModel;
+            }
+            set
+            {
+                if (_alramPagerModel != value)
+                {
+                    _alramPagerModel = value;
+                }
+            }
+        }
+
         private DevStatusModels _devStatusModels;
 
         public DevStatusModels DevStatusModel 
@@ -244,6 +263,19 @@ namespace BodDetect
             DevStatusModel = new DevStatusModels();
             DevStatusModel.init();
 
+            HisDatabase hisDatabaseLast = new HisDatabase();
+
+            int count = HisParamData.AllHisData.Count;
+            hisDatabaseLast = HisParamData.AllHisData[count - 1];
+
+            BodData = hisDatabaseLast.Bod;
+            CodData = hisDatabaseLast.CodData;
+            Uv254Data = hisDatabaseLast.Uv254Data;
+            PHData = hisDatabaseLast.PHData;
+            TurbidityData = hisDatabaseLast.TurbidityData;
+            TemperatureData = hisDatabaseLast.TemperatureData;
+            DoData = hisDatabaseLast.DoData;
+
             Hour = 1;
             Minute = 2;
             Seccond = 3;
@@ -256,6 +288,9 @@ namespace BodDetect
 
             SysStatusDataModel = new SysStatusPagerModel();
             SysStatusDataModel.init();
+
+            AlramPagerModels = new AlramPagerModel();
+            AlramPagerModels.init();
         }
 
         private int _Hour;
@@ -284,10 +319,26 @@ namespace BodDetect
             string Redpath = @"pack://application:,,,/Resources/red.png";
             string Greenpath = @"pack://application:,,,/Resources/green.png";
 
+            DateTime dateTime = DateTime.Now;
+
             if (Uv254Data == 0)
             {
                 DevStatusModel.UV254_Sensor_ImgSource = Redpath;
                 DevStatusModel.UV254_Sensor_Status = "异常";
+
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 3;
+                alarmData.ErrorCode = 5;
+                alarmData.ErrorDes = "uv254传感器断开";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
             }
             else
             {
@@ -299,6 +350,20 @@ namespace BodDetect
             {
                 DevStatusModel.Tur_Sensor_ImgSource= Redpath;
                 DevStatusModel.Tur_Sensor_Status = "异常";
+
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 4;
+                alarmData.ErrorCode = 6;
+                alarmData.ErrorDes = "浊度传感器断开";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
             }
             else
             {
@@ -310,6 +375,20 @@ namespace BodDetect
             {
                 DevStatusModel.PH_Sensor_ImgSource = Redpath;
                 DevStatusModel.PH_Sensor_Status = "异常";
+
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 5;
+                alarmData.ErrorCode = 7;
+                alarmData.ErrorDes = "PH传感器断开";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
             }
             else
             {
@@ -321,6 +400,20 @@ namespace BodDetect
             {
                 DevStatusModel.Do_Sensor_ImgSource = Redpath;
                 DevStatusModel.DO_Sensor_Status = "异常";
+
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 6;
+                alarmData.ErrorCode = 8;
+                alarmData.ErrorDes = "DO传感器断开";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
             }
             else
             {
@@ -331,6 +424,8 @@ namespace BodDetect
 
         public void UpdatePlcStatus(bool Connect, bool RunStatus) 
         {
+            DateTime dateTime = DateTime.Now;
+
             if (Connect)
             {
                 DevStatusModel.PLC_Status = "正常";
@@ -340,6 +435,20 @@ namespace BodDetect
             {
                 DevStatusModel.PLC_Status = "异常";
                 DevStatusModel.PLC_Status_ImgSource = DevStatusModels.Redpath;
+                DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Redpath;
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 2;
+                alarmData.ErrorCode = 3;
+                alarmData.ErrorDes = "PLC通讯断开";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
             }
 
             if (RunStatus)
@@ -351,6 +460,24 @@ namespace BodDetect
             {
                 DevStatusModel.PLC_Run_Status = "异常";
                 DevStatusModel.PLC__Run_Status_ImgSource = DevStatusModels.Redpath;
+
+                DevStatusModel.PLC_Status = "异常";
+                DevStatusModel.PLC_Status_ImgSource = DevStatusModels.Redpath;
+                DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Redpath;
+                AlarmData alarmData = new AlarmData();
+                alarmData.id = AlramPagerModels.AllAlarmData.Count + 1;
+                alarmData.DeviceInfo = 2;
+                alarmData.ErrorCode = 4;
+                alarmData.ErrorDes = "PLC运行状态异常";
+                alarmData.CreateDate = dateTime.ToLongDateString();
+                alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                AlramPagerModels.AddData(alarmData);
+
+                AlramInfoModel alramInfoModel = new AlramInfoModel();
+                alarmData.CopyToAlramInfoModel(alramInfoModel);
+                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
+
             }
         }
 
