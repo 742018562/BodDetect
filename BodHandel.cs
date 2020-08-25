@@ -85,6 +85,12 @@ namespace BodDetect
             {
                 return;
             }
+            if (bodHelper.IsSampling)
+            {
+                await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
+                return;
+            }
+
             await this.Dispatcher.InvokeAsync(() => StartBodStand());
 
         }
@@ -178,7 +184,7 @@ namespace BodDetect
             {
                 return;
             }
-            await Task.Factory.StartNew(() => ClearAlram());
+            await this.Dispatcher.InvokeAsync(() => ClearAlram());
         }
 
         public async void ClearAlram() 
@@ -201,7 +207,7 @@ namespace BodDetect
             {
                 return;
             }
-            await Task.Factory.StartNew(() => ResetBod());
+            await this.Dispatcher.InvokeAsync(() => ResetBod());
         }
 
         public async void ResetBod() 
@@ -354,11 +360,19 @@ namespace BodDetect
 
         public void GetBodCurrentData() 
         {
-            float[] data = bodHelper.serialPortHelp.BodCurrentData();
+            try
+            {
+                float[] data = bodHelper.serialPortHelp.BodCurrentData();
 
-            CurrentData_lab.Content = data[0].ToString("F2");
+                CurrentData_lab.Content = data[0].ToString("F2");
 
-            CurrentElePotDrop_lab.Content = data[1].ToString("F2");
+                CurrentElePotDrop_lab.Content = data[1].ToString("F2");
+            }
+            catch (Exception)
+            {
+
+            }
+
         }
 
         public bool serialPortIsAlive() 
@@ -373,11 +387,23 @@ namespace BodDetect
 
         public async void StartBodStandWater_Click(object sender, RoutedEventArgs e) 
         {
+            if (bodHelper.IsSampling)
+            {
+                await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
+                return;
+            }
+
             await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
         }
 
         public async void StartBodSampleWater_Click(object sender, RoutedEventArgs e) 
         {
+            if (bodHelper.IsSampling) 
+            {
+                await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
+                return ;
+            }
+
             await Task.Factory.StartNew(() => bodHelper.StartBodSample());
 
         }

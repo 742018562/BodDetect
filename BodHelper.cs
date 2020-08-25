@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
+using System.Data.Entity.Core.Mapping;
 
 namespace BodDetect
 {
@@ -25,6 +26,8 @@ namespace BodDetect
 
         public delegate void RefreshProcessStatus(ProcessType processType);
 
+        public delegate void AddAlramInfo(AlarmData alarmData);
+
         public RefreshStaus refreshStaus;
 
         public RefreshUI refreshProcess;
@@ -32,6 +35,8 @@ namespace BodDetect
         public RefreshData refreshData;
 
         public RefreshProcessStatus refreshProcessStatus;
+
+        public AddAlramInfo addAlramInfo;
 
         public FinsClient finsClient { get; set; }
 
@@ -128,7 +133,7 @@ namespace BodDetect
             {
                 return null;
             }
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
 
             ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
             if (temp == null || temp.Length < 1 || temp[0] != 0)
@@ -147,7 +152,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return null;
+                return new float[] { 0, 0 };
             }
             byte bitAdress = 0X00;
 
@@ -161,14 +166,14 @@ namespace BodDetect
 
             if (!success)
             {
-                return new float[] { -1 };
+                return new float[] { 0,0 };
             }
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
 
             ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
             if (temp == null || temp.Length < 1 || temp[0] != 0)
             {
-                return new float[] { -1 };
+                return new float[] { 0, 0 };
             }
 
             bitAdress = 0X00;
@@ -181,7 +186,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return null;
+                return new float[] { 0, 0 };
             }
             byte bitAdress = 0X00;
 
@@ -195,13 +200,13 @@ namespace BodDetect
 
             if (!success)
             {
-                return null;
+                return new float[] { 0, 0 };
             }
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
             ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
             if (temp == null || temp.Length < 1 || temp[0] != 0)
             {
-                return new float[] { -1 };
+                return new float[] { 0,0 };
             }
 
             bitAdress = 0X00;
@@ -215,7 +220,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return null;
+                return new ushort[] { 0, 0 };
             }
             byte bitAdress = 0X00;
 
@@ -229,14 +234,14 @@ namespace BodDetect
 
             if (!success)
             {
-                return null;
+                return new ushort[] { 0, 0 };
             }
-            Thread.Sleep(5000);
+            Thread.Sleep(8000);
 
             ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
             if (temp == null || temp.Length < 1 || temp[0] != 0)
             {
-                return new ushort[] { 0 };
+                return new ushort[] { 0,0 };
             }
             bitAdress = 0X00;
             ushort[] Data = finsClient.ReadData(PLCConfig.COD_StartAddress, bitAdress, PLCConfig.COD_Count, PLCConfig.Dr);
@@ -248,7 +253,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return null;
+                return new ushort[] { 0, 0 };
             }
             byte bitAdress = 0X00;
 
@@ -262,14 +267,14 @@ namespace BodDetect
 
             if (!success)
             {
-                return null;
+                return new ushort[] { 0, 0 };
             }
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
 
             ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
             if (temp == null || temp.Length < 1 || temp[0] != 0)
             {
-                return new ushort[] { 0 };
+                return new ushort[] { 0, 0 };
             }
             bitAdress = 0X00;
             ushort[] Data = finsClient.ReadData(PLCConfig.Data_TempAndHun, bitAdress, PLCConfig.TempAndHun_Count, PLCConfig.Dr);
@@ -401,7 +406,7 @@ namespace BodDetect
         /// <returns></returns>
         public bool PumpOnceProcess(List<PLCParam> pLCParams, PunpCapType punpCapType)
         {
-            manualevent.WaitOne();
+            //manualevent.WaitOne();
             if (pLCParams.Count < 2)
             {
                 return false;
@@ -461,7 +466,7 @@ namespace BodDetect
 
             Thread.Sleep(1000);
 
-            manualevent.WaitOne();
+           // manualevent.WaitOne();
             return success;
         }
 
@@ -525,116 +530,125 @@ namespace BodDetect
             return success;
         }
 
-        public bool PreInit()
+        public async Task<bool> PreInitAsync()
         {
             //【1.用空气排空储液环】
             //【2.用备用阀吸取储液环10ml清水】
             //【3.将清水,样液,标液，缓冲液管道填满相应溶液】
-            try
+            using (await s_asyncSemaphore.WaitAsync())
             {
-                //【1.用清水填满储液环】
-                int counts = 4;
-                byte[] data = { PLCConfig.AirValveBit };
 
-                ValveControl(PLCConfig.Valve2Address, data);
-                data[0] = 0X01;
-
-                bool sucess = false;
-
-
-                //【1.用空气排空储液环】
-                for (int i = 0; i < counts; i++)
+                try
                 {
-                    ChangePunpValve(PumpValveType.pre);
-                    //ValveControl(PLCConfig.Valve1Address,PLCConfig.PrePumpValveAir, data);
-                    sucess = finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
-                    Thread.Sleep(2000);
-                    sucess = PrePumpCtrl(PrePumpWork.preAbsorb);
-                    Thread.Sleep(10000);
-                    sucess = PumpDrain();
-                    Thread.Sleep(10000);
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.init);
 
-                    //byte[] data = { PLCConfig.WaterValveBit };
+                    //【1.用清水填满储液环】
+                    int counts = 4;
+                    byte[] data = { PLCConfig.AirValveBit };
 
-                    //bodHelper.ValveControl(PLCConfig.Valve2Address, data);
-                    //data[0] = 0X01;
-
-                    //bodHelper.ChangePunpValve(PumpValveType.pre);
-
-                    //bodHelper.finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
-
-                    ////bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
-                    //bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
-
-                    //Thread.Sleep(5000);
-                    //bodHelper.PumpDrain();
-
-                }
-
-                data[0] = PLCConfig.AirValveBit;
-
-                ValveControl(PLCConfig.Valve2Address, data);
-                //【2.排出储液环5ml清水，在用预备阀吸取5ml清水】
-                for (int i = 0; i < 2; i++)
-                {
+                    ValveControl(PLCConfig.Valve2Address, data);
                     data[0] = 0X01;
-                    sucess = ChangePunpValve(PumpValveType.pre);
-                    if (!sucess)
+
+                    bool sucess = false;
+
+
+                    //【1.用空气排空储液环】
+                    for (int i = 0; i < counts; i++)
                     {
-                        return false;
+                        ChangePunpValve(PumpValveType.pre);
+                        //ValveControl(PLCConfig.Valve1Address,PLCConfig.PrePumpValveAir, data);
+                        sucess = finsClient.WriteBitData(1, 0, data, PLCConfig.Wr);
+                        Thread.Sleep(2000);
+                        sucess = PrePumpCtrl(PrePumpWork.preAbsorb);
+                        Thread.Sleep(10000);
+                        sucess = PumpDrain();
+                        Thread.Sleep(10000);
+
+                        //byte[] data = { PLCConfig.WaterValveBit };
+
+                        //bodHelper.ValveControl(PLCConfig.Valve2Address, data);
+                        //data[0] = 0X01;
+
+                        //bodHelper.ChangePunpValve(PumpValveType.pre);
+
+                        //bodHelper.finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
+
+                        ////bodHelper.ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                        //bodHelper.PrePumpCtrl(PrePumpWork.preAbsorb);
+
+                        //Thread.Sleep(5000);
+                        //bodHelper.PumpDrain();
+
                     }
-                    Thread.Sleep(2000);
 
-                    finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
-                    Thread.Sleep(2000);
+                    data[0] = PLCConfig.AirValveBit;
 
-                    // ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
-                    PrePumpCtrl(PrePumpWork.preAbsorb);
-                    Thread.Sleep(10000);
+                    ValveControl(PLCConfig.Valve2Address, data);
+                    //【2.排出储液环5ml清水，在用预备阀吸取5ml清水】
+                    for (int i = 0; i < 2; i++)
+                    {
+                        data[0] = 0X01;
+                        sucess = ChangePunpValve(PumpValveType.pre);
+                        if (!sucess)
+                        {
+                            return false;
+                        }
+                        Thread.Sleep(2000);
 
-                    PumpDrain();
-                    Thread.Sleep(10000);
+                        finsClient.WriteBitData(0, 15, data, PLCConfig.Wr);
+                        Thread.Sleep(2000);
+
+                        // ValveControl(PLCConfig.Valve1Address, PLCConfig.PrePumpValveAir, data);
+                        PrePumpCtrl(PrePumpWork.preAbsorb);
+                        Thread.Sleep(10000);
+
+                        PumpDrain();
+                        Thread.Sleep(10000);
+                    }
+
+                    ////【3.将清水,样液,标液，缓冲液管道填满相应溶液】
+                    //data[0] = 0X01;
+                    ////   byte[] valve = { PLCConfig.WaterValveBit, PLCConfig.StandardValveBit, PLCConfig.DepositValveBit, PLCConfig.bufferValveBit };
+                    //List<byte> Valve = new List<byte>();
+                    //Valve.Add(PLCConfig.WaterValveBit);
+                    //Valve.Add(PLCConfig.StandardValveBit);
+                    //Valve.Add(PLCConfig.DepositValveBit);
+                    //Valve.Add(PLCConfig.bufferValveBit);
+
+                    //byte[] tempdata = { PLCConfig.AirValveBit };
+                    //foreach (byte item in Valve)
+                    //{
+                    //    data[0] = item;
+                    //    for (int i = 0; i < 2; i++)
+                    //    {
+                    //        ValveControl(PLCConfig.Valve2Address, data);
+                    //        PunpAbsorb(PunpCapType.fiveml);
+                    //        Thread.Sleep(6000);
+                    //        tempdata[0] = PLCConfig.AirValveBit;
+                    //        ValveControl(PLCConfig.Valve2Address, tempdata);
+                    //        PumpDrain();
+                    //    }
+
+                    //    tempdata[0] = PLCConfig.WaterValveBit;
+                    //    ValveControl(PLCConfig.Valve2Address, tempdata);
+                    //    PunpAbsorb(PunpCapType.fiveml);
+                    //    Thread.Sleep(6000);
+                    //    tempdata[0] = PLCConfig.AirValveBit;
+                    //    ValveControl(PLCConfig.Valve2Address, tempdata);
+                    //    PumpDrain();
+                    //}
+
+                    byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
+                    DrianEmpty(Valves);
+
                 }
+                catch (Exception)
+                {
 
-                ////【3.将清水,样液,标液，缓冲液管道填满相应溶液】
-                //data[0] = 0X01;
-                ////   byte[] valve = { PLCConfig.WaterValveBit, PLCConfig.StandardValveBit, PLCConfig.DepositValveBit, PLCConfig.bufferValveBit };
-                //List<byte> Valve = new List<byte>();
-                //Valve.Add(PLCConfig.WaterValveBit);
-                //Valve.Add(PLCConfig.StandardValveBit);
-                //Valve.Add(PLCConfig.DepositValveBit);
-                //Valve.Add(PLCConfig.bufferValveBit);
-
-                //byte[] tempdata = { PLCConfig.AirValveBit };
-                //foreach (byte item in Valve)
-                //{
-                //    data[0] = item;
-                //    for (int i = 0; i < 2; i++)
-                //    {
-                //        ValveControl(PLCConfig.Valve2Address, data);
-                //        PunpAbsorb(PunpCapType.fiveml);
-                //        Thread.Sleep(6000);
-                //        tempdata[0] = PLCConfig.AirValveBit;
-                //        ValveControl(PLCConfig.Valve2Address, tempdata);
-                //        PumpDrain();
-                //    }
-
-                //    tempdata[0] = PLCConfig.WaterValveBit;
-                //    ValveControl(PLCConfig.Valve2Address, tempdata);
-                //    PunpAbsorb(PunpCapType.fiveml);
-                //    Thread.Sleep(6000);
-                //    tempdata[0] = PLCConfig.AirValveBit;
-                //    ValveControl(PLCConfig.Valve2Address, tempdata);
-                //    PumpDrain();
-                //}
-
+                    return false;
+                }
+                return true;
             }
-            catch (Exception)
-            {
-
-                return false;
-            }
-            return true;
         }
 
         public async Task StartBodDetect(CancellationToken token)
@@ -671,6 +685,22 @@ namespace BodDetect
                     //    MessageBox.Show(" 串口打开失败,请检查串口设置..", "提示", MessageBoxButton.OK);
                     //    return;
                     //}
+                   int status = serialPortHelp.GetBodStatus();
+
+                    if (status == 2 || status == 3) 
+                    {
+                        byte[] tempvalue = { PLCConfig.BodDrainValveBit };
+                        ValveControl(PLCConfig.Valve1Address, tempvalue);
+
+                        serialPortHelp.StartWash();
+                        await Task.Delay(28 * 60 * 1000);
+
+                        tempvalue[0] =  0 ;
+                        ValveControl(PLCConfig.Valve1Address, tempvalue);
+                    }
+                    byte[] tempvalue1  = { 0};
+                    ValveControl(PLCConfig.Valve1Address, tempvalue1);
+                    serialPortHelp.StartWash();
 
                     IsSampling = true;
 
@@ -681,6 +711,10 @@ namespace BodDetect
                     {
                         return;
                     }
+
+                    DateTime dateTime = DateTime.Now;
+                    bodData.CreateTime = dateTime.ToLongTimeString();
+                    bodData.CreateDate = dateTime.ToLongDateString();
 
                     success = await FetchWater();
                     if (!success)
@@ -721,6 +755,8 @@ namespace BodDetect
 
                     //[ 启动COD开始采样]
                     StartCod();
+                    mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.CodCollection);
+
                     Task<float> CodDataResult = await Task.Factory.StartNew(() => ReadCodData());
 
                     //[ 3. 抽取标定液然后进行稀释放入到标液池,抽取清水清洗注射泵]
@@ -762,11 +798,25 @@ namespace BodDetect
                     {
                         return;
                     }
-                    manualevent.WaitOne();
+                    //manualevent.WaitOne();
 
 #if DEBUG
                     Task.WaitAll(CodDataResult);
                     bodData.CodData = CodDataResult.Result;
+
+                    if (bodData.CodData == -1) 
+                    {
+                        DisPlayAlarmInfo(8, 17, "COD化学单元断开.");
+
+                    }
+
+                    if (bodData.CodData < 0 || bodData.CodData > 999) 
+                    {
+                        DisPlayAlarmInfo(8, 13, "COD测量值超出量程");
+                        return;
+                    }
+
+
                     configData.SampDil = 1;
 
 #else
@@ -802,9 +852,17 @@ namespace BodDetect
 
                     if (ConnectSeri)
                     {
-                        serialPortHelp.SetSampleDil((ushort)configData.SampDil);
+                        success = serialPortHelp.SetSampleDil((ushort)configData.SampDil);
+                        if (!success)
+                        {
+                            return;
+                        }
                         bodData.BodElePot = serialPortHelp.GetElePot();
-                        serialPortHelp.StartSampleMes();
+                        success = serialPortHelp.StartSampleMes();
+                        if (!success)
+                        {
+                            return;
+                        }
                         await Task.Delay(8 * 60 * 1000);
 
                         //清洗
@@ -819,27 +877,63 @@ namespace BodDetect
                     }
                     if (ConnectSeri)
                     {
-                        await Task.Delay(60 * 1000);
+                        float[] recvData = { 0, 0 };
+                        int index = 0;
 
-                        float[] recvData = serialPortHelp.BodCurrentData();
-                        if (recvData != null && recvData.Length > 1)
+                        while (index < 10) 
                         {
-                            bodData.Bod = recvData[0];
-                            bodData.BodElePotDrop = recvData[1];
-                            StreamWriter streamWriter = File.CreateText("D:\\test.txt");
-                            streamWriter.WriteLine(bodData.Bod.ToString());
-                            streamWriter.Close();
-                        }
-                    }
-                    await mainWindow.Dispatcher.BeginInvoke(refreshProcessStatus, ProcessType.DrainEmpty);
+                            await Task.Delay(2*60 * 1000);
 
-                    await Task.Delay(28 * 60 * 1000);
-                    if (ConnectSeri)
-                    {
+                            index++;
+                            int bod_status = serialPortHelp.GetSamplingStatus();
+                            if (bod_status != 0) 
+                            {
+                                int i = 0;
+                                while (i < 5)
+                                {
+                                    i++;
+                                    recvData = serialPortHelp.BodCurrentData();
+    
+                                    if (recvData != null && recvData.Length > 1 && recvData[0] != 0)
+                                    {
+                                        await mainWindow.Dispatcher.BeginInvoke(refreshProcessStatus, ProcessType.BodSampleComplete);
+                                        bodData.Bod = recvData[0];
+                                        bodData.BodElePotDrop = recvData[1];
+                                        if (bodData.Bod < 0 || bodData.Bod > 50)
+                                        {
+                                            DisPlayAlarmInfo(1, 14, "BOD测量值超出量程");
+                                            bodData.CodData = CodDataResult.Result;
+                                            await mainWindow.Dispatcher.BeginInvoke(refreshData, bodData);
+                                            return;
+                                        }
+
+                                        await mainWindow.Dispatcher.BeginInvoke(refreshProcessStatus, ProcessType.BodWash);
+
+                                        await Task.Delay(28 * 60 * 1000);
+
+                                        StreamWriter streamWriter = File.CreateText("D:\\test.txt");
+                                        streamWriter.WriteLine(bodData.Bod.ToString());
+                                        streamWriter.Close();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        DisPlayAlarmInfo(1, 15, "BOD取值异常");
+                                    }
+
+                                    await Task.Delay(60 * 1000);
+ 
+                                }
+
+                                break;
+                            }
+                        }
+
                         //[ BOD的清洗液进行循环]
                         byte[] tempvalue = { 0 };
                         ValveControl(PLCConfig.Valve1Address, tempvalue);
                     }
+
                     bodData.CodData = CodDataResult.Result;
                     await mainWindow.Dispatcher.BeginInvoke(refreshData, bodData);
                 }
@@ -875,7 +969,10 @@ namespace BodDetect
         {
             mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.SampleWater);
 
-            WashCistern(configData.WashTimes);
+            if (!WashCistern(configData.WashTimes)) 
+            {
+                return false;
+            }
 
             byte[] data = { PLCConfig.CisternPumpBit };
             bool success = ValveControl(PLCConfig.Valve1Address, data);
@@ -886,6 +983,8 @@ namespace BodDetect
 
             timer = new Timer(new System.Threading.TimerCallback(PrecipitateIsTimeOut), null, configData.InietTime * 1000, configData.InietTime * 1000);
             //  timer.Change(0, configData.InietTime * 1000);
+
+            Thread.Sleep(1 * 60 * 1000);
 
             //沉淀池沉淀
             await Task.Delay(configData.PrecipitateTime * 1000);
@@ -922,9 +1021,39 @@ namespace BodDetect
                         await Task.Delay(8 * 60 * 1000);
                         byte[] tempvalue = { PLCConfig.BodDrainValveBit };
                         ValveControl(PLCConfig.Valve1Address, tempvalue);
+                        mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.BodWash);
+
                         await Task.Delay(28 * 60 * 1000);
                         byte[] temp = { 0 };
                         ValveControl(PLCConfig.Valve1Address, temp);
+
+                        mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.DrainEmpty);
+
+                        List<PLCParam> pLCParams = new List<PLCParam>();
+
+                        bool success = false;
+                        PLCParam pLCParam1 = new PLCParam
+                        {
+                            address = PLCConfig.Valve2Address
+                        };
+                        pLCParam1.data.Add(PLCConfig.NormalValveBit);
+                        pLCParams.Add(pLCParam1);
+
+                        PLCParam pLCParam2 = new PLCParam
+                        {
+                            address = PLCConfig.Valve2Address
+                        };
+                        pLCParam2.data.Add(PLCConfig.AirValveBit);
+                        pLCParams.Add(pLCParam2);
+                        int index = 0;
+                        while (index < 9) 
+                        {
+                            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+                            index++;
+                        }
+
+                        mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.Waitding);
+
                     }
                 }
                 catch (Exception)
@@ -971,11 +1100,11 @@ namespace BodDetect
                         float[] recvData = { 0, 0 };
 
                         int index = 0;
-                        while (index < 9)
+                        while (index < 5)
                         {
                             recvData = serialPortHelp.BodCurrentData();
 
-                            if (recvData == null || recvData.Length < 1 || recvData[0] < 4396)
+                            if (recvData != null && recvData.Length > 1 && recvData[0] < 65535)
                             {
                                 break;
                             }
@@ -986,6 +1115,12 @@ namespace BodDetect
 
                         bodData.Bod = recvData[0];
                         bodData.BodElePotDrop = recvData[1];
+
+                        if (bodData.Bod < 0 || bodData.Bod > 50)
+                        {
+                            DisPlayAlarmInfo(1, 14, "COD测量值超出量程");
+                            return;
+                        }
                         StreamWriter streamWriter = File.CreateText("D:\\test.txt");
                         streamWriter.WriteLine(bodData.Bod.ToString());
                         streamWriter.Close();
@@ -1157,6 +1292,24 @@ namespace BodDetect
                 TempTimes--;
             }
 
+            pLCParams[0].data[0] = PLCConfig.StandardValveBit;
+            pLCParams[1].data[0] = PLCConfig.AirValveBit;
+            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+            if (!success)
+            {
+                return false;
+            }
+
+            pLCParams[0].data[0] = PLCConfig.WaterValveBit;
+            pLCParams[1].data[0] = PLCConfig.AirValveBit;
+
+            success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
+
+            if (!success)
+            {
+                return false;
+            }
+
             //固定5ml缓冲溶液
             pLCParams[0].data[0] = PLCConfig.bufferValveBit;
             pLCParams[1].data[0] = PLCConfig.NormalValveBit;
@@ -1165,6 +1318,7 @@ namespace BodDetect
             {
                 return false;
             }
+
 
             //pLCParams[0].data[0] = PLCConfig.AirValveBit;
             //success = PumpOnceProcess(pLCParams, PunpCapType.fiveml);
@@ -1278,12 +1432,25 @@ namespace BodDetect
                 //timer = new Timer(new System.Threading.TimerCallback(CheckCisternIsFull),null, Timeout.Infinite, 1000);
                 //timer.Change(0, 1000);
                 //resetEvent.WaitOne();
-                Thread.Sleep(2 * 60 * 1000);
+                Thread.Sleep(configData.InietTime * 1000);
 
+                if (!CisternIsFull())
+                {
+                    byte[] temp = { 0 };
+                    ValveControl(PLCConfig.Valve1Address, temp);
+                    DisPlayAlarmInfo(7, 10, "抽水泵进水超时");
+                    return false;
+                }
 
                 byte[] Temdata = { PLCConfig.CisternValveBit };
                 ValveControl(PLCConfig.Valve1Address, Temdata);
-                Thread.Sleep(1 * 60 * 1000);
+                Thread.Sleep(configData.EmptyTime * 100);
+
+                //ushort[] value = finsClient.ReadData(PLCConfig.Valve1Address, 0, 1, PLCConfig.IO);
+                //if (value == null || value.Length < 1 || (value[0] & 1) != 0)
+                //{
+                //    DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
+                //}
 
                 //timer = new Timer(new System.Threading.TimerCallback(CheckCisternIsEmpty), null, Timeout.Infinite, 1000);
                 //timer.Change(0, 1000);
@@ -1295,6 +1462,9 @@ namespace BodDetect
 
         public void ReadSensorData()
         {
+
+            mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.Sensor);
+
             float[] DoDota = GetDoData();
             Thread.Sleep(5 * 1000);
 
@@ -1348,15 +1518,24 @@ namespace BodDetect
             byte bitAdress = 0X00;
             while (true)
             {
-                await Task.Delay(5 * 60 * 1000);
+                await Task.Delay(1 * 60 * 1000);
 
-                ushort[] Data = finsClient.ReadData(450, bitAdress, 1, PLCConfig.Wr);
+                ushort[] Data = finsClient.ReadData(450, bitAdress, 1, PLCConfig.Dr);
 
-                if (Data != null && Data.Length > 0 && Data[0] == 4)
+
+                if (Data != null && Data.Length > 0 )
                 {
-                    float[] Data1 = finsClient.ReadBigFloatData(432, bitAdress, 2, PLCConfig.Dr);
-                    value = Data1[0];
-                    return value;
+                    if (Data[0] == 255) 
+                    {
+                        return -1;
+                    }
+
+                    if (Data[0] == 4)
+                    {
+                        float[] Data1 = finsClient.ReadBigFloatData(432, bitAdress, 2, PLCConfig.Dr);
+                        value = Data1[0];
+                        return value;
+                    }
                 }
 
             }
@@ -1475,6 +1654,14 @@ namespace BodDetect
             byte[] data = { PLCConfig.CisternValveBit };
             ValveControl(PLCConfig.Valve1Address, data);
 
+            Thread.Sleep(configData.EmptyTime * 100);
+
+            //ushort[] value = finsClient.ReadData(PLCConfig.Valve1Address, 0, 1, PLCConfig.IO);
+            //if (value == null || value.Length < 1 || (value[0] & 1) != 0) 
+            //{
+            //    DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
+            //}
+
             return success;
         }
 
@@ -1489,8 +1676,21 @@ namespace BodDetect
                 timer.Change(Timeout.Infinite, configData.InietTime * 1000);
                 byte[] data = { 0 };
                 ValveControl(PLCConfig.Valve1Address, data);
-                MessageBox.Show(" 进水超时,水泵已关.", "提示", MessageBoxButton.OK);
+                DisPlayAlarmInfo(7, 10, "抽水泵进水超时");
             }
+        }
+
+        public void DisPlayAlarmInfo(int deviceInfo, int errorCode, string errorDes) 
+        {
+            DateTime dateTime = DateTime.Now;
+            AlarmData alarmData = new AlarmData();
+            alarmData.DeviceInfo = deviceInfo;
+            alarmData.ErrorCode = errorCode;
+            alarmData.ErrorDes = errorDes;
+            alarmData.CreateDate = dateTime.ToLongDateString();
+            alarmData.CreateTime = dateTime.ToLongTimeString();
+
+            mainWindow.Dispatcher.BeginInvoke(addAlramInfo, alarmData);
         }
 
         public bool ClearSolution()

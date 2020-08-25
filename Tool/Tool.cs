@@ -55,11 +55,15 @@ namespace BodDetect
     public enum ProcessType
     {
         init,
+        Sensor,
+        CodCollection,
         SampleWater,
         StandDil,
         SampleDil,
         BodStand,
         BodSample,
+        BodSampleComplete,
+        BodWash,
         DrainEmpty,
         Waitding
     }
@@ -331,6 +335,12 @@ namespace BodDetect
                 case ProcessType.init:
                     text += "正在初始化...";
                     break;
+                case ProcessType.Sensor:
+                    text += "正在采集传感器数据...";
+                    break;
+                case ProcessType.CodCollection:
+                    text += "正在采集Cod数据...";
+                    break;
                 case ProcessType.SampleWater:
                     text += "正在取水样...";
                     break;
@@ -345,6 +355,12 @@ namespace BodDetect
                     break;
                 case ProcessType.BodSample:
                     text += "正在测量BOD...";
+                    break;
+                case ProcessType.BodSampleComplete:
+                    text += "测量BOD完成....";
+                    break;
+                case ProcessType.BodWash:
+                    text += "正在清洗BOD...";
                     break;
                 case ProcessType.DrainEmpty:
                     text += "正在排空溶液...";

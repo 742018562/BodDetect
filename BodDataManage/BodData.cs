@@ -17,6 +17,8 @@ namespace BodDetect
         public float BodElePot { get; set; }
         public float BodElePotDrop { get; set; }
 
+        public string CreateDate { get; set; }
+        public string CreateTime { get; set; }
 
 
         public BodData() { }

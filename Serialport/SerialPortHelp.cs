@@ -239,7 +239,7 @@ namespace BodDetect
 
         public bool StartWash()
         {
-            byte[] sendMsg = BodCtrlFun(RegCtrl.Stop_All, 1);
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Stop_All, 7);
 
             byte[] recvMsg = ReadData();
 
@@ -389,16 +389,16 @@ namespace BodDetect
 
             if (data == null)
             {
-                return new float[] { -1 };
+                return new float[] { 0 };
             }
 
             int iLength = data.Length;
 
             if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
                 data[2] != 0x06 ||
-                iLength != 11)
+                iLength < 11)
             {
-                return new float[] { -1 };
+                return new float[] { 0 };
             }
 
             int iCount = Convert.ToInt32(data[2]);

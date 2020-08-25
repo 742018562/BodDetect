@@ -98,13 +98,13 @@ namespace BodDetect
             //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
             //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
 
-            init();
+            initAsync();
 
             this.DataContext = mainWindow_Model;
 
         }
 
-        public void init()
+        public async void initAsync()
         {
             try
             {
@@ -126,7 +126,7 @@ namespace BodDetect
                 string[] value = ip.Split('.');
                 if (value.Length < 4)
                 {
-                    this.ShowMessageAsync("Error", "异常ip!", MessageDialogStyle.Affirmative);
+                    await this.ShowMessageAsync("Error", "异常ip!", MessageDialogStyle.Affirmative);
                 }
                 int port = Convert.ToInt32(Port_TextBox.Text, 10);
 
@@ -135,10 +135,10 @@ namespace BodDetect
 
                 bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
                 bodHelper.refreshStaus = new BodHelper.RefreshStaus(RefreshStatus);
-
                 bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
                 bodHelper.refreshProcessStatus = new BodHelper.RefreshProcessStatus(RefreshProcessStatus);
-
+                bodHelper.addAlramInfo = new BodHelper.AddAlramInfo(AddAlarmInfo);
+                
                 bodHelper.mainWindow = this;
 
                 initConfig();
@@ -150,10 +150,38 @@ namespace BodDetect
                 UpdataStatusTimer.Tick += UpdateDevStatus;
                 int times = Convert.ToInt32(UpdataStatus.Text);
                 UpdataStatusTimer.Interval = new TimeSpan(0, times, 0);
+
+                int SpaceHour = Convert.ToInt32(sampleSpac.Text);
+
+                
+                start.IsChecked = true;
+                if (!bodHelper.IsSampling)
+                {
+                    initConfig();
+
+                    await Task.Factory.StartNew(() => bodHelper.PreInitAsync());
+
+                    if (RunTimer == null || !RunTimer.IsEnabled)
+                    {
+                        RunTimer.Tick += BodRun;
+                        RunTimer.Interval = new TimeSpan(SpaceHour, 0, 0);
+                        RunTimer.Start();
+                    }
+
+                    await Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
+                    _loading.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    bodHelper.manualevent.Set();
+                    _loading.Visibility = Visibility.Collapsed;
+                }
+
+
             }
             catch (Exception)
             {
-                this.ShowMessageAsync("Error", "连接PLC异常!");
+               await this.ShowMessageAsync("Error", "连接PLC异常!");
             }
         }
 
@@ -260,9 +288,8 @@ namespace BodDetect
             hisDatabase.BodElePot = data.BodElePot;
             hisDatabase.BodElePotDrop = data.BodElePotDrop;
 
-            DateTime dateTime = DateTime.Now;
-            hisDatabase.CreateDate = dateTime.ToLongDateString();
-            hisDatabase.CreateTime = dateTime.ToLongTimeString();
+            hisDatabase.CreateDate = data.CreateDate;
+            hisDatabase.CreateTime = data.CreateTime;
 
             mainWindow_Model.HisParamData.AddData(hisDatabase);
 
@@ -515,6 +542,14 @@ namespace BodDetect
             sysStatusData.CopyToSysStatusInfoModel(sysStatusInfoModel);
 
             await Task.Factory.StartNew(() => BodSqliteHelp.InsertSysStatusData(sysStatusInfoModel));
+        }
+
+        public void AddAlarmInfo(AlarmData alarmData) 
+        {
+            alarmData.id = mainWindow_Model.AlramPagerModels.AllAlarmData.Count + 1;
+
+            mainWindow_Model.AlramPagerModels.AddData(alarmData);
+
         }
 
         #endregion
@@ -997,9 +1032,9 @@ namespace BodDetect
                 int times = capData;
 
 
-                byte[] StandValve = { PLCConfig.WaterValveBit };
+                byte[] StandValve = { PLCConfig.NormalValveBit };
 
-                byte[] StandBodValve = { PLCConfig.NormalValveBit };
+                byte[] StandBodValve = { PLCConfig.AirValveBit };
 
                 List<byte[]> data = new List<byte[]>();
                 List<ushort> address = new List<ushort>();
@@ -1496,7 +1531,7 @@ namespace BodDetect
             }
 
 
-            await Task.Factory.StartNew(() => bodHelper.PreInit());
+            await Task.Factory.StartNew(() => bodHelper.PreInitAsync());
         }
 
         private async void PreButton2ml_ClickAsync(object sender, RoutedEventArgs e)
@@ -1752,7 +1787,7 @@ namespace BodDetect
             RunTimer.Tick -= BodRun;
             RunTimer.Stop();
             BodRunImg.IsEnabled = true;
-            await this.ShowMessageAsync("Please wait...", "正在重置运行流程,请稍等...", MessageDialogStyle.Affirmative);
+            await this.ShowMessageAsync("Please wait...", "正在停止运行流程,请稍等...", MessageDialogStyle.Affirmative);
 
             // await Task.Run(StopBod);
         }
@@ -2045,7 +2080,7 @@ namespace BodDetect
 
         }
 
-        private async Task GetData()
+        private async void GetData()
         {
             byte[] Temp = { PLCConfig.SensorPower };
             bool success = bodHelper.ValveControl(100, Temp);
@@ -2055,17 +2090,20 @@ namespace BodDetect
             }
             int warmUpTime = Convert.ToInt32(WarmUpTime.Text);
             await Task.Delay(warmUpTime * 1000);
-            float[] DoDota = bodHelper.GetDoData();
+
+            float[] DoDota = await Task.Factory.StartNew(() => bodHelper.GetDoData());
+
+           // float[] DoDota =  bodHelper.GetDoData();
             await Task.Delay(3 * 1000);
 
-            uint[] TurbidityData = bodHelper.GetTurbidityData();
+            uint[] TurbidityData = await Task.Factory.StartNew(()=>bodHelper.GetTurbidityData());
             await Task.Delay(3 * 1000);
 
-            float[] PHData = bodHelper.GetPHData();
+            float[] PHData = await Task.Factory.StartNew(()=>bodHelper.GetPHData());
             await Task.Delay(3 * 1000);
-            ushort[] Uv254Data = bodHelper.GetUv254Data();
+            ushort[] Uv254Data = await Task.Factory.StartNew(()=>bodHelper.GetUv254Data());
             await Task.Delay(3 * 1000);
-            ushort[] TempAndHumDada = bodHelper.GetTempAndHumData();
+            ushort[] TempAndHumDada = await Task.Factory.StartNew(()=>bodHelper.GetTempAndHumData());
             await Task.Delay(3 * 1000);
 
             mainWindow_Model.TemperatureData = DoDota[0];
@@ -2073,9 +2111,9 @@ namespace BodDetect
             mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
             mainWindow_Model.PHData = PHData[1];
             mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
-            mainWindow_Model.CodData = bodData.CodData;
             mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
             mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
+
 
             HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
@@ -2090,6 +2128,7 @@ namespace BodDetect
             hisDatabase.CreateTime = dateTime.ToLongTimeString();
             hisDatabase.Bod = mainWindow_Model.BodData;
             hisDatabase.Uv254Data = mainWindow_Model.Uv254Data;
+            hisDatabase.CodData = mainWindow_Model.CodData;
 
             mainWindow_Model.HisParamData.AddData(hisDatabase);
 
@@ -2123,6 +2162,11 @@ namespace BodDetect
         {
             //LoginDialogSettings loginDialogSettings = new LoginDialogSettings();
             //await this.ShowLoginAsync();
+            if (bodHelper.IsSampling)
+            {
+                await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
+                return;
+            }
 
             bodHelper.WashCistern(configData.WashTimes);
 
@@ -2183,7 +2227,7 @@ namespace BodDetect
             if (string.IsNullOrEmpty(text))
             {
                 mainWindow_Model.DevStatusModel.BOD_Connect_Status = "异常";
-                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Greenpath;
+                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Redpath;
 
                 mainWindow_Model.DevStatusModel.BOD_Run_Status = "异常";
                 mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Redpath;
