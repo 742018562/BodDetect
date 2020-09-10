@@ -255,6 +255,22 @@ namespace BodDetect
             }
         }
 
+        private MaintainInfoPagerModel _maintainInfoPagerModels;
+        public MaintainInfoPagerModel MaintainInfoPagerModels 
+        {
+            get
+            {
+                return _maintainInfoPagerModels;
+            }
+            set
+            {
+                if (_maintainInfoPagerModels != value)
+                {
+                    _maintainInfoPagerModels = value;
+                }
+            }
+        }
+
         public MainWindow_Model()
         {
 
@@ -291,6 +307,9 @@ namespace BodDetect
 
             AlramPagerModels = new AlramPagerModel();
             AlramPagerModels.init();
+
+            MaintainInfoPagerModels = new MaintainInfoPagerModel();
+            MaintainInfoPagerModels.init();
         }
 
         private int _Hour;

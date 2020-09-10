@@ -12,16 +12,14 @@
         x:Class="BodDetect.MainWindow"
         Loaded="Window_Loaded" 
         mc:Ignorable="d"
-        Width="1366" MaxWidth="1366" MinWidth="1366"
-        Height="768" MaxHeight="768" MinHeight="768"
     
         Closed="MetroWindow_Closed" Background="#FF954619"
 
         WindowState="Maximized"
-        ResizeMode="NoResize" KeepBorderOnMaximize="False" 
+        ResizeMode="NoResize" KeepBorderOnMaximize="False"   IgnoreTaskbarOnMaximize="True" 
         
         >
-    <!--ResizeMode="NoResize" ShowInTaskbar="False"  IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
+    <!-- UseNoneWindowStyle="True" ResizeMode="NoResize" ShowInTaskbar="False"  IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
 
     <Window.Resources>
 
@@ -2134,7 +2132,11 @@
                                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
                                                             <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50"/>
                                                             <Label Content="(单位:ml)"></Label>
+                                                            
                                                             <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10" Visibility="Collapsed"/>
+
+                                                            <Metro:MetroTextBox Name="StandDilFreq" Title="标定间隔:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="3" IsEnabled="False" />
+                                                            <Label Content="(单位:天)"></Label>
 
                                                         </StackPanel>
                                                         <StackPanel Grid.Row="2" Margin="0,20,0,0">
@@ -2234,7 +2236,7 @@
                                     <Grid >
                                         <Metro:MetroGroupBox Header="网口参数" Margin="20,0,0,0">
                                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" >
-                                                <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.16.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
+                                                <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.0.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
                                                 <Metro:MetroTextBox x:Name="Port_TextBox"  Text="9600" Title="Port" HorizontalAlignment="Right" Height="30" Width="Auto" InputHint="InputHint..."  VerticalAlignment="Center" Margin="0,10,0,0"  />
                                                 <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Green" Content="连接" Command="{Binding CmdSampleWithParam}" CommandParameter="Good" IsEnabled="{Binding BtnEnabled}" VerticalAlignment="Center"   Width="25" Height="30" Margin="60,0,0,-10" Padding="8,6,8,6" ScrollViewer.CanContentScroll="True" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" Click="MetroButton_Click_1"/>
                                                 <Metro:MetroButton MinHeight="20" MinWidth="80" MetroButtonState="Red" Content="重置" VerticalAlignment="Center"   Width="25" Height="30" Margin="20,0,0,-10" Padding="8,6,8,6"  FontSize="12" FontWeight="Bold"  Click="ResetIp_Click"/>
@@ -2337,21 +2339,35 @@
 
                                     <StackPanel Grid.Row="0" Orientation="Vertical">
 
-                                        <Label Content="系统维护表单" HorizontalAlignment="Center" FontSize="22" FontWeight="Bold" Foreground="Red" Margin="0,20,0,0" Background="{x:Null}"/>
-                                        <DataGrid  ItemsSource="{Binding FakeSource}" AutoGenerateColumns="False"  Name="dataGrid1"  VerticalAlignment="Top"
-                  CanUserSortColumns="False"   Margin="5" IsReadOnly="True"
-                  CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
-                  CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}">
 
+                                        <Label Content="系统维护表单" HorizontalAlignment="Center" FontSize="22" FontWeight="Bold" Foreground="Red" Margin="0,20,0,0" Background="{x:Null}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                                            <Metro:MetroButton   Width="100" Height="30" Content="新增" Click="AddRow_Click" Margin="20,0,0,0"></Metro:MetroButton>
+                                            <Metro:MetroButton Width="100" Content="保存" MetroButtonState="None" Margin="50,0,0,0" Click="GridSave_Click"/>
+                                        </StackPanel>
+                                        <DataGrid   AutoGenerateColumns="False"  Name="dataGrid1"  VerticalAlignment="Top"                                            
+                                                    CanUserSortColumns="False"   Margin="5"                                                 
+                                                    DataContext="{Binding MaintainInfoPagerModels}"  
+                                                    ItemsSource="{Binding MaintainInfoSource}"
+                                                    CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"                                           
+                                                    CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}" LoadingRow="dataGrid1_LoadingRow" RowEditEnding="dataGrid1_RowEditEnding" BeginningEdit="dataGrid1_BeginningEdit">
+
+                                            
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Item Id" Binding="{Binding Id}" Width="80"/>
-                                                <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="180"/>
+                                                <DataGridTextColumn Header="序号" Binding="{Binding id ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="True"  />
+                                                <DataGridTextColumn Header="维护人姓名" Binding="{Binding Name ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
+                                                <DataGridTextColumn Header="报警信息码" Binding="{Binding AlramId ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
+                                                <DataGridTextColumn Header="维护信息" Binding="{Binding Info ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
+                                                <DataGridTextColumn Header="日期" Binding="{Binding CreateDate ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="True"  />
+                                                <DataGridTextColumn Header="时间" Binding="{Binding CreateTime ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="True"   />
+
                                             </DataGrid.Columns>
+
                                         </DataGrid>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Margin="0,20,0,20" >
-                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1">
+                                        <local:Pager TotalPage="{Binding TotalPage}" CurrentPage="{Binding CurrentPage, Mode=TwoWay}" HorizontalAlignment="Center" Grid.Row="1" DataContext="{Binding MaintainInfoPagerModels}" >
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="FirstPage">
                                                     <i:InvokeCommandAction Command="{Binding FirstPageCommand}" />

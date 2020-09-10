@@ -368,9 +368,9 @@ namespace BodDetect
 
                 CurrentElePotDrop_lab.Content = data[1].ToString("F2");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                LogUtil.LogError(ex);
             }
 
         }

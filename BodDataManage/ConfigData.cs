@@ -66,6 +66,8 @@ namespace BodDetect.BodDataManage
 
         public int UpdateStatusInter { get; set; }
 
+        public int BodStandFreq { get; set; }
+
         public ConfigData() { }
     }
 }

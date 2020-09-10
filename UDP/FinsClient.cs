@@ -159,8 +159,10 @@ namespace BodDetect.UDP
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return false;
             }
 
@@ -180,8 +182,10 @@ namespace BodDetect.UDP
             {
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return false;
             }
 

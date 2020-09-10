@@ -97,8 +97,9 @@ namespace BodDetect
                 byte hi = arr[0], lo = arr[1];
                 return Convert.ToString(isReverse ? hi + lo * 0x100 : hi * 0x100 + lo, 16).ToUpper().PadLeft(4, '0');
             }
-            catch (Exception) 
-            { 
+            catch (Exception ex) 
+            {
+                LogUtil.LogError(ex);
 
             }
 
@@ -111,8 +112,9 @@ namespace BodDetect
             {
                 return ByteToString(arr, true);
             }
-            catch (Exception) 
-            { 
+            catch (Exception ex) 
+            {
+                LogUtil.LogError(ex);
 
             }
 

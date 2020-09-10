@@ -36,6 +36,12 @@ namespace BodDetect.UIConvert
                 case 6:
                     text = "DO传感器";
                     break;
+                case 7:
+                    text = "抽水泵";
+                    break;
+                case 8:
+                    text = "COD化学单元";
+                    break;
                 default:
                     break;
             }

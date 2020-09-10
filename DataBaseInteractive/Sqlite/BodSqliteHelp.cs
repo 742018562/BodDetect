@@ -322,6 +322,71 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             return alramInfoModelList;
         }
 
+        public static void InsertMaintainInfo(MaintainInfoModel maintainInfoModel)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM MaintainInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+                DataTable dt = ds.Tables[0];
+
+                DataRow dataRow = dt.NewRow();
+                dt.Rows.Add(dataRow);
+
+                sql = "INSERT INTO MaintainInfo(id,Name,AlramId,Info,CreateDate,CreateTime) " +
+                    "VALUES(@id,@Name,@AlramId,@Info,@CreateDate,@CreateTime)";
+
+                object[] paramList = maintainInfoModel.GetObjectList();
+
+                SQLiteHelper.ExecuteNonQuery(conn, sql, paramList);
+
+                conn.Close();
+                conn.Dispose();
+            }
+        }
+
+        public static List<MaintainInfoModel> SelectMaintainInfo()
+        {
+            List<MaintainInfoModel> maintainInfoModelList = new List<MaintainInfoModel>();
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM MaintainInfo";
+
+                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+
+                DataSet ds = new DataSet();
+                ap.Fill(ds);
+                ap.Dispose();
+
+
+                DataTable dt = ds.Tables[0];
+                foreach (DataRow item in dt.Rows)
+                {
+                    MaintainInfoModel maintainInfoModel = new MaintainInfoModel();
+                    maintainInfoModel.id = (int)item["id"];
+                    maintainInfoModel.Name = (string)item["Name"];
+                    maintainInfoModel.AlramId = (string)item["AlramId"];
+                    maintainInfoModel.Info = (string)item["Info"];
+                    maintainInfoModel.CreateDate = (string)item["CreateDate"];
+                    maintainInfoModel.CreateTime = (string)item["CreateTime"];
+
+                    maintainInfoModelList.Add(maintainInfoModel);
+                }
+
+                conn.Close();
+                conn.Dispose();
+            }
+
+            return maintainInfoModelList;
+        }
+
 
     }
 }

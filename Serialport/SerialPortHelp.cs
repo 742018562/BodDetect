@@ -46,8 +46,9 @@ namespace BodDetect
                 //serialPort.DataReceived += SerialPort_DataReceived;
                 flag = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
 
@@ -63,8 +64,9 @@ namespace BodDetect
                 serialPort.Close();
                 flag = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
 
@@ -113,6 +115,7 @@ namespace BodDetect
 
             Message.Add(Crc16[1]);
             Message.Add(Crc16[0]);
+            LogUtil.Log("发送读取BOD命令报文，功能类型：" + regStatus + ",具体发送报文：" + Convert.ToBase64String(Message.ToArray()));
 
             SerialPortWrite(Message.ToArray());
         }
@@ -145,6 +148,8 @@ namespace BodDetect
 
             SerialPortWrite(Message.ToArray());
 
+            LogUtil.Log("发送BOD控制命令报文，功能类型：" + regCtrl + ",具体发送报文：" + Convert.ToBase64String(Message.ToArray()));
+
             return Message.ToArray();
         }
 
@@ -157,30 +162,6 @@ namespace BodDetect
 
             return Tool.IsSameBytes(sendMsg, recvMsg);
 
-            //List<byte> Message = new List<byte>();
-
-            //byte Address = SerialPortConfig.Address;
-            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            //byte RegHighAddress = (int)RegCtrl.Start_Stand >> 8;
-
-            //ushort temp = (ushort)RegCtrl.Start_Stand;
-            //byte RegLowAddress = (byte)temp;
-            //byte DataHighAddress = 0X00;
-            //byte DataLowAddress = 0x01;
-
-            //Message.Add(Address);
-            //Message.Add(FunCode);
-            //Message.Add(RegHighAddress);
-            //Message.Add(RegLowAddress);
-            //Message.Add(DataHighAddress);
-            //Message.Add(DataLowAddress);
-
-            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
-
-            //Message.Add(Crc16[1]);
-            //Message.Add(Crc16[0]);
-
-            //SerialPortWrite(Message.ToArray());
         }
 
         public bool StartSampleMes()
@@ -190,29 +171,6 @@ namespace BodDetect
 
             return Tool.IsSameBytes(sendMsg, recvMsg);
 
-            //List<byte> Message = new List<byte>();
-
-            //byte Address = SerialPortConfig.Address;
-            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            //byte RegHighAddress = (int)RegCtrl.Start_Sample >> 8;
-            //ushort temp = (ushort)RegCtrl.Start_Sample;
-            //byte RegLowAddress = (byte)temp;
-            //byte DataHighAddress = 0X00;
-            //byte DataLowAddress = 0x01;
-
-            //Message.Add(Address);
-            //Message.Add(FunCode);
-            //Message.Add(RegHighAddress);
-            //Message.Add(RegLowAddress);
-            //Message.Add(DataHighAddress);
-            //Message.Add(DataLowAddress);
-
-            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
-
-            //Message.Add(Crc16[1]);
-            //Message.Add(Crc16[0]);
-
-            //SerialPortWrite(Message.ToArray());
         }
 
         public bool SetSampleDil(ushort Dil)
@@ -245,29 +203,6 @@ namespace BodDetect
 
             return Tool.IsSameBytes(sendMsg, recvMsg);
 
-            //List<byte> Message = new List<byte>();
-
-            //byte Address = SerialPortConfig.Address;
-            //byte FunCode = SerialPortConfig.Fun_Ctrl_Code;
-            //byte RegHighAddress = (int)RegCtrl.Stop_All >> 8;
-            //ushort temp = (ushort)RegCtrl.Stop_All;
-            //byte RegLowAddress = (byte)temp;
-            //byte DataHighAddress = 0X00;
-            //byte DataLowAddress = 0x01;
-
-            //Message.Add(Address);
-            //Message.Add(FunCode);
-            //Message.Add(RegHighAddress);
-            //Message.Add(RegLowAddress);
-            //Message.Add(DataHighAddress);
-            //Message.Add(DataLowAddress);
-
-            //byte[] Crc16 = CRC.CRC16(Message.ToArray());
-
-            //Message.Add(Crc16[1]);
-            //Message.Add(Crc16[0]);
-
-            //SerialPortWrite(Message.ToArray());
         }
 
         public bool ClearAlram(ushort data)
@@ -324,8 +259,10 @@ namespace BodDetect
                 return Tool.IsSameBytes(revData, Message.ToArray());
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return false;
 
             }
@@ -350,8 +287,10 @@ namespace BodDetect
                 serialPort.Write(textData, 0, textData.Length);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return false;
             }
 
@@ -372,10 +311,13 @@ namespace BodDetect
                     return null;
                 }
 
+                LogUtil.Log("串口读取数据：" + Convert.ToBase64String(tempBuffer));
                 return tempBuffer;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return null;
             }
 

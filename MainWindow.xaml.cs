@@ -47,7 +47,6 @@ namespace BodDetect
         DispatcherTimer RunTimer = new DispatcherTimer();
         DispatcherTimer CodTimer = new DispatcherTimer();
 
-
         public Process kbpr;
         private BodHelper bodHelper;
         public BodData bodData = new BodData();
@@ -60,6 +59,8 @@ namespace BodDetect
 
         ConfigData configData = new ConfigData();
         private bool disposedValue;
+
+        public bool DataGridIsEdit = false;
 
         public MainWindow()
         {
@@ -98,6 +99,8 @@ namespace BodDetect
             //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
             //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
 
+            LogUtil.LogError("test");
+            LogUtil.Log("test1");
             initAsync();
 
             this.DataContext = mainWindow_Model;
@@ -138,28 +141,68 @@ namespace BodDetect
                 bodHelper.refreshData = new BodHelper.RefreshData(RefreshData);
                 bodHelper.refreshProcessStatus = new BodHelper.RefreshProcessStatus(RefreshProcessStatus);
                 bodHelper.addAlramInfo = new BodHelper.AddAlramInfo(AddAlarmInfo);
-                
+
                 bodHelper.mainWindow = this;
 
                 initConfig();
 
-                StandWaterTimer.Tick += StartStandWaterAsync;
-                StandWaterTimer.Interval = new TimeSpan(3, 0, 0, 0);
-                StandWaterTimer.Start();
+                if (!bodHelper.IsConnectPlc)
+                {
+                    LogUtil.LogError("连接PLC异常");
+                    await this.ShowMessageAsync("Error", "连接PLC异常!");
+                    return;
+                }
+                if (!bodHelper.ConnectSeri)
+                {
+                    LogUtil.LogError("连接串口异常");
 
+                    await this.ShowMessageAsync("Error", "连接串口异常!");
+                    return;
+
+                }
+
+                await this.Dispatcher.InvokeAsync(() => Start());
+
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex, "开机启动initAsync");
+                await this.ShowMessageAsync("Error", "连接PLC异常!");
+            }
+        }
+
+        private async void Start()
+        {
+            try
+            {
                 UpdataStatusTimer.Tick += UpdateDevStatus;
                 int times = Convert.ToInt32(UpdataStatus.Text);
                 UpdataStatusTimer.Interval = new TimeSpan(0, times, 0);
 
                 int SpaceHour = Convert.ToInt32(sampleSpac.Text);
 
-                
                 start.IsChecked = true;
                 if (!bodHelper.IsSampling)
                 {
                     initConfig();
 
-                    await Task.Factory.StartNew(() => bodHelper.PreInitAsync());
+                    Task initTask = await Task.Factory.StartNew(() => bodHelper.PreInitAsync());
+
+                    if (!System.IO.File.Exists(XmlHelp.Xmlpath)) 
+                    {
+                        XmlHelp.createXml(XmlHelp.Xmlpath);
+                    }
+
+                    Task.WaitAll(initTask);
+
+                    StandWaterTimer.Tick += StartStandWaterAsync;
+                    StandWaterTimer.Interval = new TimeSpan(0, 4, 0, 0);
+
+                    StandWaterTimer.Start();
+                    //Task StandTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+
+                    TimeSpan timeSpan = new TimeSpan(1, 0, 0);
+                    //Task.WaitAll(StandTask);
 
                     if (RunTimer == null || !RunTimer.IsEnabled)
                     {
@@ -177,11 +220,10 @@ namespace BodDetect
                     _loading.Visibility = Visibility.Collapsed;
                 }
 
-
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-               await this.ShowMessageAsync("Error", "连接PLC异常!");
+                LogUtil.LogError(ex, "开机启动异步线程Start");
             }
         }
 
@@ -248,8 +290,9 @@ namespace BodDetect
                     this.ShowMessageAsync("与PLC通讯", "连接成功！", MessageDialogStyle.Affirmative);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
                 this.ShowMessageAsync("Error", "连接PLC异常!");
             }
 
@@ -257,7 +300,7 @@ namespace BodDetect
 
         private void ResetIp_Click(object sender, RoutedEventArgs e)
         {
-            IP_textbox.Text = "192.168.16.174";
+            IP_textbox.Text = "192.168.0.174";
             Port_TextBox.Text = "9600";
         }
 
@@ -315,37 +358,8 @@ namespace BodDetect
 
             byte[] IOCmd2 = { PLCConfig.DepositValveBit, PLCConfig.StandardValveBit };
             bodHelper.ValveControl(PLCConfig.Valve1Address, IOCmd2);
-
-            //Dictionary<UInt16, UInt16> dic = new Dictionary<ushort, ushort>();
-
-            //dic.Add(32300, 3);
-            //dic.Add(32301, 4);
-            //dic.Add(32302, 4);
-            //dic.Add(32303, 1);
-            //dic.Add(32304, 2);
-
-            //byte bitAdress = 0X00;
-
-            //ushort[] value = { 3, 4, 4, 1, 2 };
-            //finsClient.WriteData(32300, bitAdress, value, Dr);
-
-            //bitAdress = 0X08;
-            //byte[] wValue = { 0X01 };
-            //finsClient.WriteBitData(0, bitAdress, wValue, Wr);
-
-            //bitAdress = 0X00;
-            //float[] floatData = finsClient.ReadBigFloatData(596, bitAdress, 2, Dr);
         }
 
-        //private void Sampling_Click_3(object sender, RoutedEventArgs e)
-        //{
-        //    MessageBox.Show("sssss");
-        //    return;
-
-        //    Thread BodDectThread = new Thread(new ThreadStart(bodHelper.StartBodDetect));
-        //    BodDectThread.IsBackground = true;
-        //    BodDectThread.Start();
-        //}
 
         #region 委托处理
         public void RefeshProcess(DelegateParam param)
@@ -372,8 +386,9 @@ namespace BodDetect
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
                 return;
             }
@@ -544,62 +559,21 @@ namespace BodDetect
             await Task.Factory.StartNew(() => BodSqliteHelp.InsertSysStatusData(sysStatusInfoModel));
         }
 
-        public void AddAlarmInfo(AlarmData alarmData) 
+        public void AddAlarmInfo(AlarmData alarmData)
         {
             alarmData.id = mainWindow_Model.AlramPagerModels.AllAlarmData.Count + 1;
 
             mainWindow_Model.AlramPagerModels.AddData(alarmData);
 
+            AlramInfoModel alramInfoModel = new AlramInfoModel();
+            alarmData.CopyToAlramInfoModel(alramInfoModel);
+            BodSqliteHelp.InsertAlramInfo(alramInfoModel);
+
+            HisAlarmList.UpdateLayout();
         }
 
         #endregion
 
-        //private void StoreValve_Checked(object sender, RoutedEventArgs e)
-        //{
-        //    MetroSwitch a = (MetroSwitch)sender;
-        //    a.IsChecked = false;
-
-        //    return;
-
-        //    try
-        //    {
-
-        //        if (bodHelper.IsSampling == true)
-        //        {
-        //            MessageBox.Show(" 现在正在采样过程中,禁止相关操作.", "提示", MessageBoxButton.OK);
-        //            return;
-        //        }
-
-        //        if (StoreValve.IsChecked == true)
-        //        {
-        //            bool hasChecked = ValveDic.Any(t => t.Value.IsChecked == true && t.Key != PLCConfig.DepositValveBit);
-
-        //            if (hasChecked)
-        //            {
-        //                if (MessageBox.Show("有其他的阀门打开,是否关闭其他阀门", "提示", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
-        //                {
-        //                    foreach (var item in ValveDic)
-        //                    {
-        //                        if (item.Key != PLCConfig.DepositValveBit)
-        //                        {
-        //                            item.Value.IsChecked = false;
-        //                        }
-        //                    }
-
-        //                    byte[] data = { PLCConfig.DepositValveBit };
-        //                    bodHelper.ValveControl(PLCConfig.Valve2Address, data);
-        //                }
-        //            }
-
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        StoreValve.IsChecked = false;
-        //        MessageBox.Show(" 沉淀池阀门打开失败.", "提示", MessageBoxButton.OK);
-        //    }
-
-        //}
 
         private void Valve_Checked(object sender, RoutedEventArgs e)
         {
@@ -611,8 +585,10 @@ namespace BodDetect
                     bodHelper.ValveControl(PLCConfig.Valve2Address, data);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 Valve.IsChecked = false;
                 this.ShowMessageAsync("Error", "送样(样液)阀门打开失败.");
             }
@@ -628,8 +604,10 @@ namespace BodDetect
                     bodHelper.ValveControl(PLCConfig.Valve2Address, data);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 NormalValve.IsChecked = false;
                 this.ShowMessageAsync("Error", "送样(标液)阀门打开失败.");
             }
@@ -666,8 +644,10 @@ namespace BodDetect
                     bodHelper.ValveControl(PLCConfig.Valve2Address, data);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 StoreValve.IsChecked = false;
                 this.ShowMessageAsync("Error", "阀门打开失败.");
             }
@@ -707,8 +687,9 @@ namespace BodDetect
                 timer.Start();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
         }
@@ -741,8 +722,9 @@ namespace BodDetect
                 bodHelper.PumpDrain();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
         }
@@ -777,8 +759,9 @@ namespace BodDetect
                 bodHelper.PumpDrain();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
         }
@@ -801,10 +784,9 @@ namespace BodDetect
 
                 bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                LogUtil.LogError(ex);
             }
 
         }
@@ -827,10 +809,10 @@ namespace BodDetect
 
                 bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
-                throw;
             }
 
         }
@@ -849,10 +831,9 @@ namespace BodDetect
                 byte[] data = { PLCConfig.DepositValveBit };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                LogUtil.LogError(ex);
             }
         }
 
@@ -911,9 +892,10 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
+                LogUtil.LogError(ex);
 
             }
         }
@@ -1009,9 +991,10 @@ namespace BodDetect
                     byte[] data1 = { 0 };
                     bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
 
+                    LogUtil.LogError(ex);
 
                 }
             });
@@ -1054,8 +1037,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
 
             }
@@ -1104,10 +1088,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-
+                LogUtil.LogError(ex);
             }
         }
 
@@ -1154,9 +1137,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                LogUtil.LogError(ex);
 
             }
         }
@@ -1204,8 +1187,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
 
             }
@@ -1248,10 +1232,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-
+                LogUtil.LogError(ex);
             }
         }
 
@@ -1298,9 +1281,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                LogUtil.LogError(ex);
 
             }
         }
@@ -1506,10 +1489,9 @@ namespace BodDetect
                 byte[] data1 = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve2Address, data1);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-
+                LogUtil.LogError(ex);
             }
         }
 
@@ -1642,6 +1624,17 @@ namespace BodDetect
 
             //this.Topmost = true;
 
+            this.WindowState = System.Windows.WindowState.Normal;
+            this.WindowStyle = System.Windows.WindowStyle.None;
+            this.ResizeMode = System.Windows.ResizeMode.NoResize;
+            this.Topmost = true;
+
+            this.Left = 0.0;
+            this.Top = 0.0;
+            this.Width = System.Windows.SystemParameters.PrimaryScreenWidth;
+            this.Height = System.Windows.SystemParameters.PrimaryScreenHeight;
+            this.WindowState = System.Windows.WindowState.Maximized;
+
         }
 
         private void start_Click(object sender, RoutedEventArgs e)
@@ -1656,10 +1649,10 @@ namespace BodDetect
                 }
                 StartBod(sender, e);
             }
-            else
-            {
-                AbortBod(sender, e);
-            }
+            //else
+            //{
+            //    AbortBod(sender, e);
+            //}
         }
 
         public async void BodRun(object sender, EventArgs e)
@@ -1668,7 +1661,8 @@ namespace BodDetect
             //{
 
             //    if (BodDetectRun != null && BodDetectRun.IsAlive)
-            //    {
+            //    
+
             //        BodDetectRun.Abort();
             //    }
 
@@ -1719,16 +1713,30 @@ namespace BodDetect
                     _loading.Visibility = Visibility.Collapsed;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                LogUtil.LogError(ex);
             }
 
         }
 
         public async void StartStandWaterAsync(object sender, EventArgs e)
         {
-            await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+            if (!System.IO.File.Exists(XmlHelp.Xmlpath)) 
+            {
+                XmlHelp.createXml(XmlHelp.Xmlpath);
+                return;
+            }
+
+            string time = XmlHelp.readtext(XmlHelp.Xmlpath);
+
+            DateTime dateTime = Convert.ToDateTime(time);
+
+            TimeSpan timeSpan = DateTime.Now - dateTime;
+            if (timeSpan.Days > configData.BodStandFreq)
+            {
+                await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+            }
         }
 
         public void initConfig()
@@ -1756,6 +1764,7 @@ namespace BodDetect
             configData.WashTimes = Convert.ToInt32(WashTimes.Text);
             configData.SampleScale = Convert.ToInt32(SampleScale.Text);
             configData.UpdateStatusInter = Convert.ToInt32(UpdataStatus.Text);
+            configData.BodStandFreq = Convert.ToInt32(StandDilFreq.Text);
 
             bodHelper.configData = configData;
         }
@@ -1905,9 +1914,9 @@ namespace BodDetect
                 serialPortHelp.StartSampleMes();
                 serialPortHelp.ClosePort();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                LogUtil.LogError(ex);
             }
 
         }
@@ -1923,10 +1932,9 @@ namespace BodDetect
                 serialPortHelp.StartStandMeas();
                 serialPortHelp.ClosePort();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-
+                LogUtil.LogError(ex);
             }
 
 
@@ -1946,8 +1954,9 @@ namespace BodDetect
                 serialPortHelp.StartWash();
                 serialPortHelp.ClosePort();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
 
@@ -1975,18 +1984,27 @@ namespace BodDetect
 
         private void ReadConfig_Click(object sender, RoutedEventArgs e)
         {
-            SampDil.Text = configData.SampDil.ToString();
-            SampVol.Text = configData.SampVol.ToString();
-            StandDil.Text = configData.StandDil.ToString();
-            StandVol.Text = configData.StandVol.ToString();
-            EmptyTime.Text = configData.EmptyTime.ToString();
-            InietTime.Text = configData.InietTime.ToString();
-            PrecipitateTime.Text = configData.PrecipitateTime.ToString();
-            sampleSpac.Text = configData.SpaceHour.ToString();
-            WarmUpTime.Text = configData.WarmUpTime.ToString();
-            WashTimes.Text = configData.WashTimes.ToString();
-            SampleScale.Text = configData.SampleScale.ToString();
-            UpdataStatus.Text = configData.UpdateStatusInter.ToString();
+            try
+            {
+                SampDil.Text = configData.SampDil.ToString();
+                SampVol.Text = configData.SampVol.ToString();
+                StandDil.Text = configData.StandDil.ToString();
+                StandVol.Text = configData.StandVol.ToString();
+                EmptyTime.Text = configData.EmptyTime.ToString();
+                InietTime.Text = configData.InietTime.ToString();
+                PrecipitateTime.Text = configData.PrecipitateTime.ToString();
+                sampleSpac.Text = configData.SpaceHour.ToString();
+                WarmUpTime.Text = configData.WarmUpTime.ToString();
+                WashTimes.Text = configData.WashTimes.ToString();
+                SampleScale.Text = configData.SampleScale.ToString();
+                UpdataStatus.Text = configData.UpdateStatusInter.ToString();
+                StandDilFreq.Text = configData.BodStandFreq.ToString();
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+            }
+
         }
 
         private void ResetConfig_Click(object sender, RoutedEventArgs e)
@@ -2002,6 +2020,7 @@ namespace BodDetect
             configData.WashTimes = 5;
             configData.SampleScale = 1;
             configData.UpdateStatusInter = 30;
+            configData.BodStandFreq = 3;
 
             ReadConfig_Click(sender, e);
 
@@ -2061,10 +2080,7 @@ namespace BodDetect
             }
             catch (Exception ex)
             {
-                streamWriter.WriteLine(ex.Message);
-                streamWriter.WriteLine(ex.StackTrace);
-
-                streamWriter.Close();
+                LogUtil.LogError(ex);
             }
 
         }
@@ -2082,79 +2098,86 @@ namespace BodDetect
 
         private async void GetData()
         {
-            byte[] Temp = { PLCConfig.SensorPower };
-            bool success = bodHelper.ValveControl(100, Temp);
-            if (!success)
+            try
             {
-                return;
+                byte[] Temp = { PLCConfig.SensorPower };
+                bool success = bodHelper.ValveControl(100, Temp);
+                if (!success)
+                {
+                    return;
+                }
+                int warmUpTime = Convert.ToInt32(WarmUpTime.Text);
+                await Task.Delay(warmUpTime * 1000);
+
+                float[] DoDota = await Task.Factory.StartNew(() => bodHelper.GetDoData());
+
+                // float[] DoDota =  bodHelper.GetDoData();
+                await Task.Delay(3 * 1000);
+
+                uint[] TurbidityData = await Task.Factory.StartNew(() => bodHelper.GetTurbidityData());
+                await Task.Delay(3 * 1000);
+
+                float[] PHData = await Task.Factory.StartNew(() => bodHelper.GetPHData());
+                await Task.Delay(3 * 1000);
+                ushort[] Uv254Data = await Task.Factory.StartNew(() => bodHelper.GetUv254Data());
+                await Task.Delay(3 * 1000);
+                ushort[] TempAndHumDada = await Task.Factory.StartNew(() => bodHelper.GetTempAndHumData());
+                await Task.Delay(3 * 1000);
+
+                mainWindow_Model.TemperatureData = DoDota[0];
+                mainWindow_Model.DoData = DoDota[1];
+                mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
+                mainWindow_Model.PHData = PHData[1];
+                mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
+                mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
+                mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
+
+
+                HisDatabase hisDatabase = new HisDatabase();
+                hisDatabase.DoData = mainWindow_Model.DoData;
+                hisDatabase.DoDataUnit = "mg/L";
+                hisDatabase.PHData = mainWindow_Model.PHData;
+                hisDatabase.TemperatureData = mainWindow_Model.TemperatureData;
+                hisDatabase.TemperatureUnit = "C";
+                hisDatabase.TurbidityData = mainWindow_Model.TurbidityData;
+                hisDatabase.TurbidityUnit = "mg/L";
+                DateTime dateTime = DateTime.Now;
+                hisDatabase.CreateDate = dateTime.ToLongDateString();
+                hisDatabase.CreateTime = dateTime.ToLongTimeString();
+                hisDatabase.Bod = mainWindow_Model.BodData;
+                hisDatabase.Uv254Data = mainWindow_Model.Uv254Data;
+                hisDatabase.CodData = mainWindow_Model.CodData;
+
+                mainWindow_Model.HisParamData.AddData(hisDatabase);
+
+                HisDataBaseModel model = new HisDataBaseModel();
+
+                hisDatabase.CopyToHisDataBaseModel(model);
+                //model.AirTemperature = hisDatabase.AirTemperatureData;
+                //model.Bod = hisDatabase.Bod;
+                //model.Cod = hisDatabase.CodData;
+                //model.CreateDate = hisDatabase.CreateDate;
+                //model.CreateTime = hisDatabase.CreateTime;
+                //model.DO = hisDatabase.DoData;
+                //model.Humidity = hisDatabase.HumidityData;
+                //model.id = hisDatabase.Id;
+                //model.PH = hisDatabase.PHData;
+                //model.RunNum = 0;
+                //model.Temperature = hisDatabase.TemperatureData;
+                //model.Turbidity = hisDatabase.TurbidityData;
+                //model.Uv254 = hisDatabase.Uv254Data;
+
+                //BodSqliteHelp bodSqliteHelp = new BodSqliteHelp();
+
+                await Task.Factory.StartNew(() => BodSqliteHelp.InsertHisBodData(model));
+
+                mainWindow_Model.UpdateSensorStatus();
+                UpdataBodStatus();
             }
-            int warmUpTime = Convert.ToInt32(WarmUpTime.Text);
-            await Task.Delay(warmUpTime * 1000);
-
-            float[] DoDota = await Task.Factory.StartNew(() => bodHelper.GetDoData());
-
-           // float[] DoDota =  bodHelper.GetDoData();
-            await Task.Delay(3 * 1000);
-
-            uint[] TurbidityData = await Task.Factory.StartNew(()=>bodHelper.GetTurbidityData());
-            await Task.Delay(3 * 1000);
-
-            float[] PHData = await Task.Factory.StartNew(()=>bodHelper.GetPHData());
-            await Task.Delay(3 * 1000);
-            ushort[] Uv254Data = await Task.Factory.StartNew(()=>bodHelper.GetUv254Data());
-            await Task.Delay(3 * 1000);
-            ushort[] TempAndHumDada = await Task.Factory.StartNew(()=>bodHelper.GetTempAndHumData());
-            await Task.Delay(3 * 1000);
-
-            mainWindow_Model.TemperatureData = DoDota[0];
-            mainWindow_Model.DoData = DoDota[1];
-            mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
-            mainWindow_Model.PHData = PHData[1];
-            mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
-            mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
-            mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
-
-
-            HisDatabase hisDatabase = new HisDatabase();
-            hisDatabase.DoData = mainWindow_Model.DoData;
-            hisDatabase.DoDataUnit = "mg/L";
-            hisDatabase.PHData = mainWindow_Model.PHData;
-            hisDatabase.TemperatureData = mainWindow_Model.TemperatureData;
-            hisDatabase.TemperatureUnit = "C";
-            hisDatabase.TurbidityData = mainWindow_Model.TurbidityData;
-            hisDatabase.TurbidityUnit = "mg/L";
-            DateTime dateTime = DateTime.Now;
-            hisDatabase.CreateDate = dateTime.ToLongDateString();
-            hisDatabase.CreateTime = dateTime.ToLongTimeString();
-            hisDatabase.Bod = mainWindow_Model.BodData;
-            hisDatabase.Uv254Data = mainWindow_Model.Uv254Data;
-            hisDatabase.CodData = mainWindow_Model.CodData;
-
-            mainWindow_Model.HisParamData.AddData(hisDatabase);
-
-            HisDataBaseModel model = new HisDataBaseModel();
-
-            hisDatabase.CopyToHisDataBaseModel(model);
-            //model.AirTemperature = hisDatabase.AirTemperatureData;
-            //model.Bod = hisDatabase.Bod;
-            //model.Cod = hisDatabase.CodData;
-            //model.CreateDate = hisDatabase.CreateDate;
-            //model.CreateTime = hisDatabase.CreateTime;
-            //model.DO = hisDatabase.DoData;
-            //model.Humidity = hisDatabase.HumidityData;
-            //model.id = hisDatabase.Id;
-            //model.PH = hisDatabase.PHData;
-            //model.RunNum = 0;
-            //model.Temperature = hisDatabase.TemperatureData;
-            //model.Turbidity = hisDatabase.TurbidityData;
-            //model.Uv254 = hisDatabase.Uv254Data;
-
-            //BodSqliteHelp bodSqliteHelp = new BodSqliteHelp();
-
-            await Task.Factory.StartNew(() => BodSqliteHelp.InsertHisBodData(model));
-
-            mainWindow_Model.UpdateSensorStatus();
-            UpdataBodStatus();
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+            }
 
         }
 
@@ -2281,7 +2304,7 @@ namespace BodDetect
             }
         }
 
-        public void HisDataExport_click(object sender, RoutedEventArgs e) 
+        public void HisDataExport_click(object sender, RoutedEventArgs e)
         {
             bool isSuccess = false;
             string text = "导出成功.";
@@ -2302,7 +2325,7 @@ namespace BodDetect
                 isSuccess = Tool.DataToExcel(dt, "hisData");
             }
 
-            if (!isSuccess) 
+            if (!isSuccess)
             {
                 text = "导出失败.";
             }
@@ -2334,8 +2357,9 @@ namespace BodDetect
                 System.Environment.Exit(0);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
             }
 
@@ -2386,10 +2410,10 @@ namespace BodDetect
             {
                 await this.Dispatcher.InvokeAsync(() => mainWindow_Model.HisParamData.UpdateDataByDate(HisDataStartPicker.SelectedDate, HisDataEndPicker.SelectedDate));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
-                throw;
             }
         }
 
@@ -2399,11 +2423,49 @@ namespace BodDetect
             {
                 await this.Dispatcher.InvokeAsync(() => mainWindow_Model.AlramPagerModels.UpdateDataByDate(AlarmDataStartPicker.SelectedDate, AlarmDataEndPicker.SelectedDate));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                LogUtil.LogError(ex);
             }
+        }
+
+
+        private void dataGrid1_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            if (DataGridIsEdit)
+            {
+                e.Row.IsEnabled = true;
+                e.Row.Background = new SolidColorBrush(Color.FromRgb(255, 180, 180));
+            }
+            else
+            {
+                e.Row.IsEnabled = false;
+            }
+        }
+
+        public void AddRow_Click(object sender, RoutedEventArgs e)
+        {
+            DataGridIsEdit = true;
+            dataGrid1.CanUserAddRows = true;
+
+        }
+
+        public void GridSave_Click(object sender, RoutedEventArgs e)
+        {
+            dataGrid1.UpdateDefaultStyle();
+        }
+
+
+        private void dataGrid1_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            e.Row.Background = new SolidColorBrush(Color.FromRgb(0, 200, 200));
+            Tool.HideInputPanel(kbpr);
+        }
+
+        private void dataGrid1_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            kbpr = Tool.ShowInputPanel(kbpr);
         }
     }
 }

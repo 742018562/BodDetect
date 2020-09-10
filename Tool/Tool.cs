@@ -68,7 +68,7 @@ namespace BodDetect
         Waitding
     }
 
-    class Tool
+    public class Tool
     {
 
         private const Int32 WM_SYSCOMMAND = 274;
@@ -134,21 +134,31 @@ namespace BodDetect
                 ////return SetUnDock(); //不知SetUnDock()是什么，所以直接注释返回1
                 //return 1;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return null;
             }
         }
 
         public static void HideInputPanel(Process kbpr)
         {
-
-            if (kbpr != null && !kbpr.HasExited)
+            try
             {
-                kbpr.CloseMainWindow();
+                if (kbpr != null && !kbpr.HasExited)
+                {
+                    kbpr.CloseMainWindow();
 
-                kbpr.Kill();
+                    kbpr.Kill();
+                }
             }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+
+            }
+
         }
 
         #endregion
@@ -430,6 +440,8 @@ namespace BodDetect
             }
             catch (Exception ex)
             {
+                LogUtil.LogError(ex);
+
                 return ex.Message;
             }
         }
@@ -587,8 +599,9 @@ namespace BodDetect
                 objFileStream.Close();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogUtil.LogError(ex);
 
                 return false;
             }
