@@ -189,7 +189,7 @@ namespace BodDetect
 
         public async void ClearAlram() 
         {
-            ushort data = 1;
+            ushort data = 7;
             bool success = bodHelper.serialPortHelp.ClearAlram(data);
             if (success)
             {
@@ -387,7 +387,7 @@ namespace BodDetect
 
         public async void StartBodStandWater_Click(object sender, RoutedEventArgs e) 
         {
-            if (bodHelper.IsSampling)
+            if (bodHelper.IsSampling || (BodCurrentRunTask != null && !BodCurrentRunTask.IsCompleted))
             {
                 await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
                 return;

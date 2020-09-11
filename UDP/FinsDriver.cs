@@ -37,11 +37,15 @@ namespace BodDetect.UDP
             byte finishCode1 = data[12],
                 finishCode2 = data[13];
 
+            string msg = Tool.BytesToText(data.ToList(), ReceiveMode.Hex);
+            LogUtil.Log("PLC回复报文:"+msg);
+
             var sid = data[9];
             if (finishCode1 != 0 || finishCode2 != 0)
             {
+                LogUtil.LogError($"Failure code {finishCode1} {finishCode2}");
                 responses[sid].CmdSuccess = false;
-                throw new FinsException($"Failure code {finishCode1} {finishCode2}");
+                return;
             }
 
             responses[sid].CmdSuccess = true;

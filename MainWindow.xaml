@@ -771,7 +771,7 @@
                     </Grid.RowDefinitions>
                     <Metro:MetroImage Grid.Row="0" Name="BiaotiImage" Content="BiaotiImage"  HorizontalAlignment="Center"  VerticalAlignment="Top"  Source="/Resources/biaoti.png"  Background="{x:Null}"/>
                     <Metro:MetroTabControl x:Name="tabc" Foreground="#FF2F48B8" FontSize="14" Grid.Row="1" Background="{x:Null}">
-                        <Metro:MetroTabItem Header="参数3D显示" Icon="/Resources/tabIcon.png">
+                        <!--<Metro:MetroTabItem Header="参数3D显示" Icon="/Resources/tabIcon.png">
                             <Grid  HorizontalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="200" />
@@ -780,7 +780,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" >
-                                    <Label FontSize="36" Name="BOD" HorizontalAlignment="Center"   Content="{Binding BodData,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BodDataToString}, ConverterParameter = 0}"  ></Label>
+                                    <Label FontSize="36" Name="BOD" HorizontalAlignment="Center"  Content="{Binding BodData,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BodDataToString}, ConverterParameter = 0}"  ></Label>
                                     <Metro:MetroImage Grid.Column="0"  Name="BODImage" Content="BODImage"  Source="/Resources/2D/BOD.png"  />
                                 </StackPanel>
 
@@ -839,7 +839,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
-                        </Metro:MetroTabItem>
+                        </Metro:MetroTabItem>-->
                         <Metro:MetroTabItem Header="参数正面显示" Icon="/Resources/tabIcon.png">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                                 <Grid.ColumnDefinitions>
@@ -912,7 +912,7 @@
 
                             </Grid>
                         </Metro:MetroTabItem>
-                        <Metro:MetroTabItem Header="折线图" Icon="/Resources/tabIcon.png">
+                        <Metro:MetroTabItem Header="折线图" Icon="/Resources/tabIcon.png" Visibility="Collapsed">
                             <Grid>
                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0">
                                     <local:LiveCharts Width="800" Height="450" >
@@ -1886,8 +1886,8 @@
                                                         <GridViewColumn Header="PH值" Width="100" DisplayMemberBinding="{Binding PHData,Converter={StaticResource HisParamDataToString}, ConverterParameter = 5}"/>
                                                         <GridViewColumn Header="温度" Width="100" DisplayMemberBinding="{Binding TemperatureData,Converter={StaticResource HisParamDataToString}, ConverterParameter = 4}"/>
                                                         <GridViewColumn Header="COD" Width="100" DisplayMemberBinding="{Binding CodData, Converter={StaticResource HisParamDataToString}, ConverterParameter = 6}"/>
-                                                        <GridViewColumn Header="BOD" Width="100" DisplayMemberBinding="{Binding Bod,Converter={StaticResource HisParamDataToString}, ConverterParameter = 0}"/>
-                                                        <GridViewColumn Header="初始电位值" Width="100" DisplayMemberBinding="{Binding BodElePot,Converter={StaticResource HisParamDataToString}, ConverterParameter = 7}"/>
+                                                        <GridViewColumn Header="BOD" Width="100" DisplayMemberBinding="{Binding Bod,Converter={StaticResource HisParamDataToString}, ConverterParameter = 0 }" />
+                                                        <GridViewColumn Header="初始电位值" Width="100"  DisplayMemberBinding="{Binding BodElePot,Converter={StaticResource HisParamDataToString}, ConverterParameter = 7}"/>
                                                         <GridViewColumn Header="电位降" Width="100" DisplayMemberBinding="{Binding BodElePotDrop,Converter={StaticResource HisParamDataToString}, ConverterParameter = 8}"/>
                                                         <GridViewColumn Header="采集日期" Width="120" DisplayMemberBinding="{Binding CreateDate}"/>
                                                         <GridViewColumn Header="采集时间" Width="120" DisplayMemberBinding="{Binding CreateTime}"/>
@@ -1921,9 +1921,9 @@
 
                                 </Grid>
                             </Metro:MetroTabItem>
-                            <Metro:MetroTabItem Header="日志数据" Icon="/Resources/tabIcon.png">
+                            <Metro:MetroTabItem Header="日志数据" Icon="/Resources/tabIcon.png" Visibility="Collapsed">
                                 <ListBox x:Name="logList" FontSize="20"  Background="{x:Null}" Height="450">
-                                    <ListBoxItem Content="error:PLC 连接异常" Style="{StaticResource MahApps.Styles.ListBoxItem}" ></ListBoxItem>
+                                    <ListBoxItem Content="error:test" Style="{StaticResource MahApps.Styles.ListBoxItem}" ></ListBoxItem>
                                     <ListBoxItem Content="warning: 传感器连接异常"></ListBoxItem>
                                 </ListBox>
                             </Metro:MetroTabItem>
@@ -2132,7 +2132,7 @@
                                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
                                                             <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50"/>
                                                             <Label Content="(单位:ml)"></Label>
-                                                            
+
                                                             <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10" Visibility="Collapsed"/>
 
                                                             <Metro:MetroTextBox Name="StandDilFreq" Title="标定间隔:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="3" IsEnabled="False" />
@@ -2352,7 +2352,7 @@
                                                     CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"                                           
                                                     CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}" LoadingRow="dataGrid1_LoadingRow" RowEditEnding="dataGrid1_RowEditEnding" BeginningEdit="dataGrid1_BeginningEdit">
 
-                                            
+
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="序号" Binding="{Binding id ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="True"  />
                                                 <DataGridTextColumn Header="维护人姓名" Binding="{Binding Name ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
@@ -2427,22 +2427,6 @@
                 </Grid>
 
             </Metro:MetroMenuTabItem>
-            <!--<Metro:MetroMenuTabItem Header="数据调试">
-                <Grid>
-                    <StackPanel>
-                        <GroupBox Style="{StaticResource MahApps.Styles.GroupBox}">
-                            <StackPanel>
-
-                                <Metro:MetroTextBox Title=""/>
-
-                                <Metro:MetroButton>
-                                    
-                                </Metro:MetroButton>
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
-                </Grid>
-            </Metro:MetroMenuTabItem>-->
         </Metro:MetroMenuTabControl>
     </Grid>
 </mah:MetroWindow>

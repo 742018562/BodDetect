@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Schema;
+using System.Linq;
 
 
 namespace BodDetect
@@ -29,6 +30,15 @@ namespace BodDetect
         Little_float,
         Big_float,
         DO_float
+    }
+
+    public enum ReceiveMode
+    {
+        Character,  //字符显示
+        Hex,        //十六进制
+        Decimal,    //十进制
+        Octal,      //八进制
+        Binary      //二进制
     }
 
 
@@ -514,6 +524,39 @@ namespace BodDetect
                 sw.WriteLine("</body>");
                 sw.WriteLine("</html>");
             }
+        }
+
+        public static string BytesToText(List<byte> bytesBuffer, ReceiveMode mode)
+        {
+            string result = "";
+
+            //if (mode == ReceiveMode.Character)
+            //{
+            //    return encoding.GetString(bytesBuffer.ToArray<byte>());
+            //}
+
+            foreach (var item in bytesBuffer)
+            {
+                switch (mode)
+                {
+                    case ReceiveMode.Hex:
+                        result += Convert.ToString(item, 16).ToUpper() + " ";
+                        break;
+                    case ReceiveMode.Decimal:
+                        result += Convert.ToString(item, 10) + " ";
+                        break;
+                    case ReceiveMode.Octal:
+                        result += Convert.ToString(item, 8) + " ";
+                        break;
+                    case ReceiveMode.Binary:
+                        result += Convert.ToString(item, 2) + " ";
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

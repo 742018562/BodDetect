@@ -62,6 +62,8 @@ namespace BodDetect
 
         public bool DataGridIsEdit = false;
 
+        public Task BodCurrentRunTask;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -188,7 +190,7 @@ namespace BodDetect
 
                     Task initTask = await Task.Factory.StartNew(() => bodHelper.PreInitAsync());
 
-                    if (!System.IO.File.Exists(XmlHelp.Xmlpath)) 
+                    if (!System.IO.File.Exists(XmlHelp.Xmlpath))
                     {
                         XmlHelp.createXml(XmlHelp.Xmlpath);
                     }
@@ -316,6 +318,11 @@ namespace BodDetect
             mainWindow_Model.HumidityDataData = data.HumidityData;
             mainWindow_Model.AirTemperatureData = data.AirTemperatureData;
 
+            if(mainWindow_Model.BodData <0 || mainWindow_Model.BodData > 1000) 
+            {
+                //BOD.Foreground = new SolidColorBrush( Color.FromRgb(255,0,0));
+                BOD_.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+            }
 
             HisDatabase hisDatabase = new HisDatabase();
             hisDatabase.DoData = mainWindow_Model.DoData;
@@ -345,7 +352,6 @@ namespace BodDetect
 
         private void MetroButton_Click_2(object sender, RoutedEventArgs e)
         {
-
             float[] floatData = bodHelper.GetDoData();
 
             floatData = bodHelper.GetPHData();
@@ -1639,23 +1645,31 @@ namespace BodDetect
 
         private void start_Click(object sender, RoutedEventArgs e)
         {
-
-            ToggleButton toggleButton = sender as ToggleButton;
-            if ((bool)toggleButton.IsChecked)
+            try
             {
-                if (bodHelper.IsSampling)
+                ToggleButton toggleButton = sender as ToggleButton;
+                if ((bool)toggleButton.IsChecked)
                 {
-                    this.ShowMessageAsync("Warning。。。。", "BOD流程给已启动，请勿重复启动流程。", MessageDialogStyle.Affirmative);
+                    if (bodHelper.IsSampling)
+                    {
+                        this.ShowMessageAsync("Warning。。。。", "BOD流程给已启动，请勿重复启动流程。", MessageDialogStyle.Affirmative);
+                    }
+                    StartBod(sender, e);
                 }
-                StartBod(sender, e);
             }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+
             //else
             //{
             //    AbortBod(sender, e);
             //}
         }
 
-        public async void BodRun(object sender, EventArgs e)
+        public void BodRun(object sender, EventArgs e)
         {
             //try
             //{
@@ -1671,10 +1685,21 @@ namespace BodDetect
             //{
 
             //}
-            await Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
 
+            if (bodHelper.IsSampling)
+            {
+                if(BodCurrentRunTask == null) 
+                {
+                    return;
+                }
+                if (BodCurrentRunTask.Status != TaskStatus.RanToCompletion) 
+                {
+                    Task.WaitAll(BodCurrentRunTask);
+                }
+            }
 
-
+            BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
+            BodCurrentRunTask.Start();
             //BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
             //BodDetectRun.IsBackground = true;
             //BodDetectRun.Start();
@@ -1720,23 +1745,40 @@ namespace BodDetect
 
         }
 
-        public async void StartStandWaterAsync(object sender, EventArgs e)
+        public  void StartStandWaterAsync(object sender, EventArgs e)
         {
-            if (!System.IO.File.Exists(XmlHelp.Xmlpath)) 
+            try
             {
-                XmlHelp.createXml(XmlHelp.Xmlpath);
-                return;
+                if (!System.IO.File.Exists(XmlHelp.Xmlpath))
+                {
+                    XmlHelp.createXml(XmlHelp.Xmlpath);
+                    return;
+                }
+
+                string time = XmlHelp.readtext(XmlHelp.Xmlpath);
+
+                DateTime dateTime = Convert.ToDateTime(time);
+
+                TimeSpan timeSpan = DateTime.Now - dateTime;
+                if (timeSpan.Days > configData.BodStandFreq)
+                {
+                    if (BodCurrentRunTask != null && !BodCurrentRunTask.IsCompleted)
+                    {
+
+                        LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
+                        Task.WaitAll(BodCurrentRunTask);
+                    }
+                    BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+                    BodCurrentRunTask.Start();
+                    LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
             }
 
-            string time = XmlHelp.readtext(XmlHelp.Xmlpath);
-
-            DateTime dateTime = Convert.ToDateTime(time);
-
-            TimeSpan timeSpan = DateTime.Now - dateTime;
-            if (timeSpan.Days > configData.BodStandFreq)
-            {
-                await Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
-            }
         }
 
         public void initConfig()
@@ -1824,29 +1866,38 @@ namespace BodDetect
 
             await Task.Factory.StartNew(() =>
             {
-                byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
-
-                List<byte[]> data = new List<byte[]>();
-                byte[] tem = { PLCConfig.SampleValveBit };
-                byte[] tem1 = { PLCConfig.AirValveBit };
-                data.Add(tem);
-                data.Add(tem1);
-
-                List<ushort> Address = new List<ushort>();
-                Address.Add(PLCConfig.Valve2Address);
-                Address.Add(PLCConfig.Valve2Address);
-
-                foreach (var item in Valves)
+                try
                 {
-                    data[0][0] = item;
-                    for (int i = 0; i < 10; i++)
+                    byte[] Valves = { PLCConfig.NormalValveBit, PLCConfig.SampleValveBit };
+
+                    List<byte[]> data = new List<byte[]>();
+                    byte[] tem = { PLCConfig.SampleValveBit };
+                    byte[] tem1 = { PLCConfig.AirValveBit };
+                    data.Add(tem);
+                    data.Add(tem1);
+
+                    List<ushort> Address = new List<ushort>();
+                    Address.Add(PLCConfig.Valve2Address);
+                    Address.Add(PLCConfig.Valve2Address);
+
+                    foreach (var item in Valves)
                     {
-                        PumpProcess(data, Address, PunpCapType.fiveml);
+                        data[0][0] = item;
+                        for (int i = 0; i < 10; i++)
+                        {
+                            PumpProcess(data, Address, PunpCapType.fiveml);
+                        }
                     }
+
+                    byte[] data1 = { PLCConfig.CisternValveBit };
+                    bodHelper.ValveControl(PLCConfig.Valve1Address, data1);
+                }
+                catch (Exception ex)
+                {
+
+                    LogUtil.LogError(ex);
                 }
 
-                byte[] data1 = { PLCConfig.CisternValveBit };
-                bodHelper.ValveControl(PLCConfig.Valve1Address, data1);
             });
 
         }
@@ -1964,21 +2015,30 @@ namespace BodDetect
 
         private async void SaveConfig_Click(object sender, RoutedEventArgs e)
         {
-            initConfig();
-
-            double hours = RunTimer.Interval.TotalHours;
-            if (hours != configData.SpaceHour)
+            try
             {
-                RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+                initConfig();
+
+                double hours = RunTimer.Interval.TotalHours;
+                if (hours != configData.SpaceHour)
+                {
+                    RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+                }
+
+                double min = UpdataStatusTimer.Interval.TotalMinutes;
+                if (min != configData.UpdateStatusInter)
+                {
+                    UpdataStatusTimer.Interval = new TimeSpan(0, configData.UpdateStatusInter, 0);
+                }
+
+                await this.ShowMessageAsync("Tips.", "配置成功。", MessageDialogStyle.Affirmative);
+            }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
             }
 
-            double min = UpdataStatusTimer.Interval.TotalMinutes;
-            if (min != configData.UpdateStatusInter)
-            {
-                UpdataStatusTimer.Interval = new TimeSpan(0, configData.UpdateStatusInter, 0);
-            }
-
-            await this.ShowMessageAsync("Tips.", "配置成功。", MessageDialogStyle.Affirmative);
 
         }
 
@@ -2009,59 +2069,58 @@ namespace BodDetect
 
         private void ResetConfig_Click(object sender, RoutedEventArgs e)
         {
-            configData.SampVol = 50;
-            configData.StandDil = 250;
-            configData.StandVol = 50;
-            configData.EmptyTime = 300;
-            configData.InietTime = 60;
-            configData.PrecipitateTime = 10;
-            configData.SpaceHour = 2;
-            configData.WarmUpTime = 60;
-            configData.WashTimes = 5;
-            configData.SampleScale = 1;
-            configData.UpdateStatusInter = 30;
-            configData.BodStandFreq = 3;
+            try
+            {
+                configData.SampVol = 50;
+                configData.StandDil = 250;
+                configData.StandVol = 50;
+                configData.EmptyTime = 300;
+                configData.InietTime = 60;
+                configData.PrecipitateTime = 10;
+                configData.SpaceHour = 2;
+                configData.WarmUpTime = 60;
+                configData.WashTimes = 5;
+                configData.SampleScale = 1;
+                configData.UpdateStatusInter = 30;
+                configData.BodStandFreq = 3;
 
-            ReadConfig_Click(sender, e);
+                ReadConfig_Click(sender, e);
 
-            DebugModel.IsChecked = true;
+                DebugModel.IsChecked = true;
 
-            OutModel.IsChecked = true;
+                OutModel.IsChecked = true;
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+            }
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:指定 IFormatProvider", Justification = "<挂起>")]
         private void GetBodData_Click(object sender, RoutedEventArgs e)
         {
-
-            StreamWriter streamWriter = File.CreateText("D:\\test1111.txt");
             try
             {
                 byte[] data = { 0 };
                 bodHelper.ValveControl(PLCConfig.Valve1Address, data);
 
                 //bodHelper.serialPortHelp.OpenPort();
-                streamWriter.WriteLine("开始读数据");
 
                 float[] BodData = bodHelper.serialPortHelp.BodCurrentData();
 
                 if (BodData == null)
                 {
-                    streamWriter.WriteLine("BodData == null");
 
                     return;
                 }
 
                 int iLength = data.Length;
-                foreach (var item in data)
-                {
-                    streamWriter.WriteLine(item.ToString());
-                }
+
 
                 if (iLength != 11)
                 {
 
-                    streamWriter.WriteLine("iLength != 11");
                     return;
                 }
 
@@ -2072,9 +2131,6 @@ namespace BodDetect
 
 
                 //    float Bod = bodHelper.serialPortHelp.BodCurrentData();
-
-                streamWriter.WriteLine(Bod.ToString());
-                streamWriter.Close();
 
                 //bodHelper.serialPortHelp.ClosePort();
             }
@@ -2185,21 +2241,30 @@ namespace BodDetect
         {
             //LoginDialogSettings loginDialogSettings = new LoginDialogSettings();
             //await this.ShowLoginAsync();
-            if (bodHelper.IsSampling)
+            try
             {
-                await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
-                return;
+                if (bodHelper.IsSampling)
+                {
+                    await this.ShowMessageAsync("Tips。", "系统BOD流程正在运行,请稍后操作。", MessageDialogStyle.Affirmative);
+                    return;
+                }
+
+                bodHelper.WashCistern(configData.WashTimes);
+
+                byte[] data = { PLCConfig.CisternPumpBit };
+                bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
+                if (!success)
+                {
+
+                    await this.ShowMessageAsync("This is the title", "PLC 通讯失败。");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
             }
 
-            bodHelper.WashCistern(configData.WashTimes);
 
-            byte[] data = { PLCConfig.CisternPumpBit };
-            bool success = bodHelper.ValveControl(PLCConfig.Valve1Address, data);
-            if (!success)
-            {
-
-                await this.ShowMessageAsync("This is the title", "PLC 通讯失败。");
-            }
         }
 
         private async void MeasureBod_Click(object sender, RoutedEventArgs e)
@@ -2218,24 +2283,36 @@ namespace BodDetect
 
         private void GetCODdata(object sender, EventArgs e)
         {
-            byte bitAdress = 0X00;
-            ushort[] Data = bodHelper.finsClient.ReadData(450, bitAdress, 1, PLCConfig.Wr);
-            if (Data != null && Data.Length > 0 && Data[0] == 4)
+            try
             {
-                CodTimer.Tick -= GetCODdata;
-                CodTimer.Stop();
-                float[] value = bodHelper.finsClient.ReadBigFloatData(432, bitAdress, 2, PLCConfig.Dr);
-                mainWindow_Model.CodData = value[0];
+                byte bitAdress = 0X00;
+                ushort[] Data = bodHelper.finsClient.ReadData(450, bitAdress, 1, PLCConfig.Wr);
+                if (Data != null && Data.Length > 0 && Data[0] == 4)
+                {
+                    CodTimer.Tick -= GetCODdata;
+                    CodTimer.Stop();
+                    float[] value = bodHelper.finsClient.ReadBigFloatData(432, bitAdress, 2, PLCConfig.Dr);
+                    mainWindow_Model.CodData = value[0];
+                }
             }
-
-
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+            }
         }
 
         private void UpdateDevStatus(object sender, EventArgs e)
         {
-            bool IsConnect = bodHelper.finsClient.IsConnect();
-            mainWindow_Model.UpdatePlcStatus(IsConnect, true);
-            UpdataBodStatus();
+            try
+            {
+                bool IsConnect = bodHelper.finsClient.IsConnect();
+                mainWindow_Model.UpdatePlcStatus(IsConnect, true);
+                UpdataBodStatus();
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+            }
         }
 
 
@@ -2306,31 +2383,41 @@ namespace BodDetect
 
         public void HisDataExport_click(object sender, RoutedEventArgs e)
         {
-            bool isSuccess = false;
-            string text = "导出成功.";
-            using (SQLiteConnection conn = new SQLiteConnection(BodSqliteHelp.connStr))
+            try
             {
-                conn.Open();
-                string sql = "SELECT * FROM HisDataBase";
+                bool isSuccess = false;
+                string text = "导出成功.";
+                using (SQLiteConnection conn = new SQLiteConnection(BodSqliteHelp.connStr))
+                {
+                    conn.Open();
+                    string sql = "SELECT * FROM HisDataBase";
 
-                SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
+                    SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
 
-                DataSet ds = new DataSet();
-                ap.Fill(ds);
-                ap.Dispose();
+                    DataSet ds = new DataSet();
+                    ap.Fill(ds);
+                    ap.Dispose();
 
 
-                DataTable dt = ds.Tables[0];
+                    DataTable dt = ds.Tables[0];
 
-                isSuccess = Tool.DataToExcel(dt, "hisData");
+                    isSuccess = Tool.DataToExcel(dt, "hisData");
+                }
+
+                if (!isSuccess)
+                {
+                    text = "导出失败.";
+                }
+
+                this.ShowMessageAsync("Tips", text, MessageDialogStyle.Affirmative);
+            }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
             }
 
-            if (!isSuccess)
-            {
-                text = "导出失败.";
-            }
 
-            this.ShowMessageAsync("Tips", text, MessageDialogStyle.Affirmative);
 
         }
 

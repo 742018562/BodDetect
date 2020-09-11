@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -282,7 +283,8 @@ namespace BodDetect.UDP
 
         private FinsResponse Read(byte sid, byte[] cmd)
         {
-
+            string msg = Tool.BytesToText(cmd.ToList(), ReceiveMode.Hex);
+            LogUtil.Log("PLC读取命令报文:" + msg);
             if (_udpClient.Send(cmd, cmd.Length) != cmd.Length)
                 throw new Exception();
             if (!_responses[sid].WaitEvent.WaitOne(Timeout))
@@ -292,6 +294,8 @@ namespace BodDetect.UDP
 
         private void Write(byte sid, byte[] cmd)
         {
+            string msg = Tool.BytesToText(cmd.ToList(), ReceiveMode.Hex);
+            LogUtil.Log("PLC写入命令报文:" + msg);
             if (_udpClient.Send(cmd, cmd.Length) != cmd.Length)
                 throw new Exception();
             if (!_responses[sid].WaitEvent.WaitOne(Timeout))
@@ -300,6 +304,8 @@ namespace BodDetect.UDP
 
         private async Task<FinsResponse> CommandAsync(byte sid, byte[] cmd)
         {
+            string msg = Tool.BytesToText(cmd.ToList(), ReceiveMode.Hex);
+            LogUtil.Log("PLC异步读取命令报文:" + msg);
             if (await _udpClient.SendAsync(cmd, cmd.Length) != cmd.Length)
                 throw new Exception();
             if (!_responses[sid].WaitEvent.WaitOne(Timeout))

@@ -115,7 +115,10 @@ namespace BodDetect
 
             Message.Add(Crc16[1]);
             Message.Add(Crc16[0]);
-            LogUtil.Log("发送读取BOD命令报文，功能类型：" + regStatus + ",具体发送报文：" + Convert.ToBase64String(Message.ToArray()));
+
+            string msg = Tool.BytesToText(Message, ReceiveMode.Hex);
+
+            LogUtil.Log("发送读取BOD命令报文，功能类型：" + regStatus + ",具体发送报文：" + msg);
 
             SerialPortWrite(Message.ToArray());
         }
@@ -148,7 +151,9 @@ namespace BodDetect
 
             SerialPortWrite(Message.ToArray());
 
-            LogUtil.Log("发送BOD控制命令报文，功能类型：" + regCtrl + ",具体发送报文：" + Convert.ToBase64String(Message.ToArray()));
+            string msg = Tool.BytesToText(Message, ReceiveMode.Hex);
+
+            LogUtil.Log("发送BOD控制命令报文，功能类型：" + regCtrl + ",具体发送报文：" + msg);
 
             return Message.ToArray();
         }
@@ -197,7 +202,7 @@ namespace BodDetect
 
         public bool StartWash()
         {
-            byte[] sendMsg = BodCtrlFun(RegCtrl.Stop_All, 7);
+            byte[] sendMsg = BodCtrlFun(RegCtrl.Stop_All, 1);
 
             byte[] recvMsg = ReadData();
 
@@ -308,10 +313,13 @@ namespace BodDetect
 
                 if (count == 0)
                 {
+                    LogUtil.Log("串口读取数据为空");
+
                     return null;
                 }
 
-                LogUtil.Log("串口读取数据：" + Convert.ToBase64String(tempBuffer));
+                string msg = Tool.BytesToText(tempBuffer.ToList(),ReceiveMode.Hex);
+                LogUtil.Log("串口读取数据：" + msg);
                 return tempBuffer;
             }
             catch (Exception ex)
