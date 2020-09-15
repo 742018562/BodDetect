@@ -295,6 +295,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="MySql.Data">
+      <HintPath>dll\MySql.Data.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Interactivity">
       <HintPath>bin\x86\Debug\System.Windows.Interactivity.dll</HintPath>
     </Reference>

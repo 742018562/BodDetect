@@ -318,7 +318,7 @@ namespace BodDetect
             mainWindow_Model.HumidityDataData = data.HumidityData;
             mainWindow_Model.AirTemperatureData = data.AirTemperatureData;
 
-            if(mainWindow_Model.BodData <0 || mainWindow_Model.BodData > 1000) 
+            if (mainWindow_Model.BodData < 0 || mainWindow_Model.BodData > 1000)
             {
                 //BOD.Foreground = new SolidColorBrush( Color.FromRgb(255,0,0));
                 BOD_.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
@@ -1685,21 +1685,24 @@ namespace BodDetect
             //{
 
             //}
+            LogUtil.Log("启动线程执行BOD流程");
 
-            if (bodHelper.IsSampling)
+            if (BodCurrentRunTask == null)
             {
-                if(BodCurrentRunTask == null) 
-                {
-                    return;
-                }
-                if (BodCurrentRunTask.Status != TaskStatus.RanToCompletion) 
-                {
-                    Task.WaitAll(BodCurrentRunTask);
-                }
+                BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);              
+                return;
+            }
+
+            if (bodHelper.IsSampling || !BodCurrentRunTask.IsCompleted)
+            {
+                Task.WaitAll(BodCurrentRunTask);
+
             }
 
             BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
-            BodCurrentRunTask.Start();
+            LogUtil.Log("执行BOD流程成功");
+
+
             //BodDetectRun = new Thread(new ThreadStart(bodHelper.StartBodDetect));
             //BodDetectRun.IsBackground = true;
             //BodDetectRun.Start();
@@ -1717,7 +1720,7 @@ namespace BodDetect
             {
                 int SpaceHour = Convert.ToInt32(sampleSpac.Text);
 
-                if (!bodHelper.IsSampling)
+                if (!bodHelper.IsSampling && BodCurrentRunTask.IsCompleted)
                 {
                     initConfig();
 
@@ -1769,7 +1772,6 @@ namespace BodDetect
                         Task.WaitAll(BodCurrentRunTask);
                     }
                     BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
-                    BodCurrentRunTask.Start();
                     LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
 
                 }
