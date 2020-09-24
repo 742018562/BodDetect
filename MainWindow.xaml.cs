@@ -29,6 +29,7 @@ using BodDetect.PagerDataModels;
 using BodDetect.UDP;
 using MahApps.Metro.Controls.Dialogs;
 using System.Configuration;
+using BodDetect.DataBaseInteractive;
 
 namespace BodDetect
 {
@@ -297,7 +298,7 @@ namespace BodDetect
         //    Port_TextBox.Text = "9600";
         //}
 
-        private async void RefreshData(BodData data)
+        private  void RefreshData(BodData data)
         {
             mainWindow_Model.BodData = data.Bod;
             mainWindow_Model.CodData = data.CodData;
@@ -336,7 +337,8 @@ namespace BodDetect
 
             HisDataBaseModel hisDataBaseModel = new HisDataBaseModel();
             hisDatabase.CopyToHisDataBaseModel(hisDataBaseModel);
-            await Task.Factory.StartNew(() => BodSqliteHelp.InsertHisBodData(hisDataBaseModel));
+            Task.Factory.StartNew(() => BodSqliteHelp.InsertHisBodData(hisDataBaseModel));
+           // Task.Factory.StartNew(() => MySqlHelper.InsertBodData(hisDataBaseModel));
 
             mainWindow_Model.UpdateSensorStatus();
         }

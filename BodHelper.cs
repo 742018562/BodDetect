@@ -901,23 +901,6 @@ namespace BodDetect
                 List<byte> TempData = new List<byte>();
                 TempData.Add(PLCConfig.WashValveBit);
                 TempData.Add(PLCConfig.BodDrainValveBit);
-#if DEBUG
-
-#else
-                    ValveControl(PLCConfig.Valve1Address, TempData.ToArray());
-                    if (ConnectSeri)
-                    {
-                        serialPortHelp.SetStandDeep(20);
-                        serialPortHelp.StartStandMeas();
-                        await Task.Delay(8 * 60 * 1000);
-                        byte[] tempvalue = { PLCConfig.BodDrainValveBit };
-                        ValveControl(PLCConfig.Valve1Address, tempvalue);
-                        await Task.Delay(28 * 60 * 1000);
-                        byte[] temp = { 0 };
-                        ValveControl(PLCConfig.Valve1Address, temp);
-                    }
-#endif
-
 
                 //[ 4. 获取COD的值判断是否需要稀释]
                 if (token.IsCancellationRequested || NeedStop)
