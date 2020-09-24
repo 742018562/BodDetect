@@ -40,11 +40,6 @@ namespace BodDetect.UIConvert
                     break;
             }
 
-            if (data == 0) 
-            {
-                text = "--";
-            }
-
             
             return text;
         }

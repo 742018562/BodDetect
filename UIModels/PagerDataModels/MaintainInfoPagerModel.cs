@@ -85,7 +85,6 @@ namespace BodDetect.UIModels.PagerDataModels
 
         public void AddData(MaintainInfo hisDatabase)
         {
-            hisDatabase.id = AllMaintainInfo.Count + 1;
             _source.Add(hisDatabase);
             AllMaintainInfo.Add(hisDatabase);
             int LastTotalPage = TotalPage;
@@ -100,22 +99,23 @@ namespace BodDetect.UIModels.PagerDataModels
                 TotalPage = _source.Count / PageSize;
             }
 
-            if (CurrentPage != LastTotalPage)
-            {
-                return;
-            }
+            LastPageAction();
+        }
 
-            if (CurrentPage == LastTotalPage)
+        public void UpdateData() 
+        {
+            for (int i = 0; i < MaintainInfoSource.Count; i++)
             {
-                if (_maintainInfoSoruce.Count < PageSize)
+                if (string.IsNullOrEmpty(MaintainInfoSource[i].CreateDate)) 
                 {
-                    _maintainInfoSoruce.Add(hisDatabase);
+                    MaintainInfoSource[i].id = i+1;
+                    DateTime dateTime = DateTime.Now;
+                    MaintainInfoSource[i].CreateDate = dateTime.ToLongDateString();
+                    MaintainInfoSource[i].CreateTime = dateTime.ToLongTimeString();
+                    MaintainInfoSource[i].IsInsert = true;
+                    AddData(MaintainInfoSource[i]);
                 }
-                else
-                {
-                    return;
-                }
-
+               
             }
         }
 
@@ -174,6 +174,19 @@ namespace BodDetect.UIModels.PagerDataModels
                 TotalPage = _source.Count / PageSize;
             }
             FirstPageAction();
+        }
+
+        public void saveData() 
+        {
+            foreach (var item in AllMaintainInfo)
+            {
+                if (item.IsInsert) 
+                {
+                    MaintainInfoModel maintainInfoModel = new MaintainInfoModel();
+                    item.CopyToMaintainInfoModel(maintainInfoModel);
+                    BodSqliteHelp.InsertMaintainInfo(maintainInfoModel);
+                }
+            }
         }
 
     }

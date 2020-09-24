@@ -15,6 +15,8 @@ namespace BodDetect.BodDataManage
         public string Info { get; set; }
         public string CreateDate { get; set; }
         public string CreateTime { get; set; }
+
+        public bool IsInsert { get; set; }
         public void CopyToMaintainInfoModel(MaintainInfoModel maintainInfoModel)
         {
             maintainInfoModel.id = id;

@@ -172,7 +172,7 @@ namespace BodDetect
             CurrentPage++;
         }
 
-        private void LastPageAction()
+        public void LastPageAction()
         {
             CurrentPage = TotalPage;
 

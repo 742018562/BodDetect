@@ -2355,7 +2355,7 @@
                                                     DataContext="{Binding MaintainInfoPagerModels}"  
                                                     ItemsSource="{Binding MaintainInfoSource}"
                                                     CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"                                           
-                                                    CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}" LoadingRow="dataGrid1_LoadingRow" RowEditEnding="dataGrid1_RowEditEnding" BeginningEdit="dataGrid1_BeginningEdit">
+                                                    CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}" LoadingRow="dataGrid1_LoadingRow" RowEditEnding="dataGrid1_RowEditEnding" BeginningEdit="dataGrid1_BeginningEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
 
 
                                             <DataGrid.Columns>

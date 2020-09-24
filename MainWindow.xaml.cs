@@ -2055,11 +2055,16 @@ namespace BodDetect
             {
                 initConfig();
 
-                double hours = RunTimer.Interval.TotalHours;
-                if (hours != configData.SpaceHour)
-                {
-                    RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
-                }
+                RunTimer.Stop();
+                RunTimer.Tick += BodRun;
+                RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+                RunTimer.Start();
+
+                //double hours = RunTimer.Interval.TotalHours;
+                //if (hours != configData.SpaceHour)
+                //{
+                //    RunTimer.Interval = new TimeSpan(configData.SpaceHour, 0, 0);
+                //}
 
                 double min = UpdataStatusTimer.Interval.TotalMinutes;
                 if (min != configData.UpdateStatusInter)
@@ -2237,7 +2242,7 @@ namespace BodDetect
 
                 n = io ^ 32;
                 io = Convert.ToUInt16(n);
-                Temp[0] = io ;
+                Temp[0] = io;
 
                 success = bodHelper.finsClient.WriteData(100, 0, Temp, PLCConfig.IO);
 
@@ -2601,18 +2606,27 @@ namespace BodDetect
         public void GridSave_Click(object sender, RoutedEventArgs e)
         {
             dataGrid1.UpdateDefaultStyle();
+            Task.Factory.StartNew(() => mainWindow_Model.MaintainInfoPagerModels.saveData());
+
+            // mainWindow_Model.MaintainInfoPagerModels._source
         }
 
 
         private void dataGrid1_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            e.Row.Background = new SolidColorBrush(Color.FromRgb(0, 200, 200));
+
+            // e.Row.Background = new SolidColorBrush(Color.FromRgb(0, 200, 200));
             Tool.HideInputPanel(kbpr);
+            mainWindow_Model.MaintainInfoPagerModels.UpdateData();
+            DataGridIsEdit = false;
+            dataGrid1.CanUserAddRows = false;
+
         }
 
         private void dataGrid1_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
             kbpr = Tool.ShowInputPanel(kbpr);
+
         }
 
         private void test11_ButtonClick(object sender, EventArgs e)

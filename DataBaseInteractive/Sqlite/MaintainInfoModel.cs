@@ -34,6 +34,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             maintainInfo.Info = Info;
             maintainInfo.CreateDate = CreateDate;
             maintainInfo.CreateTime = CreateTime;
+            maintainInfo.IsInsert = false;
         }
     }
 }
