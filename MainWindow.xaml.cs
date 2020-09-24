@@ -28,6 +28,7 @@ using BodDetect.Event;
 using BodDetect.PagerDataModels;
 using BodDetect.UDP;
 using MahApps.Metro.Controls.Dialogs;
+using System.Configuration;
 
 namespace BodDetect
 {
@@ -101,8 +102,6 @@ namespace BodDetect
             //ValveDic.Add(PLCConfig.WashValveBit, WashValve);
             //ValveDic.Add(PLCConfig.BodDrainValveBit, BodRowValve);
 
-            LogUtil.LogError("test");
-            LogUtil.Log("test1");
             initAsync();
 
             this.DataContext = mainWindow_Model;
@@ -114,28 +113,20 @@ namespace BodDetect
             try
             {
 
-                //for (int i = 0; i < 10; i++)
-                //{
-                //    AlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
-                //}
+                string PLCip = ConfigurationManager.AppSettings["PLCip"];
+                string PLCport = ConfigurationManager.AppSettings["PLCport"];
 
-                //for (int i = 0; i < 10; i++)
-                //{
-                //    HisAlarmList.Items.Add(new AlarmData(i, "test0", i + 10, "test1", "test2", true));
-                //}
+                LogUtil.Log(PLCip + PLCport);
 
-                logList.Items.Add("test");
 
-                string ip = IP_textbox.Text;
-
-                string[] value = ip.Split('.');
+                string[] value = PLCip.Split('.');
                 if (value.Length < 4)
                 {
                     await this.ShowMessageAsync("Error", "异常ip!", MessageDialogStyle.Affirmative);
                 }
-                int port = Convert.ToInt32(Port_TextBox.Text, 10);
+                int port = Convert.ToInt32(PLCport, 10);
 
-                bodHelper = new BodHelper(ip, port);
+                bodHelper = new BodHelper(PLCip, port);
                 bodHelper.Init();
 
                 bodHelper.refreshProcess = new BodHelper.RefreshUI(RefeshProcess);
@@ -198,12 +189,12 @@ namespace BodDetect
                     Task.WaitAll(initTask);
 
                     StandWaterTimer.Tick += StartStandWaterAsync;
-                    StandWaterTimer.Interval = new TimeSpan(0, 4, 0, 0);
+                    StandWaterTimer.Interval = new TimeSpan(0, 1, 0, 0);
 
                     StandWaterTimer.Start();
                     //Task StandTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
 
-                    TimeSpan timeSpan = new TimeSpan(1, 0, 0);
+                    //TimeSpan timeSpan = new TimeSpan(SpaceHour, 0, 0);
                     //Task.WaitAll(StandTask);
 
                     if (RunTimer == null || !RunTimer.IsEnabled)
@@ -213,7 +204,7 @@ namespace BodDetect
                         RunTimer.Start();
                     }
 
-                    await Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
+                    BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
                     _loading.Visibility = Visibility.Visible;
                 }
                 else
@@ -272,39 +263,39 @@ namespace BodDetect
 
         }
 
-        private void MetroButton_Click_1(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string ip = IP_textbox.Text;
+        //private void MetroButton_Click_1(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        string ip = IP_textbox.Text;
 
-                string[] value = ip.Split('.');
-                if (value.Length < 4)
-                {
-                    this.ShowMessageAsync("Error", "异常ip!");
-                }
+        //        string[] value = ip.Split('.');
+        //        if (value.Length < 4)
+        //        {
+        //            this.ShowMessageAsync("Error", "异常ip!");
+        //        }
 
-                int port = Convert.ToInt32(Port_TextBox.Text);
-                bool success = bodHelper.ConnectPlc();
+        //        int port = Convert.ToInt32(Port_TextBox.Text);
+        //        bool success = bodHelper.ConnectPlc();
 
-                if (success)
-                {
-                    this.ShowMessageAsync("与PLC通讯", "连接成功！", MessageDialogStyle.Affirmative);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.LogError(ex);
-                this.ShowMessageAsync("Error", "连接PLC异常!");
-            }
+        //        if (success)
+        //        {
+        //            this.ShowMessageAsync("与PLC通讯", "连接成功！", MessageDialogStyle.Affirmative);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        LogUtil.LogError(ex);
+        //        this.ShowMessageAsync("Error", "连接PLC异常!");
+        //    }
 
-        }
+        //}
 
-        private void ResetIp_Click(object sender, RoutedEventArgs e)
-        {
-            IP_textbox.Text = "192.168.0.174";
-            Port_TextBox.Text = "9600";
-        }
+        //private void ResetIp_Click(object sender, RoutedEventArgs e)
+        //{
+        //    IP_textbox.Text = "192.168.0.174";
+        //    Port_TextBox.Text = "9600";
+        //}
 
         private async void RefreshData(BodData data)
         {
@@ -545,10 +536,9 @@ namespace BodDetect
 
         }
 
-        public async void RefreshProcessStatus(ProcessType processType)
+        public void RefreshProcessStatus(ProcessType processType)
         {
             string status = Tool.GetProcessTypeToString(processType);
-            SysStaus.Content = status;
 
             SysStatusData sysStatusData = new SysStatusData();
             sysStatusData.Status = status;
@@ -557,12 +547,20 @@ namespace BodDetect
             DateTime dateTime = DateTime.Now;
             sysStatusData.CreateDate = dateTime.ToLongDateString();
             sysStatusData.CreateTime = dateTime.ToLongTimeString();
-            mainWindow_Model.SysStatusDataModel.AddData(sysStatusData);
-
             SysStatusInfoModel sysStatusInfoModel = new SysStatusInfoModel();
             sysStatusData.CopyToSysStatusInfoModel(sysStatusInfoModel);
+            Task refeshTask = Task.Factory.StartNew(() => BodSqliteHelp.InsertSysStatusData(sysStatusInfoModel));
 
-            await Task.Factory.StartNew(() => BodSqliteHelp.InsertSysStatusData(sysStatusInfoModel));
+            //   refeshTask.Dispose();
+            this.Dispatcher.BeginInvoke(new Action(delegate ()
+            {
+                mainWindow_Model.SysStatusDataModel.AddData(sysStatusData);
+
+                SysStaus.Content = status;
+
+                LogUtil.Log("状态更新成功:" + status);
+            }));
+
         }
 
         public void AddAlarmInfo(AlarmData alarmData)
@@ -1653,7 +1651,10 @@ namespace BodDetect
                     if (bodHelper.IsSampling)
                     {
                         this.ShowMessageAsync("Warning。。。。", "BOD流程给已启动，请勿重复启动流程。", MessageDialogStyle.Affirmative);
+                        return;
                     }
+                    bodHelper.NeedStop = false;
+
                     StartBod(sender, e);
                 }
             }
@@ -1689,16 +1690,23 @@ namespace BodDetect
 
             if (BodCurrentRunTask == null)
             {
-                BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);              
+                StopCts = new CancellationTokenSource();
+                BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
                 return;
             }
 
             if (bodHelper.IsSampling || !BodCurrentRunTask.IsCompleted)
             {
-                Task.WaitAll(BodCurrentRunTask);
+                bool success = BodCurrentRunTask.Wait(1000 * 30);
+
+                if (!success)
+                {
+                    return;
+                }
 
             }
 
+            StopCts = new CancellationTokenSource();
             BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodDetect(StopCts.Token), StopCts.Token);
             LogUtil.Log("执行BOD流程成功");
 
@@ -1720,7 +1728,7 @@ namespace BodDetect
             {
                 int SpaceHour = Convert.ToInt32(sampleSpac.Text);
 
-                if (!bodHelper.IsSampling && BodCurrentRunTask.IsCompleted)
+                if (!bodHelper.IsSampling)
                 {
                     initConfig();
 
@@ -1737,7 +1745,7 @@ namespace BodDetect
                 }
                 else
                 {
-                    bodHelper.manualevent.Set();
+                    //  bodHelper.manualevent.Set();
                     _loading.Visibility = Visibility.Collapsed;
                 }
             }
@@ -1748,13 +1756,29 @@ namespace BodDetect
 
         }
 
-        public  void StartStandWaterAsync(object sender, EventArgs e)
+        public void StartStandWaterAsync(object sender, EventArgs e)
         {
             try
             {
                 if (!System.IO.File.Exists(XmlHelp.Xmlpath))
                 {
                     XmlHelp.createXml(XmlHelp.Xmlpath);
+
+                    if (BodCurrentRunTask != null && !BodCurrentRunTask.IsCompleted)
+                    {
+
+                        LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
+                        bool success = BodCurrentRunTask.Wait(1000 * 10);
+
+                        if (!success)
+                        {
+                            return;
+                        }
+
+                    }
+                    BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
+                    LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
+
                     return;
                 }
 
@@ -1769,7 +1793,14 @@ namespace BodDetect
                     {
 
                         LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
-                        Task.WaitAll(BodCurrentRunTask);
+                        bool success = BodCurrentRunTask.Wait(1000 * 10);
+
+                        if (!success)
+                        {
+                            return;
+                        }
+
+                        // Task.WaitAll(BodCurrentRunTask);
                     }
                     BodCurrentRunTask = Task.Factory.StartNew(() => bodHelper.StartBodStandWater());
                     LogUtil.Log("等待线程task的完成,taskID = " + BodCurrentRunTask.Id);
@@ -1836,10 +1867,13 @@ namespace BodDetect
         {
             _loading.Visibility = Visibility.Visible;
             StopCts.Cancel();
+
             bodHelper.NeedStop = true;
+            LogUtil.Log("正在停止当前流程.");
             RunTimer.Tick -= BodRun;
             RunTimer.Stop();
             BodRunImg.IsEnabled = true;
+            start.IsChecked = false;
             await this.ShowMessageAsync("Please wait...", "正在停止运行流程,请稍等...", MessageDialogStyle.Affirmative);
 
             // await Task.Run(StopBod);
@@ -2158,8 +2192,20 @@ namespace BodDetect
         {
             try
             {
-                byte[] Temp = { PLCConfig.SensorPower };
-                bool success = bodHelper.ValveControl(100, Temp);
+                ushort[] data = bodHelper.finsClient.ReadData(100, 0, 1, PLCConfig.IO);
+                ushort io = 0;
+                if (data != null && data.Length > 0)
+                {
+                    io = data[0];
+                    LogUtil.Log(io.ToString());
+                }
+
+                var n = io | 32;
+                io = Convert.ToUInt16(n);
+                ushort[] Temp = { io };
+
+                bool success = bodHelper.finsClient.WriteData(100, 0, Temp, PLCConfig.IO);
+
                 if (!success)
                 {
                     return;
@@ -2181,6 +2227,19 @@ namespace BodDetect
                 await Task.Delay(3 * 1000);
                 ushort[] TempAndHumDada = await Task.Factory.StartNew(() => bodHelper.GetTempAndHumData());
                 await Task.Delay(3 * 1000);
+
+                data = bodHelper.finsClient.ReadData(100, 0, 1, PLCConfig.IO);
+                if (data != null && data.Length > 0)
+                {
+                    io = data[0];
+                    LogUtil.Log(io.ToString());
+                }
+
+                n = io ^ 32;
+                io = Convert.ToUInt16(n);
+                Temp[0] = io ;
+
+                success = bodHelper.finsClient.WriteData(100, 0, Temp, PLCConfig.IO);
 
                 mainWindow_Model.TemperatureData = DoDota[0];
                 mainWindow_Model.DoData = DoDota[1];
@@ -2316,7 +2375,6 @@ namespace BodDetect
                 LogUtil.LogError(ex);
             }
         }
-
 
         public void UpdataBodStatus()
         {
@@ -2555,6 +2613,28 @@ namespace BodDetect
         private void dataGrid1_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
             kbpr = Tool.ShowInputPanel(kbpr);
+        }
+
+        private void test11_ButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                ushort[] data = bodHelper.finsClient.ReadData(100, 0, 1, PLCConfig.IO);
+
+                if (data != null && data.Length > 0)
+                {
+                    ushort io = data[0];
+
+                    test11.Text = io.ToString();
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+
         }
     }
 }

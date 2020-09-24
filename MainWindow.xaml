@@ -16,10 +16,10 @@
         Closed="MetroWindow_Closed" Background="#FF954619"
 
         WindowState="Maximized"
-        ResizeMode="NoResize" KeepBorderOnMaximize="False"   IgnoreTaskbarOnMaximize="True" 
+        ResizeMode="NoResize" KeepBorderOnMaximize="False"   IgnoreTaskbarOnMaximize="True"  UseNoneWindowStyle="True"
         
         >
-    <!-- UseNoneWindowStyle="True" ResizeMode="NoResize" ShowInTaskbar="False"  IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
+    <!-- ResizeMode="NoResize" ShowInTaskbar="False"  IsCloseButtonEnabled="True" IsMaxRestoreButtonEnabled="True" IsMinButtonEnabled="True" KeepBorderOnMaximize="False" IsManipulationEnabled="True" ShowCloseButton="True" ShowDialogsOverTitleBar="False" ShowMaxRestoreButton="False" ShowMinButton="True" ShowSystemMenu="False" ShowSystemMenuOnRightClick="False" ShowTitleBar="False" >-->
 
     <Window.Resources>
 
@@ -2128,6 +2128,8 @@
                                                             </Metro:MetroTextBox>
                                                             <Label Content="(单位:ml)"></Label>
                                                             <Metro:MetroTextBox Name="StandDil" Title="标液稀释倍数:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="250" IsEnabled="False" />
+                                                            <Metro:MetroTextBox Name="test11" ButtonTitle="传感器" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="3" ButtonClick="test11_ButtonClick"  Visibility="Collapsed"  />
+
                                                         </StackPanel>
                                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
                                                             <Metro:MetroTextBox Name="SampVol" Title="样液溶液体积:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Text="50"/>
@@ -2135,8 +2137,11 @@
 
                                                             <Metro:MetroTextBox Name="SampDil" Title="COD稀释比例:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="10" Visibility="Collapsed"/>
 
-                                                            <Metro:MetroTextBox Name="StandDilFreq" Title="标定间隔:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="3" IsEnabled="False" />
+                                                            <Metro:MetroTextBox Name="StandDilFreq" Title="标定间隔:" InputHint="请输入整数" Width="200" HorizontalAlignment="Left" FontWeight="Bold" Margin="50,0,0,0" Text="3"  />
                                                             <Label Content="(单位:天)"></Label>
+                                                            
+                                                            
+
 
                                                         </StackPanel>
                                                         <StackPanel Grid.Row="2" Margin="0,20,0,0">
@@ -2233,7 +2238,7 @@
 
                                         </Metro:MetroGroupBox>
                                     </Grid>
-                                    <Grid >
+                                    <!--<Grid >
                                         <Metro:MetroGroupBox Header="网口参数" Margin="20,0,0,0">
                                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" >
                                                 <Metro:MetroTextBox x:Name="IP_textbox" Text="192.168.0.174" Title="PLC IP" TitleMinWidth="30" InputHint="InputHint..."   Margin="0,10,0,0" HorizontalAlignment="Left" Width="Auto" Height="30" VerticalAlignment="Center"/>
@@ -2243,7 +2248,7 @@
 
                                             </StackPanel>
                                         </Metro:MetroGroupBox>
-                                    </Grid>
+                                    </Grid>-->
 
                                     <Grid>
                                         <Metro:MetroGroupBox  Header="系统配置" Margin="20,0,0,0">

@@ -17,13 +17,12 @@ namespace BodDetect.DataBaseInteractive.Sqlite
 
         public object[] GetObjectList()
         {
-            object[] paramList = new object[5];
+            object[] paramList = new object[4];
 
-            paramList[0] = id;
-            paramList[1] = num;
-            paramList[2] = SysStatus;
-            paramList[3] = CreateDate;
-            paramList[4] = CreateTime;
+            paramList[0] = num;
+            paramList[1] = SysStatus;
+            paramList[2] = CreateDate;
+            paramList[3] = CreateTime;
 
             return paramList;
         }

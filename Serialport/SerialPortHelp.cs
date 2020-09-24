@@ -212,10 +212,19 @@ namespace BodDetect
 
         public bool ClearAlram(ushort data)
         {
-            byte[] sendMsg = BodCtrlFun(RegCtrl.Clear, data);
-            byte[] recvMsg = ReadData();
+            try
+            {
+                byte[] sendMsg = BodCtrlFun(RegCtrl.Clear, data);
+                byte[] recvMsg = ReadData();
 
-            return Tool.IsSameBytes(sendMsg, recvMsg);
+                return Tool.IsSameBytes(sendMsg, recvMsg);
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
+                return false;
+            }
+
         }
 
         public bool SysReset()
@@ -395,18 +404,27 @@ namespace BodDetect
 
         public int GetBodStatus()
         {
-            ReadBodFun(RegStatus.Nomale, 1);
-            byte[] data = ReadData();
-
-            if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
-                data[2] != 0x02)
+            try
             {
+                ReadBodFun(RegStatus.Nomale, 1);
+                byte[] data = ReadData();
+
+                if (BodRecvDataBaseCheck(data, SerialPortConfig.Fun_Red_Code) ||
+                    data[2] != 0x02)
+                {
+                    return -1;
+                }
+
+                byte[] tempbe = { data[4], data[3] };
+
+                return BitConverter.ToInt16(tempbe, 0);
+            }
+            catch (Exception ex)
+            {
+                LogUtil.LogError(ex);
                 return -1;
             }
 
-            byte[] tempbe = { data[4], data[3] };
-
-            return BitConverter.ToInt16(tempbe,0);
         }
 
         public int GetSamplingStatus()

@@ -283,13 +283,22 @@ namespace BodDetect.DataBaseInteractive.Sqlite
 
         public static int ExecuteNonQuery(SQLiteConnection cn, string commandText, params object[] paramList)
         {
-
             SQLiteCommand cmd = cn.CreateCommand();
-            cmd.CommandText = commandText;
-            AttachParameters(cmd, commandText, paramList);
-            if (cn.State == ConnectionState.Closed)
-                cn.Open();
-            int result = cmd.ExecuteNonQuery();
+            int result = 0;
+            try
+            {
+                cmd.CommandText = commandText;
+                AttachParameters(cmd, commandText, paramList);
+                if (cn.State == ConnectionState.Closed)
+                    cn.Open();
+                result = cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+
             cmd.Dispose();
             cn.Close();
 

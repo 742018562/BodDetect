@@ -27,23 +27,22 @@ namespace BodDetect.DataBaseInteractive.Sqlite
 
         public object[] GetObjectList() 
         {
-            object[] paramList = new object[15];
+            object[] paramList = new object[14];
 
-            paramList[0] = id;
-            paramList[1] = PH;
-            paramList[2] = DO;
-            paramList[3] = Temperature;
-            paramList[4] = Turbidity;
-            paramList[5] = Uv254;
-            paramList[6] = AirTemperature;
-            paramList[7] = Humidity;
-            paramList[8] = RunNum;
-            paramList[9] = Cod;
-            paramList[10] = Bod;
-            paramList[11] = BodElePot;
-            paramList[12] = BodElePotDrop;
-            paramList[13] = CreateDate;
-            paramList[14] = CreateTime;
+            paramList[0] = PH;
+            paramList[1] = DO;
+            paramList[2] = Temperature;
+            paramList[3] = Turbidity;
+            paramList[4] = Uv254;
+            paramList[5] = AirTemperature;
+            paramList[6] = Humidity;
+            paramList[7] = RunNum;
+            paramList[8] = Cod;
+            paramList[9] = Bod;
+            paramList[10] = BodElePot;
+            paramList[11] = BodElePotDrop;
+            paramList[12] = CreateDate;
+            paramList[13] = CreateTime;
 
             return paramList;
         }

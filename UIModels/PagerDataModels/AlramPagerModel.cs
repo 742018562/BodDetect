@@ -32,29 +32,38 @@ namespace BodDetect.UIModels.PagerDataModels
 
         public override void init()
         {
-            CurrentPage = 1;
-            PageSize = 10;
-            AllAlarmData = GetHisDatabases();
-            _source = AllAlarmData.ToList<object>();
-
-            _alarmDataSoruce = new ObservableCollection<AlarmData>();
-
-            int index = _source.Count % PageSize;
-            if (index > 0)
+            try
             {
-                TotalPage = _source.Count / PageSize + 1;
+                CurrentPage = 1;
+                PageSize = 10;
+                AllAlarmData = GetHisDatabases();
+                _source = AllAlarmData.ToList<object>();
+
+                _alarmDataSoruce = new ObservableCollection<AlarmData>();
+
+                int index = _source.Count % PageSize;
+                if (index > 0)
+                {
+                    TotalPage = _source.Count / PageSize + 1;
+                }
+                else
+                {
+                    TotalPage = _source.Count / PageSize;
+                }
+
+                List<AlarmData> result = _source.Take(PageSize).OfType<AlarmData>().ToList();
+                _alarmDataSoruce.Clear();
+
+                _alarmDataSoruce.AddRange(result);
+
+                base.init();
             }
-            else
+            catch (Exception ex)
             {
-                TotalPage = _source.Count / PageSize;
+
+                LogUtil.LogError(ex);
             }
 
-            List<AlarmData> result = _source.Take(PageSize).OfType<AlarmData>().ToList();
-            _alarmDataSoruce.Clear();
-
-            _alarmDataSoruce.AddRange(result);
-
-            base.init();
         }
 
         public List<AlarmData> GetHisDatabases()
@@ -73,106 +82,133 @@ namespace BodDetect.UIModels.PagerDataModels
 
         public override void UpdataSource(List<object> list)
         {
-            List<AlarmData> valueList = list.OfType<AlarmData>().ToList();
+            try
+            {
+                List<AlarmData> valueList = list.OfType<AlarmData>().ToList();
 
-            _alarmDataSoruce.Clear();
+                _alarmDataSoruce.Clear();
 
-            _alarmDataSoruce.AddRange(valueList);
+                _alarmDataSoruce.AddRange(valueList);
 
-            base.UpdataSource(list);
+                base.UpdataSource(list);
+            }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+
         }
 
         public void AddData(AlarmData hisDatabase)
         {
-            hisDatabase.id = AllAlarmData.Count + 1;
-            _source.Add(hisDatabase);
-            AllAlarmData.Add(hisDatabase);
-            int LastTotalPage = TotalPage;
+            try
+            {
+                hisDatabase.id = AllAlarmData.Count + 1;
+                _source.Add(hisDatabase);
+                AllAlarmData.Add(hisDatabase);
+                int LastTotalPage = TotalPage;
 
-            int index = _source.Count % PageSize;
-            if (index > 0)
-            {
-                TotalPage = _source.Count / PageSize + 1;
-            }
-            else
-            {
-                TotalPage = _source.Count / PageSize;
-            }
-
-            if (CurrentPage != LastTotalPage)
-            {
-                return;
-            }
-
-            if (CurrentPage == LastTotalPage)
-            {
-                if (_alarmDataSoruce.Count < PageSize)
+                int index = _source.Count % PageSize;
+                if (index > 0)
                 {
-                    _alarmDataSoruce.Add(hisDatabase);
+                    TotalPage = _source.Count / PageSize + 1;
                 }
                 else
+                {
+                    TotalPage = _source.Count / PageSize;
+                }
+
+                if (CurrentPage != LastTotalPage)
                 {
                     return;
                 }
 
+                if (CurrentPage == LastTotalPage)
+                {
+                    if (_alarmDataSoruce.Count < PageSize)
+                    {
+                        _alarmDataSoruce.Add(hisDatabase);
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                }
             }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+
         }
 
         public void UpdateDataByDate(DateTime? StartDate, DateTime? EndDate)
         {
-            int StartIndex = 0;
-            int EndIndex = 0;
-
-            List<AlarmData> hisDatabasesList = AllAlarmData.OrderBy(t => t.id).ToList();
-
-            EndIndex = hisDatabasesList.Count - 1;
-
-            if (StartDate != null)
+            try
             {
-                var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)StartDate) >= 0);
-                if (temp != null)
+                int StartIndex = 0;
+                int EndIndex = 0;
+
+                List<AlarmData> hisDatabasesList = AllAlarmData.OrderBy(t => t.id).ToList();
+
+                EndIndex = hisDatabasesList.Count - 1;
+
+                if (StartDate != null)
                 {
-                    StartIndex = temp.id - 1;
+                    var temp = hisDatabasesList.FirstOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)StartDate) >= 0);
+                    if (temp != null)
+                    {
+                        StartIndex = temp.id - 1;
+                    }
+                    else
+                    {
+                        StartIndex = -1;
+                    }
+
+                }
+
+                if (EndDate != null)
+                {
+                    var temp = hisDatabasesList.LastOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)EndDate) <= 0);
+                    if (temp != null)
+                    {
+                        EndIndex = temp.id - 1;
+                    }
+                    else
+                    {
+                        EndIndex = -1;
+                    }
+
+                }
+
+                List<object> valueList = new List<object>();
+
+                if (StartIndex != -1 && EndIndex != -1)
+                {
+                    valueList = AllAlarmData.GetRange(StartIndex, EndIndex - StartIndex + 1).ToList<object>();
+                }
+
+                _source = valueList;
+                int index = _source.Count % PageSize;
+                if (index > 0)
+                {
+                    TotalPage = _source.Count / PageSize + 1;
                 }
                 else
                 {
-                    StartIndex = -1;
+                    TotalPage = _source.Count / PageSize;
                 }
-
+                FirstPageAction();
             }
-
-            if (EndDate != null)
+            catch (Exception ex)
             {
-                var temp = hisDatabasesList.LastOrDefault(t => DateTime.Compare(Convert.ToDateTime(t.CreateDate), (DateTime)EndDate) <= 0);
-                if (temp != null)
-                {
-                    EndIndex = temp.id - 1;
-                }
-                else
-                {
-                    EndIndex = -1;
-                }
 
+                LogUtil.LogError(ex);
             }
 
-            List<object> valueList = new List<object>();
-
-            if (StartIndex != -1 && EndIndex != -1)
-            {
-                valueList = AllAlarmData.GetRange(StartIndex, EndIndex - StartIndex + 1).ToList<object>();
-            }
-
-            _source = valueList;
-            int index = _source.Count % PageSize;
-            if (index > 0)
-            {
-                TotalPage = _source.Count / PageSize + 1;
-            }
-            else
-            {
-                TotalPage = _source.Count / PageSize;
-            }
-            FirstPageAction();
         }
 
     }
