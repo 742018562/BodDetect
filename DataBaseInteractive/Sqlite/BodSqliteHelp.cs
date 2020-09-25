@@ -417,6 +417,7 @@ namespace BodDetect.DataBaseInteractive.Sqlite
                 try
                 {
                     conn.Open();
+
                     string sql = "SELECT * FROM MaintainInfo";
 
                     SQLiteDataAdapter ap = new SQLiteDataAdapter(sql, conn);
@@ -493,6 +494,29 @@ namespace BodDetect.DataBaseInteractive.Sqlite
             }
 
             return maintainInfoModelList;
+        }
+
+        public static void deleteMaintain() 
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(connStr))
+            {
+                try
+                {
+                    conn.Open();
+                    string delsql = "DELETE * FROM MaintainInfo";
+
+                    SQLiteCommand cmd = conn.CreateCommand();
+                    cmd.CommandText = delsql;
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                    conn.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    conn.Dispose();
+                }
+
+            }
         }
 
 

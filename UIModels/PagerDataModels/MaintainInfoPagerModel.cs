@@ -178,9 +178,10 @@ namespace BodDetect.UIModels.PagerDataModels
 
         public void saveData() 
         {
+          //  BodSqliteHelp.deleteMaintain();
             foreach (var item in AllMaintainInfo)
             {
-                if (item.IsInsert) 
+                if (item.IsInsert)
                 {
                     MaintainInfoModel maintainInfoModel = new MaintainInfoModel();
                     item.CopyToMaintainInfoModel(maintainInfoModel);

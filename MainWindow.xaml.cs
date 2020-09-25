@@ -139,13 +139,14 @@ namespace BodDetect
                 bodHelper.mainWindow = this;
 
                 initConfig();
-
+                UpdataBodStatus();
                 if (!bodHelper.IsConnectPlc)
                 {
                     LogUtil.LogError("连接PLC异常");
                     await this.ShowMessageAsync("Error", "连接PLC异常!");
                     return;
                 }
+
                 if (!bodHelper.ConnectSeri)
                 {
                     LogUtil.LogError("连接串口异常");
@@ -2235,6 +2236,57 @@ namespace BodDetect
                 ushort[] TempAndHumDada = await Task.Factory.StartNew(() => bodHelper.GetTempAndHumData());
                 await Task.Delay(3 * 1000);
 
+                if (DoDota == null)
+                {
+                    mainWindow_Model.TemperatureData = -1;
+                    mainWindow_Model.DoData = -1;
+                }
+                else
+                {
+                    mainWindow_Model.TemperatureData = DoDota[0];
+                    mainWindow_Model.DoData = DoDota[1];
+                }
+
+                if (TurbidityData == null)
+                {
+                    mainWindow_Model.TurbidityData = -1;
+                }
+                else
+                {
+
+                    mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
+                }
+
+                if (PHData == null)
+                {
+                    mainWindow_Model.PHData = -1;
+                }
+                else
+                {
+                    mainWindow_Model.PHData = PHData[1];
+                }
+
+                if (Uv254Data == null)
+                {
+                    mainWindow_Model.Uv254Data = -1;
+                }
+                else
+                {
+                    mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
+                }
+
+                if (TempAndHumDada == null)
+                {
+                    mainWindow_Model.HumidityDataData = -1;
+                    mainWindow_Model.AirTemperatureData = -1;
+                }
+                else
+                {
+                    mainWindow_Model.HumidityDataData = TempAndHumDada[0] / 10;
+                    mainWindow_Model.AirTemperatureData = TempAndHumDada[1] / 10;
+                }
+
+
                 data = bodHelper.finsClient.ReadData(100, 0, 1, PLCConfig.IO);
                 if (data != null && data.Length > 0)
                 {
@@ -2248,13 +2300,13 @@ namespace BodDetect
 
                 success = bodHelper.finsClient.WriteData(100, 0, Temp, PLCConfig.IO);
 
-                mainWindow_Model.TemperatureData = DoDota[0];
-                mainWindow_Model.DoData = DoDota[1];
-                mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
-                mainWindow_Model.PHData = PHData[1];
-                mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
-                mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
-                mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
+                //mainWindow_Model.TemperatureData = DoDota[0];
+                //mainWindow_Model.DoData = DoDota[1];
+                //mainWindow_Model.TurbidityData = (float)TurbidityData[0] / 1000;
+                //mainWindow_Model.PHData = PHData[1];
+                //mainWindow_Model.Uv254Data = (float)Uv254Data[0] / 100;
+                //mainWindow_Model.HumidityDataData = (float)TempAndHumDada[0] / 10;
+                //mainWindow_Model.AirTemperatureData = (float)TempAndHumDada[1] / 10;
 
 
                 HisDatabase hisDatabase = new HisDatabase();
@@ -2385,51 +2437,25 @@ namespace BodDetect
 
         public void UpdataBodStatus()
         {
-            string text = GetBodStatus();
-            string AlramInfo = GetAlramInfo();
-            string SampleText = GetBodSampleStatus();
-
-            DateTime dateTime = DateTime.Now;
-
-            if (string.IsNullOrEmpty(text))
+            try
             {
-                mainWindow_Model.DevStatusModel.BOD_Connect_Status = "异常";
-                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Redpath;
+                string text = GetBodStatus();
 
-                mainWindow_Model.DevStatusModel.BOD_Run_Status = "异常";
-                mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Redpath;
+                DateTime dateTime = DateTime.Now;
 
-                AlarmData alarmData = new AlarmData();
-                alarmData.id = mainWindow_Model.AlramPagerModels.AllAlarmData.Count + 1;
-                alarmData.DeviceInfo = 1;
-                alarmData.ErrorCode = 1;
-                alarmData.ErrorDes = "Bod通讯断开";
-                alarmData.CreateDate = dateTime.ToLongDateString();
-                alarmData.CreateTime = dateTime.ToLongTimeString();
-
-                mainWindow_Model.AlramPagerModels.AddData(alarmData);
-
-                AlramInfoModel alramInfoModel = new AlramInfoModel();
-                alarmData.CopyToAlramInfoModel(alramInfoModel);
-                BodSqliteHelp.InsertAlramInfo(alramInfoModel);
-            }
-            else
-            {
-                mainWindow_Model.DevStatusModel.BOD_Connect_Status = "正常";
-                mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Greenpath;
-
-                mainWindow_Model.DevStatusModel.BOD_Run_Status = text;
-                mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Greenpath;
-
-                mainWindow_Model.DevStatusModel.BOD_Alram_Status = AlramInfo;
-                if (AlramInfo != "无告警")
+                if (string.IsNullOrEmpty(text))
                 {
-                    mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Redpath;
+                    mainWindow_Model.DevStatusModel.BOD_Connect_Status = "异常";
+                    mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Redpath;
+
+                    mainWindow_Model.DevStatusModel.BOD_Run_Status = "异常";
+                    mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Redpath;
+
                     AlarmData alarmData = new AlarmData();
                     alarmData.id = mainWindow_Model.AlramPagerModels.AllAlarmData.Count + 1;
                     alarmData.DeviceInfo = 1;
-                    alarmData.ErrorCode = 2;
-                    alarmData.ErrorDes = AlramInfo;
+                    alarmData.ErrorCode = 1;
+                    alarmData.ErrorDes = "Bod通讯断开";
                     alarmData.CreateDate = dateTime.ToLongDateString();
                     alarmData.CreateTime = dateTime.ToLongTimeString();
 
@@ -2441,11 +2467,46 @@ namespace BodDetect
                 }
                 else
                 {
-                    mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Greenpath;
-                }
+                    string AlramInfo = GetAlramInfo();
+                    string SampleText = GetBodSampleStatus();
+                    mainWindow_Model.DevStatusModel.BOD_Connect_Status = "正常";
+                    mainWindow_Model.DevStatusModel.BOD_Connect_ImgSource = DevStatusModels.Greenpath;
 
-                mainWindow_Model.DevStatusModel.BOD_Sample_Status = SampleText;
+                    mainWindow_Model.DevStatusModel.BOD_Run_Status = text;
+                    mainWindow_Model.DevStatusModel.BOD_Run_ImgSource = DevStatusModels.Greenpath;
+
+                    mainWindow_Model.DevStatusModel.BOD_Alram_Status = AlramInfo;
+                    if (AlramInfo != "无告警")
+                    {
+                        mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Redpath;
+                        AlarmData alarmData = new AlarmData();
+                        alarmData.id = mainWindow_Model.AlramPagerModels.AllAlarmData.Count + 1;
+                        alarmData.DeviceInfo = 1;
+                        alarmData.ErrorCode = 2;
+                        alarmData.ErrorDes = AlramInfo;
+                        alarmData.CreateDate = dateTime.ToLongDateString();
+                        alarmData.CreateTime = dateTime.ToLongTimeString();
+
+                        mainWindow_Model.AlramPagerModels.AddData(alarmData);
+
+                        AlramInfoModel alramInfoModel = new AlramInfoModel();
+                        alarmData.CopyToAlramInfoModel(alramInfoModel);
+                        BodSqliteHelp.InsertAlramInfo(alramInfoModel);
+                    }
+                    else
+                    {
+                        mainWindow_Model.DevStatusModel.BOD_Alram_ImgSource = DevStatusModels.Greenpath;
+                    }
+
+                    mainWindow_Model.DevStatusModel.BOD_Sample_Status = SampleText;
+                }
             }
+            catch (Exception ex)
+            {
+
+                LogUtil.LogError(ex);
+            }
+          
         }
 
         public void HisDataExport_click(object sender, RoutedEventArgs e)
@@ -2587,15 +2648,15 @@ namespace BodDetect
 
         private void dataGrid1_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            if (DataGridIsEdit)
-            {
-                e.Row.IsEnabled = true;
-                e.Row.Background = new SolidColorBrush(Color.FromRgb(255, 180, 180));
-            }
-            else
-            {
-                e.Row.IsEnabled = false;
-            }
+            //if (DataGridIsEdit)
+            //{
+            //    e.Row.IsEnabled = true;
+            //    e.Row.Background = new SolidColorBrush(Color.FromRgb(255, 180, 180));
+            //}
+            //else
+            //{
+            //    e.Row.IsEnabled = false;
+            //}
         }
 
         public void AddRow_Click(object sender, RoutedEventArgs e)
@@ -2620,8 +2681,7 @@ namespace BodDetect
             // e.Row.Background = new SolidColorBrush(Color.FromRgb(0, 200, 200));
             Tool.HideInputPanel(kbpr);
             mainWindow_Model.MaintainInfoPagerModels.UpdateData();
-            DataGridIsEdit = false;
-            dataGrid1.CanUserAddRows = false;
+           // dataGrid1.CanUserAddRows = false;
 
         }
 

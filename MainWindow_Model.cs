@@ -340,7 +340,7 @@ namespace BodDetect
 
             DateTime dateTime = DateTime.Now;
 
-            if (Uv254Data == 0)
+            if (Uv254Data < 0 )
             {
                 DevStatusModel.UV254_Sensor_ImgSource = Redpath;
                 DevStatusModel.UV254_Sensor_Status = "异常";
@@ -365,7 +365,7 @@ namespace BodDetect
                 DevStatusModel.UV254_Sensor_Status = "正常";
             }
 
-            if (TurbidityData == 0)
+            if (TurbidityData < 0)
             {
                 DevStatusModel.Tur_Sensor_ImgSource= Redpath;
                 DevStatusModel.Tur_Sensor_Status = "异常";
@@ -390,7 +390,7 @@ namespace BodDetect
                 DevStatusModel.Tur_Sensor_Status = "正常";
             }
 
-            if (PHData == 0)
+            if (PHData < 0)
             {
                 DevStatusModel.PH_Sensor_ImgSource = Redpath;
                 DevStatusModel.PH_Sensor_Status = "异常";
@@ -415,7 +415,7 @@ namespace BodDetect
                 DevStatusModel.PH_Sensor_Status = "正常";
             }
 
-            if (DoData == 0)
+            if (DoData < 0)
             {
                 DevStatusModel.Do_Sensor_ImgSource = Redpath;
                 DevStatusModel.DO_Sensor_Status = "异常";

@@ -2359,12 +2359,12 @@
 
 
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="序号" Binding="{Binding id ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="True"  />
+                                                <DataGridTextColumn Header="序号" Binding="{Binding id ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="False"  />
                                                 <DataGridTextColumn Header="维护人姓名" Binding="{Binding Name ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
                                                 <DataGridTextColumn Header="报警信息码" Binding="{Binding AlramId ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
                                                 <DataGridTextColumn Header="维护信息" Binding="{Binding Info ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
-                                                <DataGridTextColumn Header="日期" Binding="{Binding CreateDate ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="True"  />
-                                                <DataGridTextColumn Header="时间" Binding="{Binding CreateTime ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="True"   />
+                                                <DataGridTextColumn Header="日期" Binding="{Binding CreateDate ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"  />
+                                                <DataGridTextColumn Header="时间" Binding="{Binding CreateTime ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="180" IsReadOnly="False"   />
 
                                             </DataGrid.Columns>
 

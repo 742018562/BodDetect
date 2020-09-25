@@ -160,7 +160,7 @@ namespace BodDetect
                     return Data;
                 }
             }
-            return new uint[] { 0 };
+            return new uint[] { 65532 };
 
         }
 
@@ -168,7 +168,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return new float[] { 0, 0 };
+                return null;
             }
 
             LogUtil.Log("开始采集DO数据");
@@ -185,7 +185,7 @@ namespace BodDetect
 
             if (!success)
             {
-                return new float[] { 0, 0 };
+                return null;
             }
 
             int i = 0;
@@ -210,14 +210,14 @@ namespace BodDetect
                 }
             }
 
-            return new float[] { 0, 0 };
+            return null;
         }
 
         public float[] GetPHData()
         {
             if (finsClient == null)
             {
-                return new float[] { 0, 0 };
+                return null;
             }
 
             LogUtil.Log("开始采集PH数据");
@@ -235,7 +235,7 @@ namespace BodDetect
 
             if (!success)
             {
-                return new float[] { 0, 0 };
+                return null;
             }
 
             int i = 0;
@@ -258,7 +258,7 @@ namespace BodDetect
                     return Data;
                 }
             }
-            return new float[] { 0, 0 };
+            return null;
 
         }
 
@@ -266,13 +266,13 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return new ushort[] { 0, 0 };
+                return null;
             }
 
             LogUtil.Log("开始采集UV254数据");
 
             int i = 0;
-            ushort[] Data = { 0, 0 };
+            ushort[] Data = { 4369, 4369 };
             byte bitAdress = 0X00;
 
             ushort[] value = { 21, 4, 4, 8, 1 };
@@ -285,13 +285,13 @@ namespace BodDetect
 
             if (!success)
             {
-                return new ushort[] { 0, 0 };
+                return null;
             }
 
             while (i < 5)
             {
                 i++;
-                Thread.Sleep(8000);
+                Thread.Sleep(30000);
                 ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
                 if (temp == null || temp.Length < 1 || temp[0] != 0)
                 {
@@ -306,7 +306,7 @@ namespace BodDetect
                 }
 
             }
-            return new ushort[] { 0, 0 };
+            return null;
 
         }
 
@@ -314,7 +314,7 @@ namespace BodDetect
         {
             if (finsClient == null)
             {
-                return new ushort[] { 0, 0 };
+                return null;
             }
             byte bitAdress = 0X00;
 
@@ -328,14 +328,14 @@ namespace BodDetect
 
             if (!success)
             {
-                return new ushort[] { 0, 0 };
+                return null;
             }
 
             int i = 0;
             while (i < 5)
             {
                 i++;
-                Thread.Sleep(10000);
+                Thread.Sleep(30000);
 
                 ushort[] temp = finsClient.ReadData(32352, 0, 1, PLCConfig.Dr);
                 if (temp == null || temp.Length < 1 || temp[0] != 0)
@@ -349,7 +349,7 @@ namespace BodDetect
                     return Data;
                 }
             }
-            return new ushort[] { 0, 0 };
+            return null;
         }
 
         /// <summary>
@@ -849,6 +849,13 @@ namespace BodDetect
                 Task tempTask = Task.Delay(configData.WarmUpTime * 1000);
                 Task.WaitAll(tempTask);
 
+                if(configData.SampleScale == 0) 
+                {
+                    ReadSensorData();
+
+                    return;
+                }
+
                 for (int i = 0; i < configData.SampleScale - 1; i++)
                 {
                     byte[] data1 = { PLCConfig.CisternPumpBit };
@@ -874,7 +881,6 @@ namespace BodDetect
                 }
 
                 ReadSensorData();
-
 
                 //[ 启动COD开始采样]
                 StartCod();
@@ -1694,13 +1700,16 @@ namespace BodDetect
 
                 byte[] Temdata = { PLCConfig.CisternValveBit };
                 ValveControl(PLCConfig.Valve1Address, Temdata);
-                Thread.Sleep(configData.EmptyTime * 100);
+                Thread.Sleep(configData.EmptyTime * 1000);
 
-                //ushort[] value = finsClient.ReadData(PLCConfig.Valve1Address, 0, 1, PLCConfig.IO);
-                //if (value == null || value.Length < 1 || (value[0] & 1) != 0)
-                //{
-                //    DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
-                //}
+              //  ushort[] value = finsClient.ReadData(PLCConfig.Valve1Address, 0, 1, PLCConfig.IO);
+                if (!CisternIsEmpty())
+                {
+                    byte[] temp = { 0 };
+                    ValveControl(PLCConfig.Valve1Address, temp);
+                    DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
+                    return false;
+                }
 
                 //timer = new Timer(new System.Threading.TimerCallback(CheckCisternIsEmpty), null, Timeout.Infinite, 1000);
                 //timer.Change(0, 1000);
@@ -1717,6 +1726,7 @@ namespace BodDetect
                 updateProcessInfo(ProcessType.Sensor);
 
                 // mainWindow.Dispatcher.Invoke(refreshProcessStatus, ProcessType.Sensor);
+                Thread.Sleep(60 * 1000);
 
                 float[] DoDota = GetDoData();
                 Thread.Sleep(5 * 1000);
@@ -1746,14 +1756,60 @@ namespace BodDetect
                 ushort[]  Temp = { io };
                 LogUtil.Log("PLC写入100串口数据:"+io.ToString());
                 finsClient.WriteData(100, 0, Temp, PLCConfig.IO);
+                if (DoDota == null)
+                {
+                    bodData.TemperatureData = -1;
+                    bodData.DoData = -1;
+                }
+                else 
+                {
+                    bodData.TemperatureData = DoDota[0];
+                    bodData.DoData = DoDota[1];
+                }
 
-                bodData.TemperatureData = DoDota[0];
-                bodData.DoData = DoDota[1];
-                bodData.TurbidityData = (float)TurbidityData[0] / 1000;
-                bodData.PHData = PHData[1];
-                bodData.Uv254Data = (float)Uv254Data[0] / 100;
-                bodData.HumidityData = TempAndHumData[0] / 10;
-                bodData.AirTemperatureData = TempAndHumData[1] / 10;
+                if (TurbidityData == null)
+                {
+                    bodData.TurbidityData = -1;
+                }
+                else 
+                {
+
+                    bodData.TurbidityData = (float)TurbidityData[0] / 1000;
+                }
+
+                if (PHData == null)
+                {
+                    bodData.PHData = -1;
+                }
+                else 
+                {
+                    bodData.PHData = PHData[1];
+                }
+
+                if (Uv254Data == null)
+                {
+                    bodData.Uv254Data = -1;
+                }
+                else 
+                {
+                    bodData.Uv254Data = (float)Uv254Data[0] / 100;
+                }
+
+                if (TempAndHumData == null)
+                {
+                    bodData.HumidityData = -1;
+                    bodData.AirTemperatureData = -1;
+                }
+                else 
+                {
+                    bodData.HumidityData = TempAndHumData[0] / 10;
+                    bodData.AirTemperatureData = TempAndHumData[1] / 10;
+                }
+
+
+                //bodData.Bod = -1;
+                //bodData.CodData = -1;
+                //mainWindow.Dispatcher.BeginInvoke(refreshData, bodData);
 
                 string msg = "传感器数据:" + "DoDota = " + bodData.DoData + ",TurbidityData = " + bodData.TurbidityData + ",PHData = " + bodData.PHData + ",Uv254Data = " + bodData.Uv254Data;
 
@@ -2027,13 +2083,15 @@ namespace BodDetect
             byte[] data = { PLCConfig.CisternValveBit };
             ValveControl(PLCConfig.Valve1Address, data);
 
-            Thread.Sleep(configData.EmptyTime * 100);
+            Thread.Sleep(configData.EmptyTime * 1000);
 
-            //ushort[] value = finsClient.ReadData(PLCConfig.Valve1Address, 0, 1, PLCConfig.IO);
-            //if (value == null || value.Length < 1 || (value[0] & 1) != 0) 
-            //{
-            //    DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
-            //}
+            if (!CisternIsEmpty())
+            {
+                byte[] temp = { 0 };
+                ValveControl(PLCConfig.Valve1Address, temp);
+                DisPlayAlarmInfo(7, 11, "抽水泵排水超时");
+                return false;
+            }
 
             return success;
         }
